@@ -70,16 +70,16 @@ const startFundraiser = () => {
     <!-- Support Banner (Top) -->
     <div v-if="showBanner"
       class="bg-blue-50 text-blue-700 py-3 px-4 text-sm font-medium border-b border-blue-100 transition-all duration-300">
-      <div class="max-w-7xl mx-auto flex items-center justify-between">
-        <div class="flex items-center gap-2 mx-auto sm:mx-0">
+      <div class="max-w-7xl mx-auto flex items-center justify-center relative">
+        <div class="flex items-center gap-2">
           <span class="flex h-2 w-2 relative">
             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
             <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
           </span>
-          <span>Support urgent earthquake relief and future recovery in Colombia. <RouterLink to="/donate/crisis-relief"
-              class="underline hover:text-blue-900 font-bold">Learn more</RouterLink></span>
+          <span class="text-center">Support urgent earthquake relief and future recovery in Colombia. <RouterLink
+              to="/donate/crisis-relief" class="underline hover:text-blue-900 font-bold">Learn more</RouterLink></span>
         </div>
-        <button @click="showBanner = false" class="text-blue-500 hover:text-blue-800 p-1 hidden sm:block">
+        <button @click="showBanner = false" class="text-blue-500 hover:text-blue-800 p-1 absolute right-0 hidden sm:block">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor"
             stroke-width="2.5" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

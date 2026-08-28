@@ -54,6 +54,11 @@ const router = createRouter({
       component: () => import('../domains/auth/views/ProfileView.vue'),
     },
     {
+      path: '/my-fundraisers',
+      name: 'my-fundraisers',
+      component: () => import('../domains/auth/views/MyFundraisersView.vue'),
+    },
+    {
       path: '/your-impact',
       name: 'your-impact',
       component: () => import('../domains/auth/views/YourImpactView.vue'),

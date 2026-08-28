@@ -7,8 +7,10 @@ import NavHeader from '../../landing/components/NavHeader.vue'
 import MainFooter from '../../landing/components/MainFooter.vue'
 
 // Import subcomponents
-import DashboardTab from '../components/DashboardTab.vue'
-import DonationsTab from '../components/DonationsTab.vue'
+import TodayTab from '../components/TodayTab.vue'
+import SupportersTab from '../components/SupportersTab.vue'
+import SharehubTab from '../components/SharehubTab.vue'
+import FundraiserTab from '../components/FundraiserTab.vue'
 import TransfersTab from '../components/TransfersTab.vue'
 import UpdatesTab from '../components/UpdatesTab.vue'
 
@@ -22,8 +24,12 @@ const fundraiser = computed(() => {
   return fundraisers.value.find((f) => f.id === campaignId.value)
 })
 
-// Left sidebar options: 'dashboard' | 'donations' | 'transfers' | 'update'
-const activeTab = ref<'dashboard' | 'donations' | 'transfers' | 'update'>('dashboard')
+// Left sidebar options: 'today' | 'supporters' | 'sharehub' | 'fundraiser'
+const activeTab = ref<'today' | 'supporters' | 'sharehub' | 'fundraiser'>('today')
+
+// Modal states
+const showUpdateModal = ref(false)
+const showTransfersModal = ref(false)
 
 // Header view dropdowns
 const navHeaderRef = ref<any>(null)
@@ -49,88 +55,64 @@ const editCampaign = () => {
   router.push('/signup')
 }
 
-// Circular progress calculations
+// Circular progress calculations (for Today tab preview)
 const progressPercent = computed(() => {
   if (!fundraiser.value) return 0
   const pct = (fundraiser.value.raisedAmount / fundraiser.value.targetAmount) * 100
   return Math.min(100, Math.round(pct))
 })
 
-const strokeCircumference = 2 * Math.PI * 18 // radius is 18
-const strokeDashoffset = computed(() => {
-  const percent = progressPercent.value
-  return strokeCircumference - (percent / 100) * strokeCircumference
-})
-
-// Event handlers from subcomponents
-const handleAddOffline = (payload: { amount: number; firstName: string; lastName: string; anonymous: boolean }) => {
-  if (!fundraiser.value) return
-  
-  // Update campaign in store
-  fundraiser.value.raisedAmount += payload.amount
-  fundraiser.value.donorCount += 1
-
-  // Update in localStorage
-  const savedCampaigns = JSON.parse(localStorage.getItem('helpfund_campaigns') || '[]')
-  const index = savedCampaigns.findIndex((c: any) => c.id === fundraiser.value?.id)
-  if (index !== -1) {
-    savedCampaigns[index].raisedAmount = fundraiser.value.raisedAmount
-    savedCampaigns[index].donorCount = fundraiser.value.donorCount
-    localStorage.setItem('helpfund_campaigns', JSON.stringify(savedCampaigns))
-  }
-
-  toastMessage.value = `Offline donation of $${payload.amount} added!`
-  showToast.value = true
-  setTimeout(() => {
-    showToast.value = false
-  }, 2500)
-}
-
 const handlePostUpdate = (text: string) => {
   toastMessage.value = 'Update sent to donors!'
   showToast.value = true
+  showUpdateModal.value = false
   setTimeout(() => {
     showToast.value = false
   }, 2500)
-}
-
-const openTransfersTab = () => {
-  activeTab.value = 'transfers'
 }
 </script>
 
 <template>
-  <div v-if="fundraiser" class="min-h-screen bg-slate-50 text-slate-800 font-sans text-left flex flex-col" @click="closeDropdowns">
+  <div v-if="fundraiser" class="min-h-screen bg-slate-50 text-slate-800 font-sans text-left flex flex-col"
+    @click="closeDropdowns">
     <NavHeader ref="navHeaderRef" />
 
     <!-- Core Content Container: Sidebar + Dashboard body -->
     <div class="max-w-7xl w-full mx-auto px-4 py-8 lg:py-12 flex-grow flex flex-col md:flex-row gap-8 items-start">
-      
+
       <!-- Left Sidebar Navigation -->
       <aside class="w-full md:w-60 shrink-0 bg-white border border-slate-100 rounded-3xl p-5 shadow-sm">
         <ul class="flex flex-col gap-1.5 text-xs font-bold text-slate-500">
           <li>
-            <button @click="activeTab = 'dashboard'" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer text-left" :class="activeTab === 'dashboard' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
-              <iconify-icon icon="ph:squares-four-bold" class="text-base"></iconify-icon>
-              <span>Dashboard</span>
+            <button @click="activeTab = 'today'"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer text-left"
+              :class="activeTab === 'today' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
+              <iconify-icon icon="ph:check-circle-bold" class="text-base"></iconify-icon>
+              <span>Today</span>
             </button>
           </li>
           <li>
-            <button @click="activeTab = 'donations'" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer text-left" :class="activeTab === 'donations' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
+            <button @click="activeTab = 'supporters'"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer text-left"
+              :class="activeTab === 'supporters' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
+              <iconify-icon icon="ph:users-bold" class="text-base"></iconify-icon>
+              <span>Supporters</span>
+            </button>
+          </li>
+          <li>
+            <button @click="activeTab = 'sharehub'"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer text-left"
+              :class="activeTab === 'sharehub' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
+              <iconify-icon icon="ph:megaphone-bold" class="text-base"></iconify-icon>
+              <span>Sharehub</span>
+            </button>
+          </li>
+          <li>
+            <button @click="activeTab = 'fundraiser'"
+              class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer text-left"
+              :class="activeTab === 'fundraiser' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
               <iconify-icon icon="ph:heart-bold" class="text-base"></iconify-icon>
-              <span>Donations</span>
-            </button>
-          </li>
-          <li>
-            <button @click="activeTab = 'transfers'" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer text-left" :class="activeTab === 'transfers' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
-              <iconify-icon icon="ph:bank-bold" class="text-base"></iconify-icon>
-              <span>Transfers</span>
-            </button>
-          </li>
-          <li>
-            <button @click="activeTab = 'update'" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer text-left" :class="activeTab === 'update' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
-              <iconify-icon icon="ph:note-pencil-bold" class="text-base"></iconify-icon>
-              <span>Update</span>
+              <span>Fundraiser</span>
             </button>
           </li>
         </ul>
@@ -138,53 +120,82 @@ const openTransfersTab = () => {
 
       <!-- Right Dashboard Panel -->
       <div class="flex-grow flex flex-col gap-6 w-full">
-        
+
         <!-- Welcome banner (Always shown) -->
         <div class="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm flex items-center justify-between gap-4">
           <div class="text-xs text-slate-500 font-bold text-left">
-            HI, RAYMOND &bull; <span class="text-slate-400">We're in this together</span>
+            HI, {{ fundraiser.organizer.split(' ')[0] }} &bull; <span class="text-slate-400">We're in this together</span>
           </div>
-          <RouterLink :to="`/campaign/${fundraiser.id}`" class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold text-xs px-5 py-2 rounded-full transition-all shadow-sm">
+          <RouterLink :to="`/campaign/${fundraiser.id}`"
+            class="bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-bold text-xs px-5 py-2 rounded-full transition-all shadow-sm">
             View page
           </RouterLink>
         </div>
 
         <!-- Render subcomponent corresponding to active tab -->
-        <DashboardTab
-          v-if="activeTab === 'dashboard'"
-          :title="fundraiser.title"
+        <TodayTab 
+          v-if="activeTab === 'today'" 
+          :title="fundraiser.title" 
           :targetAmount="fundraiser.targetAmount"
-          :raisedAmount="fundraiser.raisedAmount"
-          :progressPercent="progressPercent"
-          :strokeDashoffset="strokeDashoffset"
-          :strokeCircumference="strokeCircumference"
+          :raisedAmount="fundraiser.raisedAmount" 
+          :imageUrl="fundraiser.imageUrl"
+          :organizer="fundraiser.organizer"
+          @share="activeTab = 'sharehub'"
+        />
+
+        <SupportersTab 
+          v-else-if="activeTab === 'supporters'" 
+          :campaignId="fundraiser.id"
+          @copy-link="copyLink"
+        />
+
+        <SharehubTab 
+          v-else-if="activeTab === 'sharehub'" 
+          :campaignId="fundraiser.id"
+          :title="fundraiser.title"
+          :organizer="fundraiser.organizer"
+          :imageUrl="fundraiser.imageUrl"
+          @copy-link="copyLink"
+        />
+
+        <FundraiserTab 
+          v-else-if="activeTab === 'fundraiser'" 
+          :campaignId="fundraiser.id"
+          :title="fundraiser.title"
+          :imageUrl="fundraiser.imageUrl"
+          @post-update="showUpdateModal = true"
+          @transfers="showTransfersModal = true"
           @edit="editCampaign"
-          @share="copyLink"
-          @transfers="openTransfersTab"
-        />
-
-        <DonationsTab
-          v-else-if="activeTab === 'donations'"
-          :donorCount="fundraiser.donorCount"
-          @share="copyLink"
-          @addOffline="handleAddOffline"
-        />
-
-        <TransfersTab
-          v-else-if="activeTab === 'transfers'"
-        />
-
-        <UpdatesTab
-          v-else-if="activeTab === 'update'"
-          @postUpdate="handlePostUpdate"
         />
 
       </div>
 
     </div>
 
+    <!-- Modals Overlay -->
+    <!-- Post Update Modal -->
+    <div v-if="showUpdateModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4" @click.self="showUpdateModal = false">
+      <div class="bg-white rounded-3xl w-full max-w-xl p-8 border border-slate-100 shadow-2xl relative overflow-y-auto max-h-[85vh] text-left animate-scale">
+        <button @click="showUpdateModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl focus:outline-none cursor-pointer">
+          <iconify-icon icon="ph:x-bold"></iconify-icon>
+        </button>
+        <UpdatesTab @postUpdate="handlePostUpdate" />
+      </div>
+    </div>
+
+    <!-- Transfers Modal -->
+    <div v-if="showTransfersModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4" @click.self="showTransfersModal = false">
+      <div class="bg-white rounded-3xl w-full max-w-2xl p-8 border border-slate-100 shadow-2xl relative overflow-y-auto max-h-[85vh] text-left animate-scale">
+        <button @click="showTransfersModal = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl focus:outline-none cursor-pointer">
+          <iconify-icon icon="ph:x-bold"></iconify-icon>
+        </button>
+        <TransfersTab />
+      </div>
+    </div>
+
     <!-- Copy/Success Toast Notification -->
-    <div v-if="showToast" class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 z-50 animate-bounce">
+    <div v-if="showToast"
+      class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 z-50 animate-bounce">
       <iconify-icon icon="ph:check-circle-bold" class="text-blue-400 text-base"></iconify-icon>
       <span>{{ toastMessage }}</span>
     </div>
@@ -195,12 +206,26 @@ const openTransfersTab = () => {
   <div v-else class="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
     <iconify-icon icon="ph:warning-bold" class="text-red-500 text-5xl mb-4"></iconify-icon>
     <h3 class="text-xl font-bold text-slate-900 mb-2">Fundraiser Not Found</h3>
-    <RouterLink to="/" class="px-5 py-2.5 bg-blue-600 text-white font-bold text-xs rounded-full shadow hover:bg-blue-700 transition-all">
+    <RouterLink to="/"
+      class="px-5 py-2.5 bg-blue-600 text-white font-bold text-xs rounded-full shadow hover:bg-blue-700 transition-all">
       Return Home
     </RouterLink>
   </div>
 </template>
 
 <style scoped>
-/* Scoped styles kept minimal for transitions */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fadeIn 0.25s ease-out forwards;
+}
+@keyframes scale {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+.animate-scale {
+  animation: scale 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 </style>

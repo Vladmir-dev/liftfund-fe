@@ -118,7 +118,7 @@ export const useCampaignStore = defineStore('campaign', () => {
       startingGoal: startingGoal.value,
       mediaUrl: mediaUrl.value,
       createdAt: new Date().toISOString(),
-      organizer: organizerName || 'Raymond Mwese',
+      organizer: organizerName || 'John Doe',
       city: city || 'Beverly Hills',
       raisedAmount: 0,
       donorCount: 0,

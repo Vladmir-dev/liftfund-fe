@@ -158,6 +158,9 @@ const handleLogout = () => {
                 <RouterLink to="/profile" @click="closeDropdowns" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                   Profile
                 </RouterLink>
+                <RouterLink to="/my-fundraisers" @click="closeDropdowns" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
+                  Your fundraisers
+                </RouterLink>
                 <RouterLink to="/your-impact" @click="closeDropdowns" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                   Your impact
                 </RouterLink>

@@ -79,14 +79,8 @@ const getProgressPercent = (raised: number, target: number) => {
              class="p-6 rounded-2xl border bg-white cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
              :class="selectedCategory === cat.name ? 'border-blue-600 ring-2 ring-blue-500/20' : 'border-slate-100'">
           <div class="flex items-center gap-3 mb-4">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold" :class="cat.colorClass">
-              <!-- SVG Icons matching categories -->
-              <span v-if="cat.icon === 'heart'">♥</span>
-              <span v-else-if="cat.icon === 'shield-alert'">⚠</span>
-              <span v-else-if="cat.icon === 'users'">👥</span>
-              <span v-else-if="cat.icon === 'graduation-cap'">🎓</span>
-              <span v-else-if="cat.icon === 'paw'">🐾</span>
-              <span v-else-if="cat.icon === 'palette'">🎨</span>
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl" :class="cat.colorClass">
+              <iconify-icon :icon="'lucide:' + cat.icon"></iconify-icon>
             </div>
             <h3 class="font-bold text-slate-800 text-base">{{ cat.name }}</h3>
           </div>

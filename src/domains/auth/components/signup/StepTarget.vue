@@ -38,7 +38,7 @@ const emit = defineEmits<{
       <!-- Charity card -->
       <div @click="emit('update:beneficiary', 'Charity')" class="border rounded-2xl p-5 flex items-start gap-4 cursor-pointer transition-all hover:bg-slate-50/50" :class="beneficiary === 'Charity' ? 'border-blue-600 ring-2 ring-blue-500/10 bg-blue-50/10' : 'border-slate-200'">
         <div class="w-14 h-14 rounded-xl flex items-center justify-center shrink-0 text-3xl transition-colors" :class="beneficiary === 'Charity' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-slate-50 text-slate-500 border border-slate-100'">
-          <iconify-icon icon="ph:ribbon-bold"></iconify-icon>
+          <iconify-icon icon="lucide:ribbon"></iconify-icon>
         </div>
         <div>
           <h4 class="text-sm font-bold text-slate-800 mb-0.5">Charity</h4>

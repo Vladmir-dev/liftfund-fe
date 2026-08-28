@@ -5,10 +5,32 @@ import type { Fundraiser, Category, FAQItem } from '../types'
 export const useLandingStore = defineStore('landing', () => {
   // Load initial custom campaigns from localStorage
   const loadCustomCampaigns = (): Fundraiser[] => {
-    const saved = localStorage.getItem('helpfund_campaigns')
-    if (!saved) return []
+    let saved = localStorage.getItem('helpfund_campaigns')
+    if (!saved) {
+      const defaultCampaign = {
+        id: 'camp-cats',
+        title: 'Help Cats',
+        story: 'We are raising funds to help rescue and take care of community cats in our neighborhood. With winter approaching, we need to secure cozy shelters and veterinary care.',
+        category: 'Animals',
+        country: 'United States',
+        zipCode: '90210',
+        beneficiary: 'Charity',
+        targetAmount: 200,
+        useAutomatedGoal: true,
+        startingGoal: 200,
+        mediaUrl: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=600',
+        createdAt: new Date().toISOString(),
+        organizer: 'John Doe',
+        city: 'Beverly Hills',
+        raisedAmount: 0,
+        donorCount: 0,
+        daysLeft: 30
+      }
+      localStorage.setItem('helpfund_campaigns', JSON.stringify([defaultCampaign]))
+      saved = localStorage.getItem('helpfund_campaigns')
+    }
     try {
-      const parsed = JSON.parse(saved)
+      const parsed = JSON.parse(saved!)
       return parsed.map((c: any) => ({
         id: c.id,
         title: c.title,
@@ -19,7 +41,7 @@ export const useLandingStore = defineStore('landing', () => {
         raisedAmount: Number(c.raisedAmount) || 0,
         donorCount: Number(c.donorCount) || 0,
         daysLeft: Number(c.daysLeft) || 30,
-        organizer: c.organizer || 'Raymond Mwese',
+        organizer: c.organizer || 'John Doe',
         city: c.city || 'Beverly Hills',
         country: c.country || 'United States'
       }))
@@ -128,7 +150,7 @@ export const useLandingStore = defineStore('landing', () => {
     { id: 'emergency', name: 'Emergency', icon: 'shield-alert', description: 'Direct support for natural disasters, crises, and urgent safety needs.', colorClass: 'bg-red-50 text-red-600 border-red-100' },
     { id: 'community', name: 'Community', icon: 'users', description: 'Fund local neighborhood projects, community parks, and civic improvements.', colorClass: 'bg-amber-50 text-amber-600 border-amber-100' },
     { id: 'education', name: 'Education', icon: 'graduation-cap', description: 'Support student fees, class materials, technology, and learning environments.', colorClass: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-    { id: 'animals', name: 'Animals', icon: 'paw', description: 'Help animal shelters, rescue clinics, and vet care operations.', colorClass: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
+    { id: 'animals', name: 'Animals', icon: 'paw-print', description: 'Help animal shelters, rescue clinics, and vet care operations.', colorClass: 'bg-indigo-50 text-indigo-600 border-indigo-100' },
     { id: 'creative', name: 'Creative', icon: 'palette', description: 'Support local art, photography, indie films, and publishing dreams.', colorClass: 'bg-purple-50 text-purple-600 border-purple-100' }
   ])
 
@@ -159,9 +181,9 @@ export const useLandingStore = defineStore('landing', () => {
   // Filtered Fundraisers
   const filteredFundraisers = computed(() => {
     return fundraisers.value.filter((f) => {
-      const matchesSearch = f.title.toLowerCase().includes(searchQuery.value.toLowerCase()) || 
-                            f.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                            f.organizer.toLowerCase().includes(searchQuery.value.toLowerCase())
+      const matchesSearch = f.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        f.description.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+        f.organizer.toLowerCase().includes(searchQuery.value.toLowerCase())
       const matchesCategory = !selectedCategory.value || f.category.toLowerCase() === selectedCategory.value.toLowerCase()
       return matchesSearch && matchesCategory
     })
@@ -201,7 +223,7 @@ export const useLandingStore = defineStore('landing', () => {
       raisedAmount: Number(c.raisedAmount) || 0,
       donorCount: Number(c.donorCount) || 0,
       daysLeft: Number(c.daysLeft) || 30,
-      organizer: c.organizer || 'Raymond Mwese',
+      organizer: c.organizer || 'John Doe',
       city: c.city || 'Beverly Hills',
       country: c.country || 'United States'
     }
