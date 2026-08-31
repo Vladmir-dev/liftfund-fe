@@ -107,13 +107,13 @@ const unsubscribeAll = () => {
           <div class="flex-1">
             <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Name</span>
             <div v-if="isEditingName" class="flex gap-2 max-w-sm mt-1.5">
-              <input type="text" v-model="inputName" class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 flex-1 font-semibold" />
-              <button @click="saveName" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg cursor-pointer">Save</button>
+              <input type="text" v-model="inputName" class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#024731] flex-1 font-semibold" />
+              <button @click="saveName" class="px-3 py-1.5 bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs rounded-lg cursor-pointer transition-all">Save</button>
               <button @click="isEditingName = false" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-lg cursor-pointer">Cancel</button>
             </div>
             <span v-else class="text-sm font-bold text-slate-800 leading-snug">{{ authStore.user.name }}</span>
           </div>
-          <button v-if="!isEditingName" @click="isEditingName = true" class="px-4 py-2 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-bold text-xs rounded-xl transition-all text-slate-700 cursor-pointer">
+          <button v-if="!isEditingName" @click="isEditingName = true" class="px-4 py-2 border border-slate-200 hover:border-[#024731] hover:bg-slate-50 font-bold text-xs rounded-xl transition-all text-slate-700 cursor-pointer">
             Edit
           </button>
         </div>
@@ -126,13 +126,13 @@ const unsubscribeAll = () => {
               <iconify-icon icon="lucide:info" class="text-slate-400 text-xs"></iconify-icon>
             </div>
             <div v-if="isEditingPhone" class="flex gap-2 max-w-sm mt-1.5">
-              <input type="text" v-model="phoneVal" placeholder="+1 (555) 000-0000" class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 flex-1 font-semibold" />
-              <button @click="savePhone" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg cursor-pointer">Save</button>
+              <input type="text" v-model="phoneVal" placeholder="+1 (555) 000-0000" class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#024731] flex-1 font-semibold" />
+              <button @click="savePhone" class="px-3 py-1.5 bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs rounded-lg cursor-pointer transition-all">Save</button>
               <button @click="isEditingPhone = false" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-lg cursor-pointer">Cancel</button>
             </div>
             <span v-else class="text-sm font-bold text-slate-800 leading-snug">{{ phoneVal || 'No phone number' }}</span>
           </div>
-          <button v-if="!isEditingPhone" @click="isEditingPhone = true" class="px-4 py-2 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-bold text-xs rounded-xl transition-all text-slate-700 cursor-pointer">
+          <button v-if="!isEditingPhone" @click="isEditingPhone = true" class="px-4 py-2 border border-slate-200 hover:border-[#024731] hover:bg-slate-50 font-bold text-xs rounded-xl transition-all text-slate-700 cursor-pointer">
             {{ phoneVal ? 'Edit' : 'Add' }}
           </button>
         </div>
@@ -164,13 +164,13 @@ const unsubscribeAll = () => {
           <div class="flex-1">
             <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Birthday</span>
             <div v-if="isEditingBirthday" class="flex gap-2 max-w-sm mt-1.5">
-              <input type="date" v-model="birthdayVal" class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600 flex-1 font-semibold" />
-              <button @click="saveBirthday" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg cursor-pointer">Save</button>
+              <input type="date" v-model="birthdayVal" class="px-3 py-1.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#024731] flex-1 font-semibold" />
+              <button @click="saveBirthday" class="px-3 py-1.5 bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs rounded-lg cursor-pointer transition-all">Save</button>
               <button @click="isEditingBirthday = false" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs rounded-lg cursor-pointer">Cancel</button>
             </div>
             <span v-else class="text-sm font-bold text-slate-800 leading-snug">{{ birthdayVal || 'Add your birthday' }}</span>
           </div>
-          <button v-if="!isEditingBirthday" @click="isEditingBirthday = true" class="px-4 py-2 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 font-bold text-xs rounded-xl transition-all text-slate-700 cursor-pointer">
+          <button v-if="!isEditingBirthday" @click="isEditingBirthday = true" class="px-4 py-2 border border-slate-200 hover:border-[#024731] hover:bg-slate-50 font-bold text-xs rounded-xl transition-all text-slate-700 cursor-pointer">
             Edit
           </button>
         </div>

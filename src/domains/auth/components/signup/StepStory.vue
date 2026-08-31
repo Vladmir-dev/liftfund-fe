@@ -23,7 +23,7 @@ const localStory = computed({
   <div class="text-left animate-fade-in">
     <!-- Textarea area -->
     <div class="mb-4">
-      <textarea v-model="localStory" placeholder="Explain who you are raising money for, what the funds will be used for, and how soon you need them..." class="w-full h-52 px-4 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm font-medium leading-relaxed resize-none"></textarea>
+      <textarea v-model="localStory" placeholder="Explain who you are raising money for, what the funds will be used for, and how soon you need them..." class="w-full h-52 px-4 py-4 rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] focus:border-transparent text-sm font-medium leading-relaxed resize-none"></textarea>
     </div>
 
     <!-- Strengthen your story box -->
@@ -41,8 +41,8 @@ const localStory = computed({
         </div>
         
         <!-- Enhance button -->
-        <button @click="emit('enhanceStory')" :disabled="isEnhancing" class="bg-white border border-slate-200 hover:border-slate-400 disabled:opacity-50 text-slate-700 font-bold text-xs px-4 py-1.5 rounded-full transition-all shrink-0 shadow-sm flex items-center gap-1">
-          <span v-if="isEnhancing" class="h-3 w-3 border-2 border-slate-700 border-t-transparent rounded-full animate-spin"></span>
+        <button @click="emit('enhanceStory')" :disabled="isEnhancing" class="bg-white border border-slate-200 hover:border-[#024731] disabled:opacity-50 text-slate-800 font-bold text-xs px-4 py-1.5 rounded-full transition-all shrink-0 shadow-sm flex items-center gap-1 cursor-pointer">
+          <span v-if="isEnhancing" class="h-3 w-3 border-2 border-[#024731] border-t-transparent rounded-full animate-spin"></span>
           <span>Enhance</span>
         </button>
       </div>
@@ -54,8 +54,8 @@ const localStory = computed({
             <iconify-icon icon="ph:pencil-circle-bold" class="text-red-500 text-xs shrink-0"></iconify-icon>
             Spelling and grammar
           </span>
-          <span class="inline-flex items-center gap-1 text-[10px] bg-white text-blue-700 px-2.5 py-1 rounded-full border border-blue-100 font-bold">
-            <iconify-icon icon="ph:microphone-stage-bold" class="text-blue-500 text-xs shrink-0"></iconify-icon>
+          <span class="inline-flex items-center gap-1 text-[10px] bg-white text-[#024731] px-2.5 py-1 rounded-full border border-[#d8fc9e] font-bold">
+            <iconify-icon icon="ph:microphone-stage-bold" class="text-[#02a95c] text-xs shrink-0"></iconify-icon>
             Tone
           </span>
           <span class="inline-flex items-center gap-1 text-[10px] bg-white text-purple-700 px-2.5 py-1 rounded-full border border-purple-100 font-bold">

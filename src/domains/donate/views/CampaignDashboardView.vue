@@ -86,32 +86,32 @@ const handlePostUpdate = (text: string) => {
           <li>
             <button @click="activeTab = 'today'"
               class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer text-left"
-              :class="activeTab === 'today' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
-              <iconify-icon icon="ph:check-circle-bold" class="text-base"></iconify-icon>
+              :class="activeTab === 'today' ? 'bg-[#edfce0] text-[#024731] border-l-4 border-[#024731] font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
+              <iconify-icon icon="ph:check-circle-bold" class="text-base" :class="activeTab === 'today' ? 'text-[#024731]' : 'text-slate-400'"></iconify-icon>
               <span>Today</span>
             </button>
           </li>
           <li>
             <button @click="activeTab = 'supporters'"
               class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer text-left"
-              :class="activeTab === 'supporters' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
-              <iconify-icon icon="ph:users-bold" class="text-base"></iconify-icon>
+              :class="activeTab === 'supporters' ? 'bg-[#edfce0] text-[#024731] border-l-4 border-[#024731] font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
+              <iconify-icon icon="ph:users-bold" class="text-base" :class="activeTab === 'supporters' ? 'text-[#024731]' : 'text-slate-400'"></iconify-icon>
               <span>Supporters</span>
             </button>
           </li>
           <li>
             <button @click="activeTab = 'sharehub'"
               class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer text-left"
-              :class="activeTab === 'sharehub' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
-              <iconify-icon icon="ph:megaphone-bold" class="text-base"></iconify-icon>
+              :class="activeTab === 'sharehub' ? 'bg-[#edfce0] text-[#024731] border-l-4 border-[#024731] font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
+              <iconify-icon icon="ph:megaphone-bold" class="text-base" :class="activeTab === 'sharehub' ? 'text-[#024731]' : 'text-slate-400'"></iconify-icon>
               <span>Sharehub</span>
             </button>
           </li>
           <li>
             <button @click="activeTab = 'fundraiser'"
               class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all cursor-pointer text-left"
-              :class="activeTab === 'fundraiser' ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-600 font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
-              <iconify-icon icon="ph:heart-bold" class="text-base"></iconify-icon>
+              :class="activeTab === 'fundraiser' ? 'bg-[#edfce0] text-[#024731] border-l-4 border-[#024731] font-extrabold' : 'hover:bg-slate-50 hover:text-slate-800'">
+              <iconify-icon icon="ph:heart-bold" class="text-base" :class="activeTab === 'fundraiser' ? 'text-[#024731]' : 'text-slate-400'"></iconify-icon>
               <span>Fundraiser</span>
             </button>
           </li>
@@ -196,7 +196,7 @@ const handlePostUpdate = (text: string) => {
     <!-- Copy/Success Toast Notification -->
     <div v-if="showToast"
       class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 z-50 animate-bounce">
-      <iconify-icon icon="ph:check-circle-bold" class="text-blue-400 text-base"></iconify-icon>
+      <iconify-icon icon="ph:check-circle-bold" class="text-[#02a95c] text-base"></iconify-icon>
       <span>{{ toastMessage }}</span>
     </div>
 
@@ -207,7 +207,7 @@ const handlePostUpdate = (text: string) => {
     <iconify-icon icon="ph:warning-bold" class="text-red-500 text-5xl mb-4"></iconify-icon>
     <h3 class="text-xl font-bold text-slate-900 mb-2">Fundraiser Not Found</h3>
     <RouterLink to="/"
-      class="px-5 py-2.5 bg-blue-600 text-white font-bold text-xs rounded-full shadow hover:bg-blue-700 transition-all">
+      class="px-5 py-2.5 bg-[#024731] text-white font-bold text-xs rounded-full shadow hover:bg-[#013424] transition-all">
       Return Home
     </RouterLink>
   </div>

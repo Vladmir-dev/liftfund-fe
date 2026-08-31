@@ -35,7 +35,7 @@ const localZipCode = computed({
         <div class="sm:col-span-8 flex flex-col">
           <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Country</label>
           <div class="relative">
-            <select v-model="localCountry" class="w-full bg-white px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm appearance-none cursor-pointer pr-10 font-medium">
+            <select v-model="localCountry" class="w-full bg-white px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] focus:border-transparent text-sm appearance-none cursor-pointer pr-10 font-medium">
               <option>United States</option>
               <option>Canada</option>
               <option>United Kingdom</option>
@@ -49,7 +49,7 @@ const localZipCode = computed({
 
         <div class="sm:col-span-4 flex flex-col">
           <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Zip code</label>
-          <input type="text" v-model="localZipCode" placeholder="Zip code" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm font-semibold" />
+          <input type="text" v-model="localZipCode" placeholder="Zip code" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] focus:border-transparent text-sm font-semibold" />
         </div>
       </div>
     </div>
@@ -59,7 +59,7 @@ const localZipCode = computed({
       <p class="text-slate-400 text-xs mb-4">Select the primary category for your campaign to help donors find you.</p>
 
       <div class="flex flex-wrap gap-2.5">
-        <button v-for="cat in categories" :key="cat" @click="emit('selectCategory', cat)" class="px-4 py-2 border rounded-full text-xs font-bold transition-all" :class="selectedCategory === cat ? 'bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-100' : 'bg-white border-slate-200 hover:border-slate-400 text-slate-700'">
+        <button v-for="cat in categories" :key="cat" @click="emit('selectCategory', cat)" class="px-4 py-2 border rounded-full text-xs font-bold transition-all cursor-pointer" :class="selectedCategory === cat ? 'bg-[#024731] border-[#024731] text-white shadow-md shadow-emerald-950/15' : 'bg-white border-slate-200 hover:border-[#024731] text-slate-700 hover:bg-[#edfce0]/50'">
           {{ cat }}
         </button>
       </div>

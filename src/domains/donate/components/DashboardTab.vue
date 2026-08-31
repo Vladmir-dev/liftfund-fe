@@ -23,7 +23,7 @@ const emit = defineEmits<{
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <h2 class="text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight">{{ title }}</h2>
         <button @click="emit('share')"
-          class="bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs px-6 py-3 rounded-full transition-all shadow-md shrink-0 cursor-pointer font-sans">
+          class="bg-[#024731] hover:bg-[#013424] text-white font-extrabold text-xs px-6 py-3 rounded-full transition-all shadow-md shrink-0 cursor-pointer font-sans">
           Share fundraiser
         </button>
       </div>
@@ -34,7 +34,7 @@ const emit = defineEmits<{
         <div class="relative w-12 h-12 flex items-center justify-center shrink-0">
           <svg class="w-full h-full transform -rotate-90" viewBox="0 0 40 40">
             <circle cx="20" cy="20" r="18" fill="transparent" stroke="#f1f5f9" stroke-width="3" />
-            <circle cx="20" cy="20" r="18" fill="transparent" stroke="#2563eb" stroke-width="3"
+            <circle cx="20" cy="20" r="18" fill="transparent" stroke="#02a95c" stroke-width="3"
               :stroke-dasharray="strokeCircumference" :stroke-dashoffset="strokeDashoffset" stroke-linecap="round" />
           </svg>
           <span class="absolute text-[10px] font-black text-slate-800">{{ progressPercent }}%</span>
@@ -43,7 +43,7 @@ const emit = defineEmits<{
         <div>
           <h4 class="text-sm font-bold text-slate-900 mb-0.5">${{ targetAmount }} goal</h4>
           <button @click="emit('transfers')"
-            class="text-xs text-blue-600 font-bold hover:underline cursor-pointer focus:outline-none">Set up
+            class="text-xs text-[#024731] font-bold hover:underline cursor-pointer focus:outline-none">Set up
             transfers</button>
         </div>
       </div>
@@ -51,17 +51,17 @@ const emit = defineEmits<{
       <!-- Action buttons row -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <button @click="emit('edit')"
-          class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer font-sans">
+          class="bg-white hover:bg-slate-50 border border-slate-200 hover:border-[#024731] text-slate-700 font-bold text-xs py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer font-sans">
           <iconify-icon icon="ph:pencil-simple-bold" class="text-sm"></iconify-icon>
           <span>Edit</span>
         </button>
         <button @click="emit('share')"
-          class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer font-sans">
+          class="bg-white hover:bg-slate-50 border border-slate-200 hover:border-[#024731] text-slate-700 font-bold text-xs py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer font-sans">
           <iconify-icon icon="ph:link-bold" class="text-sm"></iconify-icon>
           <span>Copy unique link</span>
         </button>
         <button @click="emit('message')"
-          class="bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer font-sans">
+          class="bg-white hover:bg-slate-50 border border-slate-200 hover:border-[#024731] text-slate-700 font-bold text-xs py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 cursor-pointer font-sans">
           <iconify-icon icon="ph:users-bold" class="text-sm"></iconify-icon>
           <span>Message co-organizers</span>
         </button>
@@ -75,7 +75,7 @@ const emit = defineEmits<{
       <div class="flex flex-col gap-4">
         <!-- Boost item -->
         <div class="border border-slate-100 rounded-2xl p-4 flex items-center gap-4 bg-slate-50/30">
-          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shrink-0">
+          <div class="w-10 h-10 rounded-xl bg-[#edfce0] text-[#02a95c] border border-[#bbf770] flex items-center justify-center text-lg shrink-0">
             <iconify-icon icon="ph:plant-bold"></iconify-icon>
           </div>
           <div class="text-xs">
@@ -89,7 +89,7 @@ const emit = defineEmits<{
 
         <!-- Share item -->
         <div class="border border-slate-100 rounded-2xl p-4 flex items-center gap-4 bg-slate-50/30">
-          <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg shrink-0">
+          <div class="w-10 h-10 rounded-xl bg-[#edfce0] text-[#02a95c] border border-[#bbf770] flex items-center justify-center text-lg shrink-0">
             <iconify-icon icon="ph:paper-plane-tilt-bold"></iconify-icon>
           </div>
           <div class="text-xs">

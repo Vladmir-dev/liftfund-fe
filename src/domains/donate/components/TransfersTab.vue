@@ -7,7 +7,7 @@
 
     <h3 class="text-base font-extrabold text-slate-900 mb-1">Whose account will the funds be transferred to?</h3>
     <p class="text-xs text-slate-400 mb-4 font-semibold leading-relaxed">
-      The account holder must be 18 years or older with a valid ID. <a href="#" class="text-blue-600 underline font-bold hover:text-blue-700">Learn more</a>
+      The account holder must be 18 years or older with a valid ID. <a href="#" class="text-[#024731] underline font-bold hover:text-[#013424]">Learn more</a>
     </p>
 
     <!-- Action list items -->

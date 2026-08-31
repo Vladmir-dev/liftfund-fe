@@ -23,7 +23,7 @@ const localTargetAmount = computed({
   <div class="text-left animate-fade-in">
     <!-- Input field container -->
     <div class="mb-6">
-      <div class="relative rounded-2xl border bg-white px-4 py-3 transition-all" :class="!amountValid ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent'">
+      <div class="relative rounded-2xl border bg-white px-4 py-3 transition-all" :class="!amountValid ? 'border-red-500 ring-2 ring-red-500/10' : 'border-slate-200 focus-within:ring-2 focus-within:ring-[#024731] focus-within:border-transparent'">
         <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Enter amount</label>
         <div class="flex items-center">
           <span class="text-xl font-bold text-slate-400 mr-2">$</span>
@@ -45,17 +45,17 @@ const localTargetAmount = computed({
     <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 text-left mb-6">
       <div class="flex items-start justify-between">
         <div>
-          <span class="inline-block bg-blue-50 text-blue-700 text-[9px] font-bold px-2 py-0.5 rounded-full mb-1 uppercase tracking-wider border border-blue-100">
+          <span class="inline-block bg-[#edfce0] text-[#024731] text-[9px] font-black px-2 py-0.5 rounded-full mb-1 uppercase tracking-wider border border-[#bbf770]">
             Recommended
           </span>
           <h4 class="text-sm font-bold text-slate-900 mb-0.5">Automated goal setting</h4>
           <p class="text-xs text-slate-500 leading-relaxed max-w-md">
-            We'll gradually adjust your goal as donations come in to help build momentum. <a href="#" class="underline hover:text-slate-800">More details</a>.
+            We'll gradually adjust your goal as donations come in to help build momentum. <a href="#" class="underline text-[#024731] font-bold">More details</a>.
           </p>
         </div>
         
         <!-- Switch toggle -->
-        <button @click="emit('update:useAutomatedGoal', !useAutomatedGoal)" class="w-11 h-6 rounded-full transition-colors relative focus:outline-none shrink-0" :class="useAutomatedGoal ? 'bg-blue-600' : 'bg-slate-300'">
+        <button @click="emit('update:useAutomatedGoal', !useAutomatedGoal)" class="w-11 h-6 rounded-full transition-colors relative focus:outline-none shrink-0 cursor-pointer" :class="useAutomatedGoal ? 'bg-[#024731]' : 'bg-slate-300'">
           <span class="w-5 h-5 bg-white rounded-full absolute top-0.5 transition-all shadow-sm" :class="useAutomatedGoal ? 'right-0.5' : 'left-0.5'"></span>
         </button>
       </div>

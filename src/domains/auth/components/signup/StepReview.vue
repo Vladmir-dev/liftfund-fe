@@ -56,9 +56,9 @@ const emit = defineEmits<{
         <div class="flex justify-between items-center">
           <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
             <span>Fundraising goal</span>
-            <span v-if="useAutomatedGoal" class="bg-blue-50 text-blue-700 text-[9px] font-bold px-1.5 py-0.2 rounded uppercase border border-blue-100">Automated</span>
+            <span v-if="useAutomatedGoal" class="bg-[#edfce0] text-[#024731] text-[9px] font-black px-2 py-0.5 rounded-full uppercase border border-[#bbf770]">Automated</span>
           </label>
-          <button @click="emit('editStep', 2)" class="text-xs font-bold text-slate-500 hover:text-slate-900 border border-slate-200 px-3 py-0.5 rounded-full hover:bg-slate-50 font-sans">Edit</button>
+          <button @click="emit('editStep', 2)" class="text-xs font-bold text-slate-500 hover:text-slate-900 border border-slate-200 px-3 py-0.5 rounded-full hover:bg-slate-50 font-sans cursor-pointer">Edit</button>
         </div>
         <p class="text-sm font-bold text-slate-800">${{ targetAmount }} USD</p>
         

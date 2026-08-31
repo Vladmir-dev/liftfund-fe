@@ -186,14 +186,14 @@ const hasAddedSocial = computed(() => {
               <iconify-icon :icon="isPrivate ? 'lucide:eye-off' : 'lucide:eye'"
                 class="text-slate-400 text-sm"></iconify-icon>
               <span>Your profile is {{ isPrivate ? 'private' : 'public' }}.</span>
-              <button @click="toggleVisibility" class="text-blue-600 hover:underline font-bold ml-1 cursor-pointer">
+              <button @click="toggleVisibility" class="text-[#024731] hover:underline font-bold ml-1 cursor-pointer">
                 Change visibility
               </button>
             </div>
           </div>
 
           <button
-            class="w-full sm:w-fit bg-blue-700 hover:bg-blue-800 text-white font-bold px-8 py-3.5 rounded-full shadow-md text-sm transition-all text-center cursor-pointer">
+            class="w-full sm:w-fit bg-[#024731] hover:bg-[#013424] text-white font-bold px-8 py-3.5 rounded-full shadow-md text-sm transition-all text-center cursor-pointer">
             Share profile
           </button>
         </div>
@@ -486,7 +486,7 @@ const hasAddedSocial = computed(() => {
             </div>
 
             <button v-if="isEditingLocation" @click="saveLocation"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingLocation = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ userInfo.location ? 'Edit' : '+ Add' }}
@@ -500,14 +500,14 @@ const hasAddedSocial = computed(() => {
               <div class="flex-1 min-w-0">
                 <span class="text-xs font-bold text-slate-800">Education</span>
                 <input v-if="isEditingEducation" type="text" v-model="tempEducation"
-                  class="w-full mt-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none" />
+                  class="w-full mt-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#024731]" />
                 <p v-else-if="userInfo.education" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">{{
                   userInfo.education }}</p>
               </div>
             </div>
 
             <button v-if="isEditingEducation" @click="saveEducation"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingEducation = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ userInfo.education ? 'Edit' : '+ Add' }}
@@ -521,14 +521,14 @@ const hasAddedSocial = computed(() => {
               <div class="flex-1 min-w-0">
                 <span class="text-xs font-bold text-slate-800">Work</span>
                 <input v-if="isEditingWork" type="text" v-model="tempWork"
-                  class="w-full mt-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none" />
+                  class="w-full mt-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#024731]" />
                 <p v-else-if="userInfo.work" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">{{
                   userInfo.work }}</p>
               </div>
             </div>
 
             <button v-if="isEditingWork" @click="saveWork"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingWork = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ userInfo.work ? 'Edit' : '+ Add' }}
@@ -542,14 +542,14 @@ const hasAddedSocial = computed(() => {
               <div class="flex-1 min-w-0">
                 <span class="text-xs font-bold text-slate-800">Birthday</span>
                 <input v-if="isEditingBirthday" type="date" v-model="tempBirthday"
-                  class="w-full mt-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none" />
+                  class="w-full mt-1 px-3 py-1.5 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#024731]" />
                 <p v-else-if="userInfo.birthday" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">{{
                   userInfo.birthday }}</p>
               </div>
             </div>
 
             <button v-if="isEditingBirthday" @click="saveBirthday"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingBirthday = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ userInfo.birthday ? 'Edit' : '+ Add' }}
@@ -561,7 +561,7 @@ const hasAddedSocial = computed(() => {
         <!-- Done Footer button (Screenshot 2 bottom right) -->
         <div class="border-t border-slate-50 pt-4 flex justify-end">
           <button @click="showInfoModal = false"
-            class="bg-[#0f2e24] hover:bg-[#1a3f33] text-white text-xs font-bold py-2.5 px-6 rounded-full cursor-pointer">
+            class="bg-[#024731] hover:bg-[#013424] text-white text-xs font-bold py-2.5 px-6 rounded-full cursor-pointer transition-all">
             Done
           </button>
         </div>
@@ -611,7 +611,7 @@ const hasAddedSocial = computed(() => {
               </div>
             </div>
             <button v-if="isEditingSocial.instagram" @click="saveSocial('instagram')"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingSocial.instagram = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ socialHandles.instagram ? 'Edit' : '+ Add' }}
@@ -627,13 +627,13 @@ const hasAddedSocial = computed(() => {
               <div class="flex-1 min-w-0">
                 <span class="text-xs font-bold text-slate-800">TikTok</span>
                 <input v-if="isEditingSocial.tiktok" type="text" v-model="tempSocial.tiktok" placeholder="@username"
-                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none" />
+                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#024731]" />
                 <p v-else-if="socialHandles.tiktok" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">{{
                   socialHandles.tiktok }}</p>
               </div>
             </div>
             <button v-if="isEditingSocial.tiktok" @click="saveSocial('tiktok')"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingSocial.tiktok = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ socialHandles.tiktok ? 'Edit' : '+ Add' }}
@@ -649,13 +649,13 @@ const hasAddedSocial = computed(() => {
               <div class="flex-1 min-w-0">
                 <span class="text-xs font-bold text-slate-800">X (Twitter)</span>
                 <input v-if="isEditingSocial.x" type="text" v-model="tempSocial.x" placeholder="@username"
-                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none" />
+                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#024731]" />
                 <p v-else-if="socialHandles.x" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">{{
                   socialHandles.x }}</p>
               </div>
             </div>
             <button v-if="isEditingSocial.x" @click="saveSocial('x')"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingSocial.x = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ socialHandles.x ? 'Edit' : '+ Add' }}
@@ -672,14 +672,14 @@ const hasAddedSocial = computed(() => {
                 <span class="text-xs font-bold text-slate-800">Facebook</span>
                 <input v-if="isEditingSocial.facebook" type="text" v-model="tempSocial.facebook"
                   placeholder="profile URL"
-                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none" />
+                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#024731]" />
                 <p v-else-if="socialHandles.facebook" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">
                   {{
                     socialHandles.facebook }}</p>
               </div>
             </div>
             <button v-if="isEditingSocial.facebook" @click="saveSocial('facebook')"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingSocial.facebook = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ socialHandles.facebook ? 'Edit' : '+ Add' }}
@@ -696,14 +696,13 @@ const hasAddedSocial = computed(() => {
                 <span class="text-xs font-bold text-slate-800">Linktree</span>
                 <input v-if="isEditingSocial.linktree" type="text" v-model="tempSocial.linktree"
                   placeholder="linktree URL"
-                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none" />
-                <p v-else-if="socialHandles.linktree" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">
-                  {{
-                    socialHandles.linktree }}</p>
+                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#024731]" />
+                <p v-else-if="socialHandles.linktree" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">{{
+                  socialHandles.linktree }}</p>
               </div>
             </div>
             <button v-if="isEditingSocial.linktree" @click="saveSocial('linktree')"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingSocial.linktree = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ socialHandles.linktree ? 'Edit' : '+ Add' }}
@@ -720,13 +719,13 @@ const hasAddedSocial = computed(() => {
                 <span class="text-xs font-bold text-slate-800">YouTube</span>
                 <input v-if="isEditingSocial.youtube" type="text" v-model="tempSocial.youtube"
                   placeholder="channel name"
-                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none" />
+                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#024731]" />
                 <p v-else-if="socialHandles.youtube" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">{{
                   socialHandles.youtube }}</p>
               </div>
             </div>
             <button v-if="isEditingSocial.youtube" @click="saveSocial('youtube')"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingSocial.youtube = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ socialHandles.youtube ? 'Edit' : '+ Add' }}
@@ -743,14 +742,14 @@ const hasAddedSocial = computed(() => {
                 <span class="text-xs font-bold text-slate-800">LinkedIn</span>
                 <input v-if="isEditingSocial.linkedin" type="text" v-model="tempSocial.linkedin"
                   placeholder="profile URL"
-                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none" />
+                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#024731]" />
                 <p v-else-if="socialHandles.linkedin" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">
                   {{
                     socialHandles.linkedin }}</p>
               </div>
             </div>
             <button v-if="isEditingSocial.linkedin" @click="saveSocial('linkedin')"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingSocial.linkedin = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ socialHandles.linkedin ? 'Edit' : '+ Add' }}
@@ -766,13 +765,13 @@ const hasAddedSocial = computed(() => {
               <div class="flex-1 min-w-0">
                 <span class="text-xs font-bold text-slate-800">Twitch</span>
                 <input v-if="isEditingSocial.twitch" type="text" v-model="tempSocial.twitch" placeholder="username"
-                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none" />
+                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#024731]" />
                 <p v-else-if="socialHandles.twitch" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">{{
                   socialHandles.twitch }}</p>
               </div>
             </div>
             <button v-if="isEditingSocial.twitch" @click="saveSocial('twitch')"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingSocial.twitch = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ socialHandles.twitch ? 'Edit' : '+ Add' }}
@@ -789,13 +788,13 @@ const hasAddedSocial = computed(() => {
               <div class="flex-1 min-w-0">
                 <span class="text-xs font-bold text-slate-800">Pillar</span>
                 <input v-if="isEditingSocial.pillar" type="text" v-model="tempSocial.pillar" placeholder="pillar page"
-                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none" />
+                  class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#024731]" />
                 <p v-else-if="socialHandles.pillar" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">{{
                   socialHandles.pillar }}</p>
               </div>
             </div>
             <button v-if="isEditingSocial.pillar" @click="saveSocial('pillar')"
-              class="text-xs font-bold text-blue-600 hover:underline cursor-pointer">Save</button>
+              class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Save</button>
             <button v-else @click="isEditingSocial.pillar = true"
               class="text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">
               {{ socialHandles.pillar ? 'Edit' : '+ Add' }}

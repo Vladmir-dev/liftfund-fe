@@ -258,16 +258,16 @@ const handleEnhanceStory = () => {
       <!-- Logo matches HelpFund header -->
       <button @click="router.push('/')"
         class="flex items-center gap-1.5 text-slate-800 focus:outline-none cursor-pointer">
-        <iconify-icon icon="lucide:sunrise" class="text-blue-500 text-2xl"></iconify-icon>
-        <span class="text-lg font-black tracking-tight text-slate-900">helpfund</span>
+        <iconify-icon icon="lucide:sunrise" class="text-[#02a95c] text-2xl"></iconify-icon>
+        <span class="text-lg font-black tracking-tight text-[#024731]">helpfund</span>
       </button>
 
       <!-- Dynamic Sidebar content based on currentStep -->
       <div class="my-16 md:my-0 flex-1 flex flex-col justify-center">
         <!-- Step Indicator -->
         <span v-if="currentStep > 0 && currentStep <= 5"
-          class="text-xs font-bold text-slate-400 mb-2 uppercase tracking-widest">
-          {{ currentStep }} of 6
+          class="text-xs font-black text-[#024731] mb-2 uppercase tracking-widest bg-[#edfce0] px-2.5 py-0.5 rounded-full inline-block w-fit">
+          Step {{ currentStep }} of 6
         </span>
 
         <h1
@@ -309,7 +309,7 @@ const handleEnhanceStory = () => {
 
       <!-- Action help -->
       <div class="text-xs text-slate-400 font-medium">
-        Already have an account? <RouterLink to="/login" class="text-blue-600 font-bold hover:underline">Sign in
+        Already have an account? <RouterLink to="/login" class="text-[#024731] font-bold hover:underline">Sign in
         </RouterLink>
       </div>
 
@@ -353,9 +353,9 @@ const handleEnhanceStory = () => {
       <!-- ACTION FOOTER: Buttons and Dynamic progress line -->
       <div class="w-full mt-auto relative z-10">
 
-        <!-- Blue Step progress line -->
+        <!-- Green Step progress line -->
         <div class="w-full bg-slate-200/50 h-[3px]">
-          <div class="bg-blue-600 h-full transition-all duration-300"
+          <div class="bg-[#02a95c] h-full transition-all duration-300"
             :style="{ width: currentStep === 0 ? '0%' : (currentStep * 16.6) + '%' }"></div>
         </div>
 
@@ -363,7 +363,7 @@ const handleEnhanceStory = () => {
 
           <!-- Back arrow button (white square box) -->
           <button v-if="currentStep > 0 && !launchSuccess" @click="handleBack"
-            class="w-10 h-10 rounded-xl border border-slate-200 hover:border-slate-400 bg-white flex items-center justify-center transition-all hover:bg-slate-50 text-slate-600 text-sm shrink-0 cursor-pointer">
+            class="w-10 h-10 rounded-xl border border-slate-200 hover:border-[#024731] bg-white flex items-center justify-center transition-all hover:bg-slate-50 text-slate-600 text-sm shrink-0 cursor-pointer">
             <iconify-icon icon="ph:arrow-left-bold"></iconify-icon>
           </button>
 
@@ -374,7 +374,7 @@ const handleEnhanceStory = () => {
           <div class="flex items-center gap-3">
             <!-- Skip link in Step 3 -->
             <button v-if="currentStep === 3" @click="currentStep = 4"
-              class="text-xs font-bold text-slate-500 hover:text-slate-800 hover:underline cursor-pointer">
+              class="text-xs font-bold text-slate-500 hover:text-[#024731] hover:underline cursor-pointer">
               Skip for now
             </button>
 
@@ -382,28 +382,28 @@ const handleEnhanceStory = () => {
             <button v-if="currentStep < 5" @click="handleContinue"
               :disabled="(currentStep === 0 && !initialStepValid) || (currentStep === 2 && !amountValid) || (currentStep === 4 && !storyValid)"
               class="px-8 py-3 font-bold text-xs rounded-full shadow-md transition-all flex items-center gap-2 cursor-pointer"
-              :class="(currentStep === 0 && !initialStepValid) || (currentStep === 2 && !amountValid) || (currentStep === 4 && !storyValid) ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' : 'bg-slate-900 text-white hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]'">
+              :class="(currentStep === 0 && !initialStepValid) || (currentStep === 2 && !amountValid) || (currentStep === 4 && !storyValid) ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none' : 'bg-[#024731] text-white hover:bg-[#013424] hover:scale-[1.02] active:scale-[0.98]'">
               <span>Continue</span>
             </button>
 
             <!-- Step 5 has 'Review' button -->
             <button v-else-if="currentStep === 5" @click="handleContinue" :disabled="!titleValid"
               class="px-8 py-3 font-bold text-xs rounded-full shadow-md transition-all flex items-center gap-2 cursor-pointer"
-              :class="!titleValid ? 'bg-gray-800 text-white cursor-not-allowed shadow-none' : 'bg-gray-800 text-white hover:bg-gray-700 hover:scale-[1.02] active:scale-[0.98]'">
+              :class="!titleValid ? 'bg-slate-300 text-slate-400 cursor-not-allowed shadow-none' : 'bg-[#024731] text-white hover:bg-[#013424] hover:scale-[1.02] active:scale-[0.98]'">
               <span>Review</span>
             </button>
 
             <!-- Step 6 has 'Preview' and 'Launch fundraiser' -->
             <div v-else-if="currentStep === 6 && !launchSuccess" class="flex items-center gap-3.5">
               <button @click="openPreview"
-                class="px-6 py-2.5 bg-white border border-slate-200 hover:border-slate-400 text-slate-700 font-bold text-xs rounded-full shadow-sm hover:bg-slate-50 transition-all cursor-pointer font-sans">
+                class="px-6 py-2.5 bg-white border border-slate-200 hover:border-[#024731] text-slate-700 font-bold text-xs rounded-full shadow-sm hover:bg-slate-50 transition-all cursor-pointer font-sans">
                 Preview
               </button>
 
               <button @click="startVerification" :disabled="isLaunching"
-                class="px-6 py-2.5 bg-gray-800 hover:bg-gray-800 text-white font-bold text-xs rounded-full shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer font-sans">
+                class="px-6 py-2.5 bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs rounded-full shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer font-sans">
                 <span v-if="isLaunching"
-                  class="h-3 w-3 border-2 border-slate-800 border-t-transparent rounded-full animate-spin"></span>
+                  class="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
                 <span>Launch fundraiser</span>
               </button>
             </div>
@@ -424,7 +424,7 @@ const handleEnhanceStory = () => {
         <div v-for="n in 30" :key="n" class="confetti-particle absolute" :style="{
           left: Math.random() * 100 + '%',
           top: -20 + 'px',
-          backgroundColor: ['#2563eb', '#60a5fa', '#eab308', '#ec4899', '#a855f7', '#3b82f6'][n % 6],
+          backgroundColor: ['#02a95c', '#bbf770', '#f8c93a', '#024731', '#10b981', '#34d399'][n % 6],
           animationDelay: Math.random() * 2 + 's',
           animationDuration: (Math.random() * 2 + 1.5) + 's',
           transform: `rotate(${Math.random() * 360}deg)`
@@ -434,12 +434,12 @@ const handleEnhanceStory = () => {
       <div
         class="bg-white rounded-3xl p-8 max-w-md w-full border border-slate-100 shadow-2xl text-center relative z-10 animate-fade-in-up">
         <div
-          class="w-16 h-16 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-4xl mb-4 text-blue-500 mx-auto shadow-sm">
+          class="w-16 h-16 rounded-full bg-[#edfce0] border border-[#bbf770] flex items-center justify-center text-4xl mb-4 text-[#02a95c] mx-auto shadow-sm">
           <iconify-icon icon="fa6-solid:circle-check" class="animate-pulse"></iconify-icon>
         </div>
         <h2 class="text-2xl font-bold text-slate-900 mb-2">Campaign Initialized!</h2>
         <p class="text-slate-500 text-sm mb-4">Great choice! Launching your custom fundraiser dashboard.</p>
-        <span class="text-xs text-slate-400 font-medium animate-pulse">Loading campaign dashboard...</span>
+        <span class="text-xs text-[#024731] font-bold animate-pulse">Loading campaign dashboard...</span>
       </div>
     </div>
 
@@ -462,18 +462,18 @@ const handleEnhanceStory = () => {
             class="relative aspect-video rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm max-w-md mx-auto w-full">
             <img :src="mediaUrl || ''" class="w-full h-full object-cover" />
             <span
-              class="absolute top-3 right-3 bg-blue-50 text-blue-700 text-[9px] font-bold px-2 py-0.5 rounded border border-blue-200 uppercase tracking-wide">
+              class="absolute top-3 right-3 bg-[#edfce0] text-[#024731] text-[9px] font-black px-2 py-0.5 rounded border border-[#d8fc9e] uppercase tracking-wide">
               Featured Photo
             </span>
           </div>
 
           <div
             class="flex justify-center items-center gap-6 border-b border-slate-100 pb-4 text-xs font-bold text-slate-600">
-            <button class="hover:text-blue-700 flex items-center gap-1 cursor-pointer">
+            <button class="hover:text-[#024731] flex items-center gap-1 cursor-pointer">
               <iconify-icon icon="ph:crop-bold" class="text-base"></iconify-icon>
               <span>Crop</span>
             </button>
-            <button @click="triggerUpload" class="hover:text-blue-700 flex items-center gap-1 cursor-pointer">
+            <button @click="triggerUpload" class="hover:text-[#024731] flex items-center gap-1 cursor-pointer">
               <iconify-icon icon="ph:arrow-clockwise-bold" class="text-base"></iconify-icon>
               <span>Replace</span>
             </button>
@@ -484,7 +484,7 @@ const handleEnhanceStory = () => {
           </p>
 
           <div @click="triggerUpload"
-            class="border border-dashed border-slate-200 hover:border-blue-500 rounded-xl p-6 text-center cursor-pointer transition-all hover:bg-slate-50/50 flex flex-col items-center justify-center gap-1.5">
+            class="border border-dashed border-slate-200 hover:border-[#024731] rounded-xl p-6 text-center cursor-pointer transition-all hover:bg-[#edfce0]/20 flex flex-col items-center justify-center gap-1.5">
             <iconify-icon icon="ph:image-square" class="text-slate-400 text-xl"></iconify-icon>
             <span class="text-xs font-semibold text-slate-600">Drag or upload up to 5 photos here</span>
           </div>
@@ -497,7 +497,7 @@ const handleEnhanceStory = () => {
 
           <div>
             <div
-              class="relative rounded-xl border border-slate-200 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all">
+              class="relative rounded-xl border border-slate-200 focus-within:ring-2 focus-within:ring-[#024731] focus-within:border-transparent transition-all">
               <iconify-icon icon="ph:link-bold" class="absolute left-3 top-3.5 text-slate-400"></iconify-icon>
               <input type="text" v-model="youtubeLink" placeholder="Add a YouTube link"
                 class="w-full pl-9 pr-4 py-3 focus:outline-none text-xs font-medium text-slate-700" />
@@ -505,7 +505,7 @@ const handleEnhanceStory = () => {
           </div>
 
           <button @click="closeEditMediaModal"
-            class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
+            class="w-full py-3 bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
             Done
           </button>
 
@@ -533,17 +533,17 @@ const handleEnhanceStory = () => {
           <!-- HelpFund Clone Header -->
           <div class="border-b border-slate-100 py-3 bg-white flex items-center justify-between px-6">
             <div class="flex items-center gap-1.5">
-              <iconify-icon icon="lucide:sunrise" class="text-blue-500 text-xl"></iconify-icon>
-              <span class="text-sm font-black tracking-tight text-slate-900">helpfund</span>
+              <iconify-icon icon="lucide:sunrise" class="text-[#02a95c] text-xl"></iconify-icon>
+              <span class="text-sm font-black tracking-tight text-[#024731]">helpfund</span>
             </div>
             <div class="flex items-center gap-4 text-xs font-bold text-slate-700">
-              <span class="hover:text-blue-600 cursor-pointer">Search</span>
-              <span class="hover:text-blue-600 cursor-pointer">Donate</span>
-              <span class="hover:text-blue-600 cursor-pointer">Fundraise</span>
-              <span class="hover:text-blue-600 cursor-pointer">About</span>
+              <span class="hover:text-[#024731] cursor-pointer">Search</span>
+              <span class="hover:text-[#024731] cursor-pointer">Donate</span>
+              <span class="hover:text-[#024731] cursor-pointer">Fundraise</span>
+              <span class="hover:text-[#024731] cursor-pointer">About</span>
               <div class="flex items-center gap-1 cursor-pointer">
                 <div
-                  class="w-5 h-5 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center text-[10px] font-bold">
+                  class="w-5 h-5 rounded-full bg-[#edfce0] text-[#024731] flex items-center justify-center text-[10px] font-bold">
                   J</div>
                 <span>John</span>
               </div>
@@ -562,19 +562,19 @@ const handleEnhanceStory = () => {
               <div class="lg:col-span-8 flex flex-col gap-6">
                 <!-- Cover Image -->
                 <div
-                  class="aspect-video w-full rounded-2xl overflow-hidden bg-blue-50/10 border border-slate-100 relative">
+                  class="aspect-video w-full rounded-2xl overflow-hidden bg-slate-50 border border-slate-100 relative">
                   <img v-if="mediaUrl" :src="mediaUrl" class="w-full h-full object-cover" />
                   <div v-else
-                    class="w-full h-full bg-gradient-to-tr from-blue-100 to-indigo-50 flex flex-col items-center justify-center text-slate-500 font-bold gap-1 text-xs">
-                    <iconify-icon icon="lucide:sunrise" class="text-blue-500 text-3xl"></iconify-icon>
-                    <span>helpfund</span>
+                    class="w-full h-full bg-slate-100 flex flex-col items-center justify-center text-slate-500 font-bold gap-1 text-xs">
+                    <iconify-icon icon="lucide:sunrise" class="text-[#02a95c] text-3xl"></iconify-icon>
+                    <span class="text-[#024731]">helpfund</span>
                   </div>
                 </div>
 
                 <!-- Organizer brief header -->
                 <div class="flex items-center gap-3 py-2 border-b border-slate-100">
                   <div
-                    class="w-8 h-8 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center font-bold text-xs shrink-0">
+                    class="w-8 h-8 rounded-full bg-[#edfce0] text-[#024731] flex items-center justify-center font-bold text-xs shrink-0">
                     JD</div>
                   <div class="text-[11px] text-slate-600 font-medium">
                     <span class="font-bold text-slate-900 block">JOHN DOE</span>
@@ -583,9 +583,9 @@ const handleEnhanceStory = () => {
                 </div>
 
                 <!-- Protected tag -->
-                <div class="bg-blue-50/30 border border-blue-100/50 rounded-xl p-3 flex items-center gap-2">
-                  <iconify-icon icon="ph:shield-check-fill" class="text-blue-600 text-base shrink-0"></iconify-icon>
-                  <span class="text-[10px] text-slate-600 leading-normal font-semibold">
+                <div class="bg-[#edfce0]/60 border border-[#d8fc9e]/80 rounded-xl p-3 flex items-center gap-2">
+                  <iconify-icon icon="ph:shield-check-fill" class="text-[#024731] text-base shrink-0"></iconify-icon>
+                  <span class="text-[10px] text-slate-700 leading-normal font-semibold">
                     Donation protected &bull; We guarantee a full refund for up to a year in the rare case that fraud
                     occurs.
                   </span>
@@ -599,14 +599,14 @@ const handleEnhanceStory = () => {
 
                 <!-- Founding Donor card -->
                 <div
-                  class="bg-blue-50/50 border border-blue-100/60 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+                  class="bg-[#edfce0]/60 border border-[#bbf770]/60 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
                   <div>
-                    <h4 class="font-bold text-blue-950 mb-0.5">Give $20 and be a founding donor</h4>
-                    <p class="text-slate-500 font-semibold">Your donation starts John's journey to success by
+                    <h4 class="font-bold text-[#024731] mb-0.5">Give $20 and be a founding donor</h4>
+                    <p class="text-slate-600 font-medium">Your donation starts John's journey to success by
                       inspiring
                       others to help.</p>
                   </div>
-                  <button class="bg-blue-600 text-white font-bold px-4 py-2 rounded-full transition-all shrink-0">
+                  <button class="bg-[#024731] text-white font-bold px-4 py-2 rounded-full transition-all shrink-0">
                     Donate
                   </button>
                 </div>
@@ -652,23 +652,23 @@ const handleEnhanceStory = () => {
                 <div class="mb-4">
                   <div class="flex items-center gap-2 mb-2 text-xs">
                     <div
-                      class="w-5 h-5 rounded-full bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center font-bold text-[10px]">
+                      class="w-5 h-5 rounded-full bg-[#edfce0] border border-[#bbf770] text-[#024731] flex items-center justify-center font-bold text-[10px]">
                       HF</div>
                     <span class="font-bold text-slate-700">Be the first to donate</span>
                   </div>
 
                   <button
-                    class="w-full bg-blue-600 text-white font-extrabold text-xs py-3.5 rounded-xl mb-2 flex items-center justify-center gap-1.5 shadow-sm">
+                    class="w-full bg-[#024731] hover:bg-[#013424] text-white font-extrabold text-xs py-3.5 rounded-xl mb-2 flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
                     Donate now
                   </button>
                   <button
-                    class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs py-3.5 rounded-xl mb-3 flex items-center justify-center gap-1.5 shadow-sm">
+                    class="w-full bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs py-3.5 rounded-xl mb-3 flex items-center justify-center gap-1.5 shadow-sm cursor-pointer">
                     Share
                   </button>
 
                   <div class="text-[10px] text-slate-500 leading-normal flex gap-2 border-t border-slate-100 pt-3">
                     <iconify-icon icon="ph:shield-check-bold"
-                      class="text-blue-600 text-base shrink-0 mt-0.5"></iconify-icon>
+                      class="text-[#024731] text-base shrink-0 mt-0.5"></iconify-icon>
                     <div>
                       <p class="font-bold text-slate-800 mb-0.5">Become the first supporter</p>
                       <p>Your donation matters. HelpFund protects your donation. We guarantee you a full refund for up
@@ -700,7 +700,7 @@ const handleEnhanceStory = () => {
         </button>
 
         <div
-          class="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-xl text-blue-600 mb-4">
+          class="w-10 h-10 rounded-full bg-[#edfce0] border border-[#bbf770] flex items-center justify-center text-xl text-[#024731] mb-4">
           <iconify-icon icon="ph:shield-check-bold"></iconify-icon>
         </div>
 
@@ -718,7 +718,7 @@ const handleEnhanceStory = () => {
             <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Code</label>
             <div class="relative">
               <select v-model="phoneCountryCode"
-                class="w-full bg-white px-3 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-semibold appearance-none pr-8 cursor-pointer">
+                class="w-full bg-white px-3 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold appearance-none pr-8 cursor-pointer">
                 <option>+256</option>
                 <option>+1</option>
                 <option>+44</option>
@@ -734,7 +734,7 @@ const handleEnhanceStory = () => {
           <div class="flex-grow">
             <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Phone number</label>
             <input type="tel" v-model="phoneNumber" placeholder="Phone number"
-              class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-semibold" />
+              class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold" />
           </div>
         </div>
 
@@ -744,7 +744,7 @@ const handleEnhanceStory = () => {
         </p>
 
         <button @click="sendOtpCode"
-          class="w-full py-3 bg-[#1e3d30] hover:bg-[#152c22] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
+          class="w-full py-3 bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
           Send Code
         </button>
       </div>
@@ -769,14 +769,14 @@ const handleEnhanceStory = () => {
 
         <!-- Not correct number links -->
         <button @click="verificationStep = 'phone_setup'"
-          class="text-[11px] font-bold text-blue-600 hover:text-blue-700 hover:underline mb-6 cursor-pointer block focus:outline-none">
+          class="text-[11px] font-bold text-[#024731] hover:underline mb-6 cursor-pointer block focus:outline-none">
           Not the right number? Change number
         </button>
 
         <!-- OTP Input Grid -->
         <div class="flex gap-2.5 justify-center mb-4">
           <input v-for="(digit, idx) in 6" :key="idx" :ref="el => setOtpInputRef(idx, el)" type="text" maxlength="1"
-            class="w-11 h-11 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-600 text-center rounded-xl font-bold text-sm bg-slate-50"
+            class="w-11 h-11 border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-center rounded-xl font-bold text-sm bg-slate-50"
             @input="onOtpInput(idx, $event)" @keydown="onOtpKeyDown(idx, $event)" />
         </div>
 
@@ -784,13 +784,13 @@ const handleEnhanceStory = () => {
 
         <!-- Resend link -->
         <button @click="verifyOtpCode"
-          class="text-[11px] font-bold text-blue-600 hover:underline block mb-6 focus:outline-none cursor-pointer">
+          class="text-[11px] font-bold text-[#024731] hover:underline block mb-6 focus:outline-none cursor-pointer">
           Resend code
         </button>
 
         <!-- Verify button -->
         <button @click="verifyOtpCode"
-          class="w-full py-3 bg-[#1e3d30] hover:bg-[#152c22] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
+          class="w-full py-3 bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
           Verify
         </button>
       </div>
@@ -809,7 +809,7 @@ const handleEnhanceStory = () => {
 
         <!-- Phone/Message icon -->
         <div
-          class="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-2xl text-blue-600 mx-auto mb-4">
+          class="w-12 h-12 rounded-full bg-[#edfce0] border border-[#bbf770] flex items-center justify-center text-2xl text-[#024731] mx-auto mb-4">
           <iconify-icon icon="ph:chats-bold"></iconify-icon>
         </div>
 
@@ -827,7 +827,7 @@ const handleEnhanceStory = () => {
         <!-- Marketing disclaimer checkbox -->
         <div class="flex gap-2.5 items-start text-left mb-6">
           <input type="checkbox" v-model="marketingConsentChecked" id="marketing-check"
-            class="mt-1 cursor-pointer w-4 h-4 accent-blue-600 shrink-0" />
+            class="mt-1 cursor-pointer w-4 h-4 accent-[#024731] shrink-0" />
           <label for="marketing-check"
             class="text-[10px] text-slate-500 font-medium leading-relaxed cursor-pointer select-none">
             Send me HelpFund success tips and updates about this fundraiser I am creating on HelpFund through texts,
@@ -847,12 +847,12 @@ const handleEnhanceStory = () => {
         <!-- Buttons row -->
         <div class="flex flex-col gap-3">
           <button @click="submitMarketingOptIn"
-            class="w-full py-3 bg-gray-800 hover:bg-gray-900 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
+            class="w-full py-3 bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
             Send me texts
           </button>
 
           <button @click="skipMarketingOptIn"
-            class="text-xs font-bold text-slate-500 hover:text-slate-800 hover:underline cursor-pointer focus:outline-none">
+            class="text-xs font-bold text-slate-500 hover:text-[#024731] hover:underline cursor-pointer focus:outline-none">
             Skip for now
           </button>
         </div>
@@ -872,7 +872,7 @@ const handleEnhanceStory = () => {
 
         <!-- Sprout/ Sunrise indicator -->
         <div
-          class="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-base text-blue-600 mx-auto mb-4">
+          class="w-10 h-10 rounded-full bg-[#edfce0] border border-[#bbf770] flex items-center justify-center text-lg text-[#02a95c] mx-auto mb-4">
           <iconify-icon icon="lucide:sunrise"></iconify-icon>
         </div>
 
@@ -880,13 +880,13 @@ const handleEnhanceStory = () => {
 
         <!-- Core Insights graphic banner -->
         <div
-          class="rounded-2xl bg-blue-50/50 p-6 flex items-center justify-center border border-blue-100/50 max-w-xs mx-auto mb-6 relative min-h-[160px] overflow-hidden">
+          class="rounded-2xl bg-[#edfce0]/50 p-6 flex items-center justify-center border border-[#bbf770]/50 max-w-xs mx-auto mb-6 relative min-h-[160px] overflow-hidden">
 
           <!-- Image preview inside box -->
           <div class="w-32 aspect-square rounded-xl overflow-hidden shadow bg-slate-100 relative z-10">
             <img v-if="mediaUrl" :src="mediaUrl" class="w-full h-full object-cover" />
             <div v-else
-              class="w-full h-full bg-gradient-to-tr from-blue-100 to-indigo-50 flex items-center justify-center text-blue-500">
+              class="w-full h-full bg-[#edfce0] flex items-center justify-center text-[#02a95c]">
               <iconify-icon icon="lucide:sunrise" class="text-2xl"></iconify-icon>
             </div>
           </div>
@@ -894,25 +894,25 @@ const handleEnhanceStory = () => {
           <!-- Overlaid absolute stats boxes -->
           <div
             class="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-xl shadow-md border border-slate-100 text-slate-800 text-[10px] font-extrabold flex flex-col items-center shrink-0 z-20 hover:scale-105 transition-all">
-            <span class="text-xs text-blue-600 font-black">32</span>
+            <span class="text-xs text-[#024731] font-black">32</span>
             <span class="text-[8px] text-slate-400 uppercase font-bold tracking-wider">Views</span>
           </div>
 
           <div
             class="absolute top-10 right-4 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-xl shadow-md border border-slate-100 text-slate-800 text-[10px] font-extrabold flex flex-col items-center shrink-0 z-20 hover:scale-105 transition-all">
-            <span class="text-xs text-blue-600 font-black">24</span>
+            <span class="text-xs text-[#024731] font-black">24</span>
             <span class="text-[8px] text-slate-400 uppercase font-bold tracking-wider">Shares</span>
           </div>
 
           <div
             class="absolute bottom-4 left-1/3 bg-white/95 backdrop-blur-sm px-2.5 py-1 rounded-xl shadow-md border border-slate-100 text-slate-800 text-[10px] font-extrabold flex flex-col items-center shrink-0 z-20 hover:scale-105 transition-all">
-            <span class="text-xs text-blue-600 font-black">12</span>
+            <span class="text-xs text-[#024731] font-black">12</span>
             <span class="text-[8px] text-slate-400 uppercase font-bold tracking-wider">Donations</span>
           </div>
         </div>
 
         <button @click="handleFinishInsights"
-          class="w-full py-3 bg-[#1e3d30] hover:bg-[#152c22] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
+          class="w-full py-3 bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
           Continue
         </button>
       </div>

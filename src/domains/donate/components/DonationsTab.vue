@@ -40,7 +40,7 @@ const addOfflineDonation = () => {
   <div class="flex flex-col gap-6 animate-fade-in text-left">
     <div class="flex items-center justify-between border-b border-slate-150 pb-3 mb-2">
       <h2 class="text-2xl font-bold text-slate-900">Donations</h2>
-      <button @click="openOfflineModal" class="w-8 h-8 rounded-full border border-blue-600 text-blue-600 hover:bg-blue-50 flex items-center justify-center text-lg font-bold cursor-pointer transition-all shadow-sm focus:outline-none">
+      <button @click="openOfflineModal" class="w-8 h-8 rounded-full border border-[#024731] text-[#024731] hover:bg-[#edfce0] flex items-center justify-center text-lg font-bold cursor-pointer transition-all shadow-sm focus:outline-none">
         +
       </button>
     </div>
@@ -51,15 +51,15 @@ const addOfflineDonation = () => {
         <h3 class="text-base md:text-lg font-extrabold text-slate-900 mb-3 leading-snug">
           Let's get to your goal, one step at a time. Connect with those who can help.
         </h3>
-        <button @click="emit('share')" class="inline-flex items-center gap-2 text-xs font-bold text-slate-800 bg-white border border-slate-200 hover:bg-slate-50 px-4 py-2.5 rounded-full transition-all shadow-sm shrink-0 cursor-pointer">
+        <button @click="emit('share')" class="inline-flex items-center gap-2 text-xs font-bold text-slate-800 bg-white border border-slate-200 hover:bg-[#edfce0]/50 hover:border-[#024731] px-4 py-2.5 rounded-full transition-all shadow-sm shrink-0 cursor-pointer">
           <span>Share your fundraiser</span>
-          <span class="w-5 h-5 rounded-full bg-slate-950 text-white flex items-center justify-center text-[10px]">➔</span>
+          <span class="w-5 h-5 rounded-full bg-[#024731] text-white flex items-center justify-center text-[10px]">➔</span>
         </button>
       </div>
 
       <!-- Avatars graphic -->
       <div class="relative w-48 h-48 flex items-center justify-center shrink-0">
-        <div class="w-20 h-20 rounded-full bg-blue-900 text-white flex items-center justify-center text-2xl shadow-lg relative z-25">
+        <div class="w-20 h-20 rounded-full bg-[#024731] text-[#02a95c] flex items-center justify-center text-3xl shadow-lg relative z-25">
           <iconify-icon icon="lucide:sunrise"></iconify-icon>
         </div>
         <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=80" class="absolute top-2 left-6 w-11 h-11 rounded-full border-2 border-white shadow z-10" />
@@ -88,18 +88,18 @@ const addOfflineDonation = () => {
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">First name</label>
-              <input type="text" v-model="offlineFirstName" placeholder="First name" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-semibold" />
+              <input type="text" v-model="offlineFirstName" placeholder="First name" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold" />
             </div>
             <div>
               <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Last name</label>
-              <input type="text" v-model="offlineLastName" placeholder="Last name" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs font-semibold" />
+              <input type="text" v-model="offlineLastName" placeholder="Last name" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold" />
             </div>
           </div>
 
           <!-- Donation amount -->
           <div>
             <label class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">Donation amount</label>
-            <div class="relative rounded-xl border border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all">
+            <div class="relative rounded-xl border border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-[#024731] focus-within:border-transparent transition-all">
               <span class="absolute left-3.5 top-3.5 font-bold text-xs text-slate-500">$</span>
               <input type="number" v-model="offlineAmount" class="w-full pl-8 pr-12 py-3 focus:outline-none text-xs font-bold text-slate-800" min="1" />
               <span class="absolute right-3.5 top-3.5 text-[10px] text-slate-400 font-bold uppercase">USD</span>
@@ -108,14 +108,14 @@ const addOfflineDonation = () => {
 
           <!-- Anonymous check -->
           <div class="flex gap-2.5 items-start">
-            <input type="checkbox" v-model="offlineAnonymous" id="anon-check" class="mt-1 cursor-pointer w-4 h-4 accent-blue-600 shrink-0 animate-fade-in" />
+            <input type="checkbox" v-model="offlineAnonymous" id="anon-check" class="mt-1 cursor-pointer w-4 h-4 accent-[#024731] shrink-0 animate-fade-in" />
             <label for="anon-check" class="text-[10px] text-slate-500 font-medium leading-relaxed cursor-pointer select-none">
               Hide this donation from the public. This offline donor will show as "Anonymous" on your fundraiser.
             </label>
           </div>
         </div>
 
-        <button @click="addOfflineDonation" :disabled="offlineAmount <= 0" class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
+        <button @click="addOfflineDonation" :disabled="offlineAmount <= 0" class="w-full py-3 bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
           Add
         </button>
       </div>

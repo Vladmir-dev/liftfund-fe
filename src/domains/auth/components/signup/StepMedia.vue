@@ -16,11 +16,11 @@ const emit = defineEmits<{
     <p class="text-slate-400 text-xs mb-6">Cover media helps tell your story. If you find a better photo later, you can always change it.</p>
 
     <!-- Upload Dropzone -->
-    <div v-if="!mediaUrl" @click="emit('triggerUpload')" class="border-2 border-dashed border-slate-200 hover:border-blue-500 rounded-2xl transition-all cursor-pointer bg-slate-50/20 hover:bg-slate-50/50 p-12 text-center flex flex-col items-center justify-center gap-3">
+    <div v-if="!mediaUrl" @click="emit('triggerUpload')" class="border-2 border-dashed border-slate-200 hover:border-[#024731] rounded-2xl transition-all cursor-pointer bg-slate-50/20 hover:bg-[#edfce0]/20 p-12 text-center flex flex-col items-center justify-center gap-3">
       <div class="w-12 h-12 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-2xl text-slate-400">
         <iconify-icon icon="ph:image-square-bold"></iconify-icon>
       </div>
-      <span class="text-sm font-semibold text-slate-600">Upload a photo or video</span>
+      <span class="text-sm font-semibold text-slate-700">Upload a photo or video</span>
       <span class="text-[10px] text-slate-400">Drag and drop or click to browse files</span>
     </div>
 

@@ -13,7 +13,7 @@ const startFundraiser = () => {
     <div class="max-w-7xl mx-auto px-4 grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
       <div class="col-span-2">
         <div class="flex items-center gap-1.5 mb-4 text-white">
-          <iconify-icon icon="lucide:sunrise" class="text-blue-500 text-2xl"></iconify-icon>
+          <iconify-icon icon="lucide:sunrise" class="text-[#02a95c] text-2xl"></iconify-icon>
           <span class="text-lg font-black tracking-tight">helpfund</span>
         </div>
         <p class="text-xs leading-relaxed max-w-sm mb-4 text-slate-400">
@@ -25,30 +25,30 @@ const startFundraiser = () => {
       <div>
         <h5 class="text-xs font-bold text-white uppercase tracking-widest mb-4">Fundraise</h5>
         <ul class="flex flex-col gap-2.5 text-xs font-semibold">
-          <li><button @click="startFundraiser" class="text-slate-400 hover:text-blue-400 text-left cursor-pointer transition-colors">Medical Fundraiser</button></li>
-          <li><button @click="startFundraiser" class="text-slate-400 hover:text-blue-400 text-left cursor-pointer transition-colors">Emergency Fundraiser</button></li>
-          <li><button @click="startFundraiser" class="text-slate-400 hover:text-blue-400 text-left cursor-pointer transition-colors">Education Fundraiser</button></li>
-          <li><button @click="startFundraiser" class="text-slate-400 hover:text-blue-400 text-left cursor-pointer transition-colors">Animal Fundraiser</button></li>
+          <li><button @click="startFundraiser" class="text-slate-400 hover:text-[#02a95c] text-left cursor-pointer transition-colors">Medical Fundraiser</button></li>
+          <li><button @click="startFundraiser" class="text-slate-400 hover:text-[#02a95c] text-left cursor-pointer transition-colors">Emergency Fundraiser</button></li>
+          <li><button @click="startFundraiser" class="text-slate-400 hover:text-[#02a95c] text-left cursor-pointer transition-colors">Education Fundraiser</button></li>
+          <li><button @click="startFundraiser" class="text-slate-400 hover:text-[#02a95c] text-left cursor-pointer transition-colors">Animal Fundraiser</button></li>
         </ul>
       </div>
 
       <div>
         <h5 class="text-xs font-bold text-white uppercase tracking-widest mb-4">Donate</h5>
         <ul class="flex flex-col gap-2.5 text-xs font-semibold">
-          <li><RouterLink to="/donate/categories" class="text-slate-400 hover:text-blue-400 transition-colors">Browse Categories</RouterLink></li>
-          <li><RouterLink to="/donate/crisis-relief" class="text-slate-400 hover:text-blue-400 transition-colors">Crisis Relief Funds</RouterLink></li>
-          <li><RouterLink to="/donate/social-impact" class="text-slate-400 hover:text-blue-400 transition-colors">Social Impact Portfolios</RouterLink></li>
-          <li><RouterLink to="/donate/supporter-space" class="text-slate-400 hover:text-blue-400 transition-colors">Supporter Resource Center</RouterLink></li>
+          <li><RouterLink to="/donate/categories" class="text-slate-400 hover:text-[#02a95c] transition-colors">Browse Categories</RouterLink></li>
+          <li><RouterLink to="/donate/crisis-relief" class="text-slate-400 hover:text-[#02a95c] transition-colors">Crisis Relief Funds</RouterLink></li>
+          <li><RouterLink to="/donate/social-impact" class="text-slate-400 hover:text-[#02a95c] transition-colors">Social Impact Portfolios</RouterLink></li>
+          <li><RouterLink to="/donate/supporter-space" class="text-slate-400 hover:text-[#02a95c] transition-colors">Supporter Resource Center</RouterLink></li>
         </ul>
       </div>
 
       <div>
         <h5 class="text-xs font-bold text-white uppercase tracking-widest mb-4">Company</h5>
         <ul class="flex flex-col gap-2.5 text-xs font-semibold">
-          <li><RouterLink to="/donate/supporter-space" class="text-slate-400 hover:text-blue-400 transition-colors">About Us</RouterLink></li>
-          <li><RouterLink to="/donate/supporter-space" class="text-slate-400 hover:text-blue-400 transition-colors">Careers</RouterLink></li>
-          <li><RouterLink to="/donate/supporter-space" class="text-slate-400 hover:text-blue-400 transition-colors">Pricing & Fees</RouterLink></li>
-          <li><RouterLink to="/donate/supporter-space" class="text-slate-400 hover:text-blue-400 transition-colors">Press Releases</RouterLink></li>
+          <li><RouterLink to="/donate/supporter-space" class="text-slate-400 hover:text-[#02a95c] transition-colors">About Us</RouterLink></li>
+          <li><RouterLink to="/donate/supporter-space" class="text-slate-400 hover:text-[#02a95c] transition-colors">Careers</RouterLink></li>
+          <li><RouterLink to="/donate/supporter-space" class="text-slate-400 hover:text-[#02a95c] transition-colors">Pricing & Fees</RouterLink></li>
+          <li><RouterLink to="/donate/supporter-space" class="text-slate-400 hover:text-[#02a95c] transition-colors">Press Releases</RouterLink></li>
         </ul>
       </div>
     </div>

@@ -41,13 +41,12 @@ const viewCampaign = (id: string) => {
 
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 py-12 flex-grow w-full">
-      
-      <!-- Top Title and Action Row -->
+            <!-- Top Title and Action Row -->
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
         <h1 class="text-3xl font-black text-slate-900 tracking-tight">Fundraisers</h1>
         <button 
           @click="startFundraiser" 
-          class="bg-[#0f2e24] hover:bg-[#153f31] text-white font-extrabold text-xs px-6 py-3 rounded-full transition-all shadow-md cursor-pointer font-sans"
+          class="bg-[#024731] hover:bg-[#013424] text-white font-extrabold text-xs px-6 py-3 rounded-full transition-all shadow-md cursor-pointer font-sans"
         >
           Start a HelpFund
         </button>
@@ -80,13 +79,13 @@ const viewCampaign = (id: string) => {
             <div class="flex items-center gap-3 w-full md:w-auto justify-end">
               <button 
                 @click="manageCampaign(campaign.id)"
-                class="border border-slate-200 text-slate-800 hover:bg-slate-50 font-bold text-xs px-6 py-2.5 rounded-full transition-all shadow-xs cursor-pointer font-sans"
+                class="border border-slate-200 text-slate-800 hover:bg-[#edfce0]/50 hover:border-[#024731] font-bold text-xs px-6 py-2.5 rounded-full transition-all shadow-xs cursor-pointer font-sans"
               >
                 Manage
               </button>
               <button 
                 @click="viewCampaign(campaign.id)"
-                class="border border-slate-200 text-slate-800 hover:bg-slate-50 font-bold text-xs px-6 py-2.5 rounded-full transition-all shadow-xs cursor-pointer font-sans"
+                class="border border-slate-200 text-slate-800 hover:bg-[#edfce0]/50 hover:border-[#024731] font-bold text-xs px-6 py-2.5 rounded-full transition-all shadow-xs cursor-pointer font-sans"
               >
                 View
               </button>
@@ -103,7 +102,7 @@ const viewCampaign = (id: string) => {
           </p>
           <button 
             @click="startFundraiser" 
-            class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-6 py-2.5 rounded-full shadow-md shadow-blue-100 transition-all cursor-pointer"
+            class="bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs px-6 py-2.5 rounded-full shadow-md transition-all cursor-pointer"
           >
             Start first fundraiser
           </button>

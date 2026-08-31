@@ -16,7 +16,7 @@ const messages = ref([
   {
     id: 'msg-01',
     senderName: 'HelpFund',
-    avatarClass: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    avatarClass: 'bg-[#edfce0] text-[#02a95c] border-[#bbf770]',
     icon: 'lucide:sunrise',
     text: "You've just unlocked a new way to connect with the HelpFund community!",
     isArchive: false
@@ -46,11 +46,11 @@ const archiveMessage = (id: string) => {
           <!-- Tabs -->
           <div class="flex items-center gap-2 border-b border-slate-100 pb-2 mb-4 text-xs font-bold">
             <button @click="activeMessageTab = 'primary'" class="pb-2 cursor-pointer transition-colors"
-              :class="activeMessageTab === 'primary' ? 'text-slate-900 border-b-2 border-slate-900' : 'text-slate-400 hover:text-slate-600'">
+              :class="activeMessageTab === 'primary' ? 'text-[#024731] border-b-2 border-[#024731]' : 'text-slate-400 hover:text-slate-600'">
               Primary
             </button>
             <button @click="activeMessageTab = 'archive'" class="pb-2 ml-4 cursor-pointer transition-colors"
-              :class="activeMessageTab === 'archive' ? 'text-slate-900 border-b-2 border-slate-900' : 'text-slate-400 hover:text-slate-600'">
+              :class="activeMessageTab === 'archive' ? 'text-[#024731] border-b-2 border-[#024731]' : 'text-slate-400 hover:text-slate-600'">
               Archive
             </button>
           </div>
@@ -61,7 +61,7 @@ const archiveMessage = (id: string) => {
               <button v-if="(activeMessageTab === 'primary' && !msg.isArchive) || (activeMessageTab === 'archive' && msg.isArchive)"
                 @click="selectedMessageId = msg.id"
                 class="w-full p-3 rounded-xl border text-left flex items-start gap-3 transition-all cursor-pointer"
-                :class="selectedMessageId === msg.id ? 'bg-slate-50 border-slate-200' : 'bg-white border-transparent hover:bg-slate-50/50'">
+                :class="selectedMessageId === msg.id ? 'bg-[#edfce0]/40 border-[#bbf770]' : 'bg-white border-transparent hover:bg-slate-50/50'">
                 <div class="w-9 h-9 rounded-full flex items-center justify-center border shrink-0" :class="msg.avatarClass">
                   <iconify-icon :icon="msg.icon" class="text-base"></iconify-icon>
                 </div>
@@ -85,11 +85,11 @@ const archiveMessage = (id: string) => {
             <!-- Chat Window Header -->
             <div class="px-6 py-4 bg-white border-b border-slate-100 flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <div class="w-7 h-7 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center">
+                <div class="w-7 h-7 rounded-full bg-[#edfce0] text-[#02a95c] border border-[#bbf770] flex items-center justify-center">
                   <iconify-icon icon="lucide:sunrise" class="text-xs"></iconify-icon>
                 </div>
                 <span class="text-xs sm:text-sm font-extrabold text-slate-900">HelpFund</span>
-                <iconify-icon icon="lucide:badge-check" class="text-blue-500 text-sm"></iconify-icon>
+                <iconify-icon icon="lucide:badge-check" class="text-[#02a95c] text-sm"></iconify-icon>
               </div>
               
               <button @click="archiveMessage('msg-01')" class="text-xs font-bold text-slate-500 hover:text-slate-900 border border-slate-200 hover:border-slate-300 rounded-lg px-3 py-1 cursor-pointer">
@@ -103,7 +103,7 @@ const archiveMessage = (id: string) => {
               <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400 text-center mb-2">Today</span>
 
               <div class="flex gap-3 items-end max-w-lg">
-                <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
+                <div class="w-8 h-8 rounded-full bg-[#edfce0] text-[#02a95c] border border-[#bbf770] flex items-center justify-center shrink-0">
                   <iconify-icon icon="lucide:sunrise" class="text-xs"></iconify-icon>
                 </div>
 
