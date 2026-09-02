@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCampaignStore } from '../../../stores/campaign'
+import { useAuthStore } from '../../../stores/auth'
 import { useLandingStore } from '../../landing/stores'
 import { storeToRefs } from 'pinia'
 
@@ -16,7 +17,12 @@ import StepReview from '../components/signup/StepReview.vue'
 
 const router = useRouter()
 const campaignStore = useCampaignStore()
+const authStore = useAuthStore()
 const landingStore = useLandingStore()
+
+onMounted(() => {
+  campaignStore.loadCategories()
+})
 
 // Extract state reactive refs
 const {
@@ -25,6 +31,7 @@ const {
   zipCode,
   selectedCategory,
   beneficiary,
+  currency,
   targetAmount,
   useAutomatedGoal,
   startingGoal,
@@ -178,8 +185,17 @@ const setOtpInputRef = (index: number, el: any) => {
   if (el) otpInputs.value[index] = el
 }
 
-const startVerification = () => {
-  verificationStep.value = 'phone_setup'
+const showAuthModal = ref(false)
+const launchError = ref('')
+
+const startVerification = async () => {
+  if (!authStore.isLoggedIn) {
+    showAuthModal.value = true
+    return
+  }
+  // Phone verification step commented out: launch fundraiser directly
+  // verificationStep.value = 'phone_setup'
+  await handleFinishInsights()
 }
 
 const sendOtpCode = () => {
@@ -204,27 +220,32 @@ const isLaunching = ref(false)
 const showConfetti = ref(false)
 const launchSuccess = ref(false)
 
-const handleFinishInsights = () => {
+const handleFinishInsights = async () => {
   verificationStep.value = 'none'
+
+  if (!authStore.isLoggedIn) {
+    showAuthModal.value = true
+    return
+  }
+
   isLaunching.value = true
-  setTimeout(() => {
-    isLaunching.value = false
+  launchError.value = ''
 
-    // Save campaign in store & localStorage
-    const saved = campaignStore.saveCampaign('John Doe', resolvedCity.value)
-
-    // Prepend to landingStore list
-    landingStore.addCampaignToFundraisers(saved)
+  try {
+    const saved = await campaignStore.submitAndPublishCampaign(resolvedCity.value || 'Kampala, Uganda')
 
     showConfetti.value = true
     launchSuccess.value = true
 
     setTimeout(() => {
       campaignStore.resetForm()
-      // Redirect directly to campaign dashboard
-      router.push(`/campaign/${saved.id}/dashboard`)
-    }, 2800)
-  }, 1200)
+      router.push('/my-fundraisers')
+    }, 2500)
+  } catch (err: any) {
+    launchError.value = err.message || 'Failed to publish campaign. Please try again.'
+  } finally {
+    isLaunching.value = false
+  }
 }
 
 // Full Public Campaign Preview
@@ -326,13 +347,22 @@ const handleEnhanceStory = () => {
         <!-- HIDDEN INPUT FOR FILE UPLOAD -->
         <input type="file" ref="fileInputRef" accept="image/*" class="hidden" @change="onFileSelected" />
 
+        <!-- Error alert if launching failed -->
+        <div v-if="launchError" class="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center justify-between text-left">
+          <div class="flex items-center gap-2">
+            <iconify-icon icon="fa6-solid:circle-exclamation" class="text-sm shrink-0"></iconify-icon>
+            <span>{{ launchError }}</span>
+          </div>
+          <button @click="launchError = ''" class="text-slate-400 hover:text-slate-700">✕</button>
+        </div>
+
         <!-- STEP COMPONENT SECTIONS -->
         <StepInitial v-if="currentStep === 0" v-model:country="country" v-model:zipCode="zipCode"
-          :selectedCategory="selectedCategory" :categories="categories" @selectCategory="selectCategory" />
+          :selectedCategory="selectedCategory" :categories="campaignStore.categories.length > 0 ? campaignStore.categories : categories" @selectCategory="campaignStore.selectCategory" />
 
         <StepTarget v-else-if="currentStep === 1" v-model:beneficiary="beneficiary" />
 
-        <StepAmount v-else-if="currentStep === 2" v-model:targetAmount="targetAmount"
+        <StepAmount v-else-if="currentStep === 2" v-model:targetAmount="targetAmount" v-model:currency="currency"
           v-model:useAutomatedGoal="useAutomatedGoal" :startingGoal="startingGoal" :amountValid="amountValid" />
 
         <StepMedia v-else-if="currentStep === 3" :mediaUrl="mediaUrl" @triggerUpload="triggerUpload"
@@ -394,18 +424,21 @@ const handleEnhanceStory = () => {
             </button>
 
             <!-- Step 6 has 'Preview' and 'Launch fundraiser' -->
-            <div v-else-if="currentStep === 6 && !launchSuccess" class="flex items-center gap-3.5">
-              <button @click="openPreview"
-                class="px-6 py-2.5 bg-white border border-slate-200 hover:border-[#024731] text-slate-700 font-bold text-xs rounded-full shadow-sm hover:bg-slate-50 transition-all cursor-pointer font-sans">
-                Preview
-              </button>
+            <div v-else-if="currentStep === 6 && !launchSuccess" class="flex flex-col items-end gap-2">
+              <div class="flex items-center gap-3.5">
+                <button @click="openPreview"
+                  class="px-6 py-2.5 bg-white border border-slate-200 hover:border-[#024731] text-slate-700 font-bold text-xs rounded-full shadow-sm hover:bg-slate-50 transition-all cursor-pointer font-sans">
+                  Preview
+                </button>
 
-              <button @click="startVerification" :disabled="isLaunching"
-                class="px-6 py-2.5 bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs rounded-full shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer font-sans">
-                <span v-if="isLaunching"
-                  class="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-                <span>Launch fundraiser</span>
-              </button>
+                <button @click="startVerification" :disabled="isLaunching"
+                  class="px-6 py-2.5 bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs rounded-full shadow-md transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer font-sans">
+                  <span v-if="isLaunching"
+                    class="h-3 w-3 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                  <span>Launch fundraiser</span>
+                </button>
+              </div>
+              <p v-if="launchError" class="text-rose-600 text-xs font-semibold mt-1">{{ launchError }}</p>
             </div>
           </div>
 
@@ -440,6 +473,39 @@ const handleEnhanceStory = () => {
         <h2 class="text-2xl font-bold text-slate-900 mb-2">Campaign Initialized!</h2>
         <p class="text-slate-500 text-sm mb-4">Great choice! Launching your custom fundraiser dashboard.</p>
         <span class="text-xs text-[#024731] font-bold animate-pulse">Loading campaign dashboard...</span>
+      </div>
+    </div>
+
+    <!-- AUTH REQUIRED MODAL DIALOG -->
+    <div v-if="showAuthModal"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+      <div
+        class="bg-white rounded-3xl w-full max-w-md p-8 border border-slate-100 shadow-2xl relative text-center animate-in fade-in duration-200">
+        
+        <button @click="showAuthModal = false"
+          class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl focus:outline-none cursor-pointer">
+          <iconify-icon icon="ph:x-bold"></iconify-icon>
+        </button>
+
+        <div class="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto mb-4 text-[#024731]">
+          <iconify-icon icon="fa6-solid:lock" class="text-2xl"></iconify-icon>
+        </div>
+
+        <h3 class="text-xl font-black text-slate-900 mb-2">Sign in to Launch</h3>
+        <p class="text-sm text-slate-500 mb-6 leading-relaxed">
+          Your fundraiser details are saved! Please sign in or create an account to publish your campaign on HelpFund.
+        </p>
+
+        <div class="flex flex-col gap-3">
+          <RouterLink to="/login"
+            class="w-full py-3 bg-[#024731] hover:bg-[#013424] text-white font-bold rounded-xl shadow-md text-sm text-center block">
+            Sign In with Email
+          </RouterLink>
+          <RouterLink to="/signup"
+            class="w-full py-3 bg-white border border-slate-200 hover:border-slate-400 text-slate-700 font-bold rounded-xl text-sm text-center block">
+            Create New Account
+          </RouterLink>
+        </div>
       </div>
     </div>
 

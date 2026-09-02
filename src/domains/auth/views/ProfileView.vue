@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../../stores/auth'
+import { campaignService } from '../../../services/campaign'
 import NavHeader from '../../landing/components/NavHeader.vue'
 import MainFooter from '../../landing/components/MainFooter.vue'
 
@@ -15,14 +16,13 @@ const closeDropdowns = () => {
 const isPrivate = ref(true)
 const activeTab = ref<'activity' | 'about'>('activity')
 
-// Discover people lists
-const people = ref([
-  { name: 'Jimmy Darts', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150', followed: false },
-  { name: 'SB Mowing', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=150', followed: false },
-  { name: 'Pattie Gonia', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=150', followed: false },
-  { name: 'Little Miss Flint', avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=150', followed: false },
-  { name: 'Kalina Silverman / Big Talk', avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150', followed: false }
-])
+// Discover people list (initialized empty with empty state)
+interface Person {
+  name: string
+  avatar: string
+  followed: boolean
+}
+const people = ref<Person[]>([])
 
 const toggleFollow = (idx: number) => {
   const person = people.value[idx]
@@ -30,6 +30,43 @@ const toggleFollow = (idx: number) => {
     person.followed = !person.followed
   }
 }
+
+// User intro (What I care about)
+const userIntro = ref(authStore.user?.bio || '')
+const isEditingIntro = ref(false)
+const tempIntro = ref('')
+const isSavingIntro = ref(false)
+
+const saveIntro = async () => {
+  userIntro.value = tempIntro.value.trim()
+  isEditingIntro.value = false
+  isSavingIntro.value = true
+  try {
+    await authStore.saveProfile({ bio: userIntro.value })
+  } catch (err) {
+    console.warn('Failed to save bio:', err)
+  } finally {
+    isSavingIntro.value = false
+  }
+}
+
+// Featured causes list (initialized empty with empty state)
+interface Cause {
+  id: string
+  title: string
+  category: string
+  imageUrl?: string
+}
+const featuredCauses = ref<Cause[]>([])
+
+// Activity list (initialized empty with empty state)
+interface ActivityItem {
+  id: string
+  type: string
+  title: string
+  date: string
+}
+const activities = ref<ActivityItem[]>([])
 
 const toggleVisibility = () => {
   isPrivate.value = !isPrivate.value
@@ -64,9 +101,14 @@ const openInfoModal = () => {
   showInfoModal.value = true
 }
 
-const saveLocation = () => {
+const saveLocation = async () => {
   userInfo.value.location = tempLocation.value
   isEditingLocation.value = false
+  try {
+    await authStore.saveProfile({ location: userInfo.value.location })
+  } catch (err) {
+    console.warn('Failed to save location:', err)
+  }
 }
 const saveEducation = () => {
   userInfo.value.education = tempEducation.value
@@ -76,9 +118,14 @@ const saveWork = () => {
   userInfo.value.work = tempWork.value
   isEditingWork.value = false
 }
-const saveBirthday = () => {
+const saveBirthday = async () => {
   userInfo.value.birthday = tempBirthday.value
   isEditingBirthday.value = false
+  try {
+    await authStore.saveProfile({ dateOfBirth: userInfo.value.birthday })
+  } catch (err) {
+    console.warn('Failed to save birthday:', err)
+  }
 }
 
 // Social handles states
@@ -124,10 +171,96 @@ const openSocialModal = () => {
   showSocialModal.value = true
 }
 
-const saveSocial = (platform: keyof typeof socialHandles.value) => {
+const saveSocial = async (platform: keyof typeof socialHandles.value) => {
   socialHandles.value[platform] = tempSocial.value[platform]
   isEditingSocial.value[platform] = false
+
+  const links: string[] = []
+  for (const [k, v] of Object.entries(socialHandles.value)) {
+    if (v && v.trim()) {
+      const val = v.trim()
+      if (val.startsWith('http://') || val.startsWith('https://')) {
+        links.push(val)
+      } else {
+        switch (k) {
+          case 'instagram': links.push(`https://instagram.com/${val}`); break
+          case 'tiktok': links.push(`https://tiktok.com/@${val}`); break
+          case 'x': links.push(`https://x.com/${val}`); break
+          case 'facebook': links.push(`https://facebook.com/${val}`); break
+          case 'linktree': links.push(`https://linktr.ee/${val}`); break
+          case 'youtube': links.push(`https://youtube.com/@${val}`); break
+          case 'linkedin': links.push(`https://linkedin.com/in/${val}`); break
+          case 'twitch': links.push(`https://twitch.tv/${val}`); break
+          case 'pillar': links.push(`https://pillar.io/${val}`); break
+        }
+      }
+    }
+  }
+
+  try {
+    await authStore.saveProfile({ socialLinks: links })
+  } catch (err) {
+    console.warn('Failed to save social links:', err)
+  }
 }
+
+// Avatar upload logic
+const fileInputRef = ref<HTMLInputElement | null>(null)
+const isUploadingAvatar = ref(false)
+
+const triggerAvatarUpload = () => {
+  fileInputRef.value?.click()
+}
+
+const showToast = ref(false)
+const toastMsg = ref('')
+const notify = (msg: string) => {
+  toastMsg.value = msg
+  showToast.value = true
+  setTimeout(() => { showToast.value = false }, 3000)
+}
+
+const handleAvatarFile = async (e: Event) => {
+  const target = e.target as HTMLInputElement
+  const file = target.files?.[0]
+  if (!file) return
+  isUploadingAvatar.value = true
+  try {
+    const res = await campaignService.uploadImage(file)
+    if (res && res.url) {
+      await authStore.saveProfile({ avatarUrl: res.url })
+      notify('Profile photo updated successfully!')
+    }
+  } catch (err: any) {
+    notify(err.message || 'Failed to upload photo')
+  } finally {
+    isUploadingAvatar.value = false
+    target.value = ''
+  }
+}
+
+onMounted(async () => {
+  await authStore.fetchProfile()
+  if (authStore.user) {
+    if (authStore.user.bio) userIntro.value = authStore.user.bio
+    if (authStore.user.location) userInfo.value.location = authStore.user.location
+    if (authStore.user.dateOfBirth) userInfo.value.birthday = authStore.user.dateOfBirth
+    if (authStore.user.socialLinks && Array.isArray(authStore.user.socialLinks)) {
+      for (const raw of authStore.user.socialLinks) {
+        const l = raw.toLowerCase()
+        if (l.includes('instagram.com/')) socialHandles.value.instagram = raw.split('instagram.com/')[1] || raw
+        else if (l.includes('tiktok.com/@')) socialHandles.value.tiktok = raw.split('tiktok.com/@')[1] || raw
+        else if (l.includes('twitter.com/') || l.includes('x.com/')) socialHandles.value.x = raw.split('.com/')[1] || raw
+        else if (l.includes('facebook.com/')) socialHandles.value.facebook = raw.split('facebook.com/')[1] || raw
+        else if (l.includes('linktr.ee/')) socialHandles.value.linktree = raw.split('linktr.ee/')[1] || raw
+        else if (l.includes('youtube.com/')) socialHandles.value.youtube = raw.split('youtube.com/')[1] || raw
+        else if (l.includes('linkedin.com/in/')) socialHandles.value.linkedin = raw.split('linkedin.com/in/')[1] || raw
+        else if (l.includes('twitch.tv/')) socialHandles.value.twitch = raw.split('twitch.tv/')[1] || raw
+        else if (l.includes('pillar.io/')) socialHandles.value.pillar = raw.split('pillar.io/')[1] || raw
+      }
+    }
+  }
+})
 
 // Checks if any info has been added
 const hasAddedInfo = computed(() => {
@@ -151,20 +284,52 @@ const hasAddedSocial = computed(() => {
         <!-- Left Side: Profile Photo curved frame -->
         <div
           class="bg-gradient-to-b from-emerald-200/50 to-emerald-800/80 p-8 flex flex-col items-center justify-center relative md:w-2/5 shrink-0 min-h-[300px]">
-          <!-- <div class="w-36 h-36 relative overflow-hidden bg-slate-200 shadow-md border-4 border-white curved-mask-1"> -->
-          <div class="w-36 h-36 relative overflow-hidden bg-slate-200 shadow-md border-4 border-white rounded-full">
-            <img :src="authStore.user.avatar" class="w-full h-full object-cover" alt="User Avatar" />
+
+          <!-- Avatar with interactive hover overlay -->
+          <div class="relative group cursor-pointer" @click="triggerAvatarUpload" title="Click to upload profile photo">
+            <div
+              class="w-36 h-36 relative overflow-hidden bg-white shadow-lg border-4 border-white rounded-full flex items-center justify-center">
+              <img v-if="authStore.user?.avatar" :src="authStore.user.avatar" class="w-full h-full object-cover"
+                alt="User Avatar" />
+              <div v-else class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-400">
+                <iconify-icon icon="ph:user-circle-fill" class="text-8xl text-slate-300"></iconify-icon>
+              </div>
+
+              <!-- Upload hover overlay -->
+              <div
+                class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-xs font-bold gap-1">
+                <span v-if="isUploadingAvatar"
+                  class="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                <template v-else>
+                  <iconify-icon icon="ph:camera-bold" class="text-2xl"></iconify-icon>
+                  <span class="text-[10px] tracking-wide uppercase font-black">Upload</span>
+                </template>
+              </div>
+            </div>
+
+            <!-- Camera button badge -->
+            <button type="button" :disabled="isUploadingAvatar"
+              class="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-white text-[#024731] flex items-center justify-center shadow-md border border-slate-100 hover:bg-slate-50 transition-all cursor-pointer">
+              <span v-if="isUploadingAvatar"
+                class="h-3.5 w-3.5 border-2 border-[#024731] border-t-transparent rounded-full animate-spin"></span>
+              <iconify-icon v-else icon="ph:camera-bold" class="text-base"></iconify-icon>
+            </button>
           </div>
+
           <!-- Edit buttons overlay -->
-          <div class="flex items-center gap-3 mt-4">
-            <button
-              class="w-9 h-9 rounded-full bg-white/90 hover:bg-white text-slate-700 flex items-center justify-center shadow-sm border border-slate-200 cursor-pointer">
-              <iconify-icon icon="lucide:pencil" class="text-sm"></iconify-icon>
+          <div class="flex items-center gap-2.5 mt-5">
+            <input type="file" ref="fileInputRef" @change="handleAvatarFile" accept="image/*" class="hidden" />
+            <button @click="triggerAvatarUpload" :disabled="isUploadingAvatar"
+              class="bg-white/95 hover:bg-white text-slate-700 font-bold text-xs px-3.5 py-1.5 rounded-full shadow-sm border border-slate-200 flex items-center gap-1.5 cursor-pointer">
+              <span v-if="isUploadingAvatar"
+                class="h-3 w-3 border-2 border-slate-700 border-t-transparent rounded-full animate-spin"></span>
+              <iconify-icon v-else icon="ph:upload-simple-bold" class="text-sm"></iconify-icon>
+              <span>{{ authStore.user?.avatar ? 'Change photo' : 'Upload photo' }}</span>
             </button>
-            <button
-              class="w-9 h-9 rounded-full bg-white/90 hover:bg-white text-slate-700 flex items-center justify-center shadow-sm border border-slate-200 cursor-pointer">
+            <RouterLink to="/account/settings" title="Account settings"
+              class="w-8 h-8 rounded-full bg-white/95 hover:bg-white text-slate-700 flex items-center justify-center shadow-sm border border-slate-200 cursor-pointer">
               <iconify-icon icon="lucide:settings" class="text-sm"></iconify-icon>
-            </button>
+            </RouterLink>
           </div>
         </div>
 
@@ -172,7 +337,7 @@ const hasAddedSocial = computed(() => {
         <div class="p-8 md:p-12 flex-1 flex flex-col justify-between">
           <div>
             <h1 class="text-3xl font-black text-slate-900 tracking-tight mb-2 uppercase">
-              {{ authStore.user.name }}
+              {{ authStore.user?.name || 'HelpFund Member' }}
             </h1>
 
             <div class="flex items-center gap-6 text-sm font-bold text-slate-500 mb-6">
@@ -223,29 +388,70 @@ const hasAddedSocial = computed(() => {
 
           <!-- What I care about -->
           <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-            <h3 class="font-extrabold text-slate-900 text-base mb-2">What I care about</h3>
-            <p class="text-slate-500 text-xs sm:text-sm leading-relaxed mb-4">
-              Share what you care about and connect with people who support similar causes.
-            </p>
-            <button
-              class="flex items-center gap-1.5 px-4 py-2 border border-slate-200 hover:border-slate-400 rounded-full text-xs font-bold text-slate-700 transition-colors cursor-pointer">
-              <span>+ Add Intro</span>
-            </button>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-extrabold text-slate-900 text-base">What I care about</h3>
+              <button v-if="userIntro && !isEditingIntro" @click="isEditingIntro = true; tempIntro = userIntro"
+                class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">Edit</button>
+            </div>
+
+            <!-- Inline editor -->
+            <div v-if="isEditingIntro" class="mb-3">
+              <textarea v-model="tempIntro" rows="3" placeholder="Share causes and passions you care about..."
+                class="w-full text-xs font-semibold p-3 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#024731] resize-none"></textarea>
+              <div class="flex justify-end gap-2 mt-2">
+                <button @click="isEditingIntro = false"
+                  class="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-800 cursor-pointer">Cancel</button>
+                <button @click="saveIntro"
+                  class="px-4 py-1.5 bg-[#024731] hover:bg-[#013424] text-white text-xs font-bold rounded-full cursor-pointer shadow-xs">Save</button>
+              </div>
+            </div>
+
+            <!-- Display intro if present -->
+            <div v-else-if="userIntro"
+              class="text-slate-700 text-xs sm:text-sm leading-relaxed mb-2 font-medium whitespace-pre-line">
+              {{ userIntro }}
+            </div>
+
+            <!-- Empty state -->
+            <div v-else>
+              <p class="text-slate-500 text-xs sm:text-sm leading-relaxed mb-4">
+                Share what you care about and connect with people who support similar causes.
+              </p>
+              <button @click="isEditingIntro = true; tempIntro = userIntro"
+                class="flex items-center gap-1.5 px-4 py-2 border border-slate-200 hover:border-slate-400 rounded-full text-xs font-bold text-slate-700 transition-colors cursor-pointer">
+                <span>+ Add Intro</span>
+              </button>
+            </div>
           </div>
 
           <!-- My featured causes -->
           <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm">
-            <h3 class="font-extrabold text-slate-900 text-base mb-2">My featured causes</h3>
-            <p class="text-slate-500 text-xs sm:text-sm leading-relaxed mb-6">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-extrabold text-slate-900 text-base">My featured causes</h3>
+              <button v-if="featuredCauses.length > 0"
+                class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">+ Add more</button>
+            </div>
+            <p class="text-slate-500 text-xs sm:text-sm leading-relaxed mb-4">
               Start adding fundraisers and nonprofits to highlight on your public profile.
             </p>
 
-            <div
+            <!-- Populated causes if any -->
+            <div v-if="featuredCauses.length > 0" class="flex flex-col gap-3 mb-4">
+              <div v-for="cause in featuredCauses" :key="cause.id"
+                class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                <span class="text-xs font-bold text-slate-800">{{ cause.title }}</span>
+                <span class="text-[10px] text-slate-500 font-semibold uppercase">{{ cause.category }}</span>
+              </div>
+            </div>
+
+            <!-- Empty state for featured causes -->
+            <div v-else
               class="flex flex-col items-center justify-center p-8 bg-slate-50/50 rounded-2xl border border-dashed border-slate-200 text-center mb-4">
               <div
                 class="w-12 h-12 rounded-xl bg-white border border-slate-100 shadow-sm flex items-center justify-center mb-3">
                 <iconify-icon icon="lucide:heart-handshake" class="text-emerald-700 text-xl"></iconify-icon>
               </div>
+              <p class="text-xs font-bold text-slate-700 mb-1">No featured causes yet</p>
               <p class="text-slate-400 text-xs font-medium">Highlight your favorite fundraising campaigns</p>
             </div>
 
@@ -268,10 +474,24 @@ const hasAddedSocial = computed(() => {
               </button>
             </div>
 
-            <!-- Tab content -->
-            <div v-if="activeTab === 'activity'"
-              class="py-12 text-center text-slate-400 text-xs sm:text-sm font-medium">
-              No recent activity to display.
+            <!-- Tab content: Activity empty state -->
+            <div v-if="activeTab === 'activity'">
+              <div v-if="activities.length > 0" class="flex flex-col gap-3">
+                <div v-for="act in activities" :key="act.id"
+                  class="p-3 bg-slate-50 rounded-xl border border-slate-100 text-xs">
+                  <span class="font-bold text-slate-800">{{ act.title }}</span>
+                  <span class="text-slate-400 text-[10px] block mt-0.5">{{ act.date }}</span>
+                </div>
+              </div>
+              <div v-else class="py-12 text-center flex flex-col items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
+                  <iconify-icon icon="lucide:activity" class="text-xl"></iconify-icon>
+                </div>
+                <p class="text-xs font-bold text-slate-700 mb-1">No recent activity</p>
+                <p class="text-slate-400 text-xs font-medium max-w-xs">Campaigns you support, donate to, or organize
+                  will
+                  appear here.</p>
+              </div>
             </div>
 
             <!-- About Tab Replicated (Screenshot 1) -->
@@ -415,7 +635,7 @@ const hasAddedSocial = computed(() => {
           <div class="bg-white rounded-2xl border border-slate-100 p-6 shadow-sm text-left">
             <h3 class="font-extrabold text-slate-900 text-base mb-6">Discover more people</h3>
 
-            <div class="flex flex-col gap-4 mb-6">
+            <div v-if="people.length > 0" class="flex flex-col gap-4 mb-6">
               <div v-for="(person, idx) in people" :key="person.name" class="flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
                   <img :src="person.avatar"
@@ -429,6 +649,18 @@ const hasAddedSocial = computed(() => {
                   {{ person.followed ? 'Following' : 'Follow' }}
                 </button>
               </div>
+            </div>
+
+            <!-- Empty state for Discover more people -->
+            <div v-else
+              class="py-8 text-center flex flex-col items-center justify-center border border-dashed border-slate-200 rounded-2xl mb-6 bg-slate-50/40">
+              <div class="w-11 h-11 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mb-2.5">
+                <iconify-icon icon="lucide:user-plus" class="text-xl"></iconify-icon>
+              </div>
+              <p class="text-xs font-bold text-slate-700 mb-1">No suggestions yet</p>
+              <p class="text-[11px] text-slate-400 max-w-[200px] leading-relaxed mx-auto">
+                Connect your network to discover fundraisers and friends.
+              </p>
             </div>
 
             <button
@@ -697,8 +929,9 @@ const hasAddedSocial = computed(() => {
                 <input v-if="isEditingSocial.linktree" type="text" v-model="tempSocial.linktree"
                   placeholder="linktree URL"
                   class="w-full mt-1 px-3 py-1 border border-slate-200 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#024731]" />
-                <p v-else-if="socialHandles.linktree" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">{{
-                  socialHandles.linktree }}</p>
+                <p v-else-if="socialHandles.linktree" class="text-slate-500 text-[11px] truncate mt-0.5 font-semibold">
+                  {{
+                    socialHandles.linktree }}</p>
               </div>
             </div>
             <button v-if="isEditingSocial.linktree" @click="saveSocial('linktree')"
@@ -811,8 +1044,14 @@ const hasAddedSocial = computed(() => {
           </button>
         </div>
       </div>
-    </div>
+      <!-- Toast Notification -->
+      <div v-if="showToast"
+        class="fixed bottom-6 right-6 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 z-50 animate-bounce">
+        <iconify-icon icon="ph:check-circle-bold" class="text-[#02a95c] text-base"></iconify-icon>
+        <span>{{ toastMsg }}</span>
+      </div>
 
+    </div>
   </div>
 </template>
 

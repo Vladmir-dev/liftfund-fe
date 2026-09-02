@@ -11,6 +11,7 @@ export interface Fundraiser {
   organizer: string
   city: string
   country: string
+  currency?: string
 }
 
 export interface Category {

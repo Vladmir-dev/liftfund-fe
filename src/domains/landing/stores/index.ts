@@ -1,148 +1,10 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Fundraiser, Category, FAQItem } from '../types'
+import { campaignService } from '../../../services/campaign'
 
 export const useLandingStore = defineStore('landing', () => {
-  // Load initial custom campaigns from localStorage
-  const loadCustomCampaigns = (): Fundraiser[] => {
-    let saved = localStorage.getItem('helpfund_campaigns')
-    if (!saved) {
-      const defaultCampaign = {
-        id: 'camp-cats',
-        title: 'Help Cats',
-        story: 'We are raising funds to help rescue and take care of community cats in our neighborhood. With winter approaching, we need to secure cozy shelters and veterinary care.',
-        category: 'Animals',
-        country: 'United States',
-        zipCode: '90210',
-        beneficiary: 'Charity',
-        targetAmount: 200,
-        useAutomatedGoal: true,
-        startingGoal: 200,
-        mediaUrl: 'https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=600',
-        createdAt: new Date().toISOString(),
-        organizer: 'John Doe',
-        city: 'Beverly Hills',
-        raisedAmount: 0,
-        donorCount: 0,
-        daysLeft: 30
-      }
-      localStorage.setItem('helpfund_campaigns', JSON.stringify([defaultCampaign]))
-      saved = localStorage.getItem('helpfund_campaigns')
-    }
-    try {
-      const parsed = JSON.parse(saved!)
-      return parsed.map((c: any) => ({
-        id: c.id,
-        title: c.title,
-        description: c.story,
-        category: c.category,
-        imageUrl: c.mediaUrl || 'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&q=80&w=600',
-        targetAmount: Number(c.targetAmount) || 20,
-        raisedAmount: Number(c.raisedAmount) || 0,
-        donorCount: Number(c.donorCount) || 0,
-        daysLeft: Number(c.daysLeft) || 30,
-        organizer: c.organizer || 'John Doe',
-        city: c.city || 'Beverly Hills',
-        country: c.country || 'United States'
-      }))
-    } catch (e) {
-      console.error(e)
-      return []
-    }
-  }
-
-  // Mock Fundraisers
-  const defaultFundraisers: Fundraiser[] = [
-    {
-      id: 'fund-01',
-      title: 'Support Emily\'s Recovery & Medical Care',
-      description: 'Emily recently underwent major surgery. We are raising funds to cover her ongoing ICU bills and physical rehabilitation therapies.',
-      category: 'Medical',
-      imageUrl: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?auto=format&fit=crop&q=80&w=600',
-      targetAmount: 50000,
-      raisedAmount: 32450,
-      donorCount: 284,
-      daysLeft: 12,
-      organizer: 'Sarah Jenkins',
-      city: 'Boston',
-      country: 'United States'
-    },
-    {
-      id: 'fund-02',
-      title: 'Support Urgent Earthquake Relief in Colombia',
-      description: 'Families have lost their homes and access to clean water. Help us distribute emergency kits, food supplies, and shelter kits.',
-      category: 'Emergency',
-      imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&q=80&w=600',
-      targetAmount: 100000,
-      raisedAmount: 76890,
-      donorCount: 940,
-      daysLeft: 18,
-      organizer: 'Global Relief Association',
-      city: 'Bogota',
-      country: 'Colombia'
-    },
-    {
-      id: 'fund-03',
-      title: 'Rescue Animal Shelter Winter Upgrade',
-      description: 'Help us buy heaters, insulate the kennels, and pay for veterinary supplies for our 120 rescue dogs and cats this winter.',
-      category: 'Animals',
-      imageUrl: 'https://images.unsplash.com/photo-1444212477490-ca407925329e?auto=format&fit=crop&q=80&w=600',
-      targetAmount: 15000,
-      raisedAmount: 9420,
-      donorCount: 165,
-      daysLeft: 7,
-      organizer: 'Second Chance Paws',
-      city: 'Portland',
-      country: 'United States'
-    },
-    {
-      id: 'fund-04',
-      title: 'Laptops and Books for Rural Community Library',
-      description: 'Bridging the digital divide by equipping our local library with modern computers and educational textbooks for school kids.',
-      category: 'Education',
-      imageUrl: 'https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&q=80&w=600',
-      targetAmount: 25000,
-      raisedAmount: 18100,
-      donorCount: 198,
-      daysLeft: 22,
-      organizer: 'Marcus Vance',
-      city: 'Austin',
-      country: 'United States'
-    },
-    {
-      id: 'fund-05',
-      title: 'Rebuilding the Green Valley Youth Sports Field',
-      description: 'Storm damage destroyed our community sports pavilion and playing fields. Help us rebuild a safe space for youth sports.',
-      category: 'Community',
-      imageUrl: 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&q=80&w=600',
-      targetAmount: 35000,
-      raisedAmount: 12500,
-      donorCount: 112,
-      daysLeft: 30,
-      organizer: 'Green Valley Sports Council',
-      city: 'Seattle',
-      country: 'United States'
-    },
-    {
-      id: 'fund-06',
-      title: 'Local Art Space and Mural Project Renovation',
-      description: 'Support local artists in designing and painting mural walls in inner-city neighborhoods to bring vibrant culture to our streets.',
-      category: 'Creative',
-      imageUrl: 'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?auto=format&fit=crop&q=80&w=600',
-      targetAmount: 8000,
-      raisedAmount: 6800,
-      donorCount: 75,
-      daysLeft: 5,
-      organizer: 'Vivid City Arts',
-      city: 'Chicago',
-      country: 'United States'
-    }
-  ]
-
-  const fundraisers = ref<Fundraiser[]>([
-    ...loadCustomCampaigns(),
-    ...defaultFundraisers
-  ])
+  const fundraisers = ref<Fundraiser[]>([])
 
   // Categories Metadata
   const categories = ref<Category[]>([
@@ -230,6 +92,50 @@ export const useLandingStore = defineStore('landing', () => {
     fundraisers.value.unshift(newFundraiser)
   }
 
+  // Fetch live campaigns from backend
+  const fetchLiveCampaigns = async () => {
+    try {
+      const { campaigns } = await campaignService.listPublicCampaigns(1, 50)
+      if (campaigns && campaigns.length > 0) {
+        const mapped: Fundraiser[] = campaigns.map((c: any) => {
+          let coverUrl = 'https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&q=80&w=600'
+          if (typeof c.coverImageUrl === 'string' && c.coverImageUrl) coverUrl = c.coverImageUrl
+          else if (c.coverImageUrl?.Valid && c.coverImageUrl.String) coverUrl = c.coverImageUrl.String
+
+          let locationStr = 'Uganda'
+          if (typeof c.location === 'string' && c.location) locationStr = c.location
+          else if (c.location?.Valid && c.location.String) locationStr = c.location.String
+
+          let shortDesc = c.story || ''
+          if (typeof c.shortSummary === 'string' && c.shortSummary) shortDesc = c.shortSummary
+          else if (c.shortSummary?.Valid && c.shortSummary.String) shortDesc = c.shortSummary.String
+
+          return {
+            id: c.id,
+            title: c.title,
+            description: shortDesc,
+            category: c.categories && c.categories[0] ? c.categories[0].name : 'Community',
+            imageUrl: coverUrl,
+            targetAmount: Number(c.goalAmount) || 1000000,
+            raisedAmount: Number(c.raisedAmount) || 0,
+            currency: c.currency || 'UGX',
+            donorCount: Number(c.donorCount) || 0,
+            daysLeft: 30,
+            organizer: c.ownerName || 'Verified Organizer',
+            city: locationStr,
+            country: 'Uganda',
+          }
+        })
+        fundraisers.value = mapped
+      } else {
+        fundraisers.value = []
+      }
+    } catch (err) {
+      console.warn('Failed to load live campaigns:', err)
+      fundraisers.value = []
+    }
+  }
+
   return {
     fundraisers,
     categories,
@@ -238,6 +144,7 @@ export const useLandingStore = defineStore('landing', () => {
     selectedCategory,
     filteredFundraisers,
     donateToFundraiser,
-    addCampaignToFundraisers
+    addCampaignToFundraisers,
+    fetchLiveCampaigns
   }
 })

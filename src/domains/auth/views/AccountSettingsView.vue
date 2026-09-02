@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from '../../../stores/auth'
 import NavHeader from '../../landing/components/NavHeader.vue'
 import MainFooter from '../../landing/components/MainFooter.vue'
@@ -15,30 +15,58 @@ const activeSettingsTab = ref<'account' | 'notifications'>('account')
 
 // Editing Name logic
 const isEditingName = ref(false)
-const inputName = ref(authStore.user.name)
+const inputName = ref(authStore.user?.name || '')
+const isSavingName = ref(false)
 
-const saveName = () => {
-  if (inputName.value.trim()) {
-    authStore.login(authStore.user.email, inputName.value)
-    isEditingName.value = false
+const saveName = async () => {
+  if (inputName.value.trim() && authStore.user) {
+    isSavingName.value = true
+    try {
+      await authStore.saveProfile({ displayName: inputName.value.trim() })
+      isEditingName.value = false
+    } catch (err) {
+      console.warn('Failed to save name:', err)
+    } finally {
+      isSavingName.value = false
+    }
   }
 }
 
 // Editing Birthday logic
 const isEditingBirthday = ref(false)
-const birthdayVal = ref('')
+const birthdayVal = ref(authStore.user?.dateOfBirth || '')
+const isSavingBirthday = ref(false)
 
-const saveBirthday = () => {
-  isEditingBirthday.value = false
+const saveBirthday = async () => {
+  isSavingBirthday.value = true
+  try {
+    if (birthdayVal.value) {
+      await authStore.saveProfile({ dateOfBirth: birthdayVal.value })
+    }
+    isEditingBirthday.value = false
+  } catch (err) {
+    console.warn('Failed to save birthday:', err)
+  } finally {
+    isSavingBirthday.value = false
+  }
 }
 
 // Editing Phone logic
 const isEditingPhone = ref(false)
-const phoneVal = ref('')
+const phoneVal = ref(authStore.user?.phone || '')
 
 const savePhone = () => {
   isEditingPhone.value = false
 }
+
+onMounted(async () => {
+  await authStore.fetchProfile()
+  if (authStore.user) {
+    inputName.value = authStore.user.name || ''
+    birthdayVal.value = authStore.user.dateOfBirth || ''
+    phoneVal.value = authStore.user.phone || ''
+  }
+})
 
 // Simulated notification switches (Screenshot 3 notifications tab)
 const messageNotif = ref(false)

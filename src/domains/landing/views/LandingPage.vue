@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLandingStore } from '../stores'
 import { storeToRefs } from 'pinia'
@@ -9,6 +9,10 @@ import MainFooter from '../components/MainFooter.vue'
 const router = useRouter()
 const store = useLandingStore()
 const { faqs, searchQuery, selectedCategory, filteredFundraisers } = storeToRefs(store)
+
+onMounted(() => {
+  store.fetchLiveCampaigns()
+})
 
 const navHeaderRef = ref<any>(null)
 const closeDropdowns = () => {
@@ -60,7 +64,7 @@ const getProgressPercent = (raised: number, target: number) => {
 }
 
 const startFundraiser = () => {
-  router.push('/signup')
+  router.push('/start-fundraiser')
 }
 </script>
 
@@ -302,10 +306,10 @@ const startFundraiser = () => {
                 </svg>
                 {{ fund.city }}, {{ fund.country }}
               </span>
-              <h3
-                class="font-bold text-slate-800 group-hover:text-[#024731] transition-colors mb-2 leading-snug line-clamp-1">
+              <RouterLink :to="'/campaign/' + fund.id"
+                class="font-bold text-slate-800 hover:text-[#024731] transition-colors mb-2 leading-snug line-clamp-1 block">
                 {{ fund.title }}
-              </h3>
+              </RouterLink>
               <p class="text-slate-500 text-xs mb-4 line-clamp-2 leading-relaxed">
                 {{ fund.description }}
               </p>
@@ -313,7 +317,7 @@ const startFundraiser = () => {
               <!-- Progress Bar (GoFundMe Kelly Green) -->
               <div class="mt-auto pt-4 border-t border-slate-50">
                 <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1">
-                  <span>${{ fund.raisedAmount.toLocaleString() }} raised</span>
+                  <span>{{ (fund.currency || 'UGX') + ' ' + fund.raisedAmount.toLocaleString() }} raised</span>
                   <span class="text-[#024731] font-black">{{ getProgressPercent(fund.raisedAmount, fund.targetAmount) }}%</span>
                 </div>
                 <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -326,11 +330,11 @@ const startFundraiser = () => {
                 </div>
               </div>
 
-              <!-- Inline Quick Donate Trigger -->
-              <button @click="openDonateModal(fund.id)"
-                class="w-full mt-4 bg-[#edfce0] hover:bg-[#024731] hover:text-white text-[#024731] text-xs font-bold py-2.5 rounded-xl transition-all border border-[#bbf770] hover:border-[#024731] text-center cursor-pointer">
+              <!-- Quick Donate Link to Campaign Page -->
+              <RouterLink :to="'/campaign/' + fund.id"
+                class="w-full mt-4 bg-[#edfce0] hover:bg-[#024731] hover:text-white text-[#024731] text-xs font-bold py-2.5 rounded-xl transition-all border border-[#bbf770] hover:border-[#024731] text-center cursor-pointer block">
                 Donate Now
-              </button>
+              </RouterLink>
             </div>
           </div>
         </div>

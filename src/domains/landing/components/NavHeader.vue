@@ -24,7 +24,7 @@ const closeDropdowns = () => {
 defineExpose({ closeDropdowns })
 
 const startFundraiser = () => {
-  router.push('/signup')
+  router.push('/start-fundraiser')
 }
 
 const goToLogin = () => {
@@ -145,8 +145,11 @@ const handleLogout = () => {
           <!-- User Dropdown Menu -->
           <div class="relative" @mouseenter="activeDropdown = 'user'" @mouseleave="activeDropdown = null">
             <button @click="toggleDropdown('user')" class="flex items-center gap-2 py-1.5 px-3 rounded-full hover:bg-slate-50 transition-colors cursor-pointer">
-              <img :src="authStore.user.avatar" class="w-7 h-7 rounded-full object-cover border border-slate-200" alt="Avatar" />
-              <span class="text-sm font-bold text-slate-800 tracking-tight uppercase">{{ authStore.user.name.split(' ')[0] }}</span>
+              <div class="w-7 h-7 rounded-full overflow-hidden border border-slate-200 bg-slate-100 flex items-center justify-center shrink-0">
+                <img v-if="authStore.user?.avatar" :src="authStore.user.avatar" class="w-full h-full object-cover" alt="Avatar" />
+                <iconify-icon v-else icon="ph:user-circle-fill" class="text-xl text-slate-400"></iconify-icon>
+              </div>
+              <span class="text-sm font-bold text-slate-800 tracking-tight uppercase">{{ (authStore.user?.name || 'Account').split(' ')[0] }}</span>
               <svg class="transition-transform duration-200 text-slate-500" :class="{ 'rotate-180': activeDropdown === 'user' }" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
               </svg>
@@ -155,6 +158,10 @@ const handleLogout = () => {
             <!-- Dropdown Menu Options (Matches Screenshot 3) -->
             <div v-if="activeDropdown === 'user'" class="absolute right-0 mt-0 pt-2 w-56 z-50">
               <div class="bg-white rounded-xl shadow-xl border border-slate-100 p-2.5 flex flex-col gap-1 animate-scale">
+                <RouterLink v-if="authStore.isAdmin" to="/admin/users" @click="closeDropdowns" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold text-purple-700 bg-purple-50/60 hover:bg-purple-100/60 transition-colors flex items-center justify-between">
+                  <span>Admin Portal</span>
+                  <span class="text-[10px] uppercase tracking-wider bg-purple-200 text-purple-800 px-1.5 py-0.5 rounded font-extrabold">Admin</span>
+                </RouterLink>
                 <RouterLink to="/profile" @click="closeDropdowns" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                   Profile
                 </RouterLink>

@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const startFundraiser = () => {
-  router.push('/signup')
+  router.push('/start-fundraiser')
 }
 </script>
 

@@ -120,7 +120,7 @@ const faqs = [
 ]
 
 const startFundraiser = () => {
-  router.push('/signup')
+  router.push('/start-fundraiser')
 }
 
 const scrollToFaq = () => {

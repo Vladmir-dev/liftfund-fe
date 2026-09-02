@@ -16,7 +16,22 @@ const router = createRouter({
     {
       path: '/signup',
       name: 'signup',
+      component: () => import('../domains/auth/views/SignupView.vue'),
+    },
+    {
+      path: '/start-fundraiser',
+      name: 'start-fundraiser',
       component: () => import('../domains/auth/views/SignupJourneyView.vue'),
+    },
+    {
+      path: '/set-password',
+      name: 'set-password',
+      component: () => import('../domains/auth/views/SetPasswordView.vue'),
+    },
+    {
+      path: '/admin/users',
+      name: 'admin-users',
+      component: () => import('../domains/admin/views/AdminUsersView.vue'),
     },
     {
       path: '/campaign/:id',
@@ -70,6 +85,7 @@ const router = createRouter({
     },
     {
       path: '/account-settings',
+      alias: '/account/settings',
       name: 'account-settings',
       component: () => import('../domains/auth/views/AccountSettingsView.vue'),
     },
