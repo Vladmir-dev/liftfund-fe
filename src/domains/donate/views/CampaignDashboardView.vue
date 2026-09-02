@@ -31,6 +31,7 @@ interface DashboardCampaign {
   shareCount: number
   donorCount: number
   isPublished?: boolean
+  status?: string
 }
 
 const route = useRoute()
@@ -163,6 +164,7 @@ const loadDashboardData = async () => {
         shareCount: detail.shareCount || 0,
         donorCount: c.donorCount || 0,
         isPublished: c.status === 'active',
+        status: c.status || 'active',
       }
 
       // Fetch donor count
@@ -185,6 +187,13 @@ const loadDashboardData = async () => {
 onMounted(() => {
   loadDashboardData()
 })
+
+const handleStatusChanged = (newStatus: string) => {
+  if (dashboardCampaign.value) {
+    dashboardCampaign.value.status = newStatus
+    dashboardCampaign.value.isPublished = newStatus === 'active'
+  }
+}
 
 const fundraiser = computed<DashboardCampaign | null>(() => {
   if (dashboardCampaign.value) return dashboardCampaign.value
@@ -312,6 +321,7 @@ const handlePostUpdate = (text: string) => {
         <!-- Render subcomponent corresponding to active tab -->
         <TodayTab 
           v-if="activeTab === 'today'" 
+          :campaignId="fundraiser.id"
           :title="fundraiser.title" 
           :targetAmount="fundraiser.targetAmount"
           :raisedAmount="fundraiser.raisedAmount" 
@@ -322,6 +332,7 @@ const handlePostUpdate = (text: string) => {
           :shareCount="fundraiser.shareCount"
           :likeCount="fundraiser.likeCount"
           @share="activeTab = 'sharehub'"
+          @post-update="activeTab = 'updates'"
         />
 
         <SupportersTab 
@@ -358,9 +369,11 @@ const handlePostUpdate = (text: string) => {
           :campaignId="fundraiser.id"
           :title="fundraiser.title"
           :imageUrl="fundraiser.imageUrl"
+          :status="fundraiser.status"
           @post-update="activeTab = 'updates'"
           @transfers="activeTab = 'transfers'"
           @edit="openEditModal"
+          @status-changed="handleStatusChanged"
         />
 
       </div>

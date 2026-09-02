@@ -100,6 +100,66 @@ export interface CreateDonationResponse {
   paymentMethodId?: string
 }
 
+export interface CampaignTeamMember {
+  id: string
+  campaignId: string
+  userId: string
+  role: string
+  joinedAt?: string
+  userName?: string
+  userEmail?: string
+}
+
+export interface AddTeamMemberPayload {
+  campaignId: string
+  userId?: string
+  email?: string
+  role?: string
+}
+
+export interface CampaignImage {
+  id: string
+  campaignId?: string
+  url: string
+  mediaType?: string
+  sortOrder?: number
+  createdAt?: string
+}
+
+export interface CreateCampaignImagePayload {
+  campaignId: string
+  url: string
+  mediaType?: string
+  sortOrder?: number
+}
+
+export interface SavedPaymentMethod {
+  id: string
+  donorId?: string
+  provider: 'card' | 'mobilemoney'
+  last4?: string
+  cardBrand?: string
+  email?: string
+  isDefault: boolean
+  createdAt?: string
+}
+
+export interface AddPaymentMethodPayload {
+  provider: 'card' | 'mobilemoney'
+  last4?: string
+  cardBrand?: string
+  email?: string
+  token?: string
+  isDefault?: boolean
+}
+
+export interface CampaignStatsResponse {
+  likeCount: number
+  commentCount: number
+  shareCount: number
+  shares?: { platform: string; shareCount: number }[]
+}
+
 export interface WithdrawalRecord {
   id: string
   campaignId: string
@@ -306,6 +366,14 @@ export const campaignService = {
     })
   },
 
+  // Verify and confirm a donation by txRef
+  verifyDonation(payload: { txRef: string; transactionId?: string }): Promise<any> {
+    return request('/api/v1/campaigns/donations/verify', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  },
+
   // List donations for a campaign
   async listCampaignDonations(campaignId: string, page: number = 1, limit: number = 50): Promise<CampaignDonation[]> {
     const res = await request<any>(`/api/v1/campaigns/${campaignId}/donations?page=${page}&limit=${limit}`)
@@ -349,17 +417,45 @@ export const campaignService = {
   },
 
   // Add team member / collaborator
-  addTeamMember(payload: { campaignId: string; userId: string; role?: string }): Promise<any> {
-    return request('/api/v1/campaigns/team', {
+  addTeamMember(payload: AddTeamMemberPayload): Promise<CampaignTeamMember> {
+    return request<CampaignTeamMember>('/api/v1/campaigns/team', {
       method: 'POST',
       body: JSON.stringify(payload),
     })
   },
 
   // List team members for a campaign
-  async listTeamMembers(campaignId: string): Promise<TeamMemberRecord[]> {
+  async listTeamMembers(campaignId: string): Promise<CampaignTeamMember[]> {
     const res = await request<any>(`/api/v1/campaigns/${campaignId}/team`)
     return Array.isArray(res) ? res : (res?.content || res?.teamMembers || [])
+  },
+
+  // Remove team member from campaign
+  removeTeamMember(campaignId: string, userId: string): Promise<any> {
+    return request(`/api/v1/campaigns/team/${campaignId}/${userId}`, {
+      method: 'DELETE',
+    })
+  },
+
+  // List extra gallery images for a campaign
+  async listCampaignImages(campaignId: string): Promise<CampaignImage[]> {
+    const res = await request<any>(`/api/v1/campaigns/${campaignId}/images`)
+    return Array.isArray(res) ? res : (res?.images || res?.content || [])
+  },
+
+  // Add an image to campaign gallery
+  createCampaignImage(payload: CreateCampaignImagePayload): Promise<CampaignImage> {
+    return request<CampaignImage>('/api/v1/campaigns/images', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  },
+
+  // Delete a campaign gallery image
+  deleteCampaignImage(campaignId: string, imageId: string): Promise<any> {
+    return request(`/api/v1/campaigns/images/${campaignId}/${imageId}`, {
+      method: 'DELETE',
+    })
   },
 
   // Update existing campaign
@@ -367,6 +463,13 @@ export const campaignService = {
     return request(`/api/v1/campaigns/${id}`, {
       method: 'PUT',
       body: JSON.stringify({ id, ...payload }),
+    })
+  },
+
+  // Delete / archive a campaign
+  deleteCampaign(id: string): Promise<any> {
+    return request(`/api/v1/campaigns/${id}`, {
+      method: 'DELETE',
     })
   },
 
@@ -378,6 +481,46 @@ export const campaignService = {
       totalDonations: Number(res?.totalDonations) || 0,
       totalDonated: Number(res?.totalDonated) || 0,
     }
+  },
+
+  // Fetch campaign detailed stats and social breakdown
+  async getCampaignStats(campaignId: string): Promise<CampaignStatsResponse> {
+    const res = await request<any>(`/api/v1/campaigns/${campaignId}/stats`)
+    return {
+      likeCount: Number(res?.likeCount || 0),
+      commentCount: Number(res?.commentCount || 0),
+      shareCount: Number(res?.shareCount || 0),
+      shares: Array.isArray(res?.shares) ? res.shares : [],
+    }
+  },
+
+  // List saved payment methods for authenticated user
+  async listPaymentMethods(): Promise<SavedPaymentMethod[]> {
+    const res = await request<any>('/api/v1/campaigns/payment-methods')
+    return Array.isArray(res) ? res : (res?.content || res?.paymentMethods || [])
+  },
+
+  // Add a saved payment method
+  addPaymentMethod(payload: AddPaymentMethodPayload): Promise<SavedPaymentMethod> {
+    return request<SavedPaymentMethod>('/api/v1/campaigns/payment-methods', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+  },
+
+  // Set default payment method
+  setDefaultPaymentMethod(id: string): Promise<any> {
+    return request('/api/v1/campaigns/payment-methods', {
+      method: 'PUT',
+      body: JSON.stringify({ id }),
+    })
+  },
+
+  // Delete a saved payment method
+  deletePaymentMethod(id: string): Promise<any> {
+    return request(`/api/v1/campaigns/payment-methods/${id}`, {
+      method: 'DELETE',
+    })
   },
 
   // Fetch all donations made by the current user

@@ -2,6 +2,8 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../../stores/auth'
+import { authService } from '../../../services/auth'
+import { Notify } from '../../../utils/notify'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -17,6 +19,39 @@ const otpCode = ref('')
 const isLoading = ref(false)
 const errorMsg = ref('')
 const successMsg = ref('')
+
+// Forgot Password states
+const showForgotModal = ref(false)
+const forgotEmail = ref('')
+const isSendingReset = ref(false)
+const forgotSuccess = ref(false)
+const forgotError = ref('')
+
+const openForgotPassword = () => {
+  forgotEmail.value = email.value.trim()
+  forgotSuccess.value = false
+  forgotError.value = ''
+  showForgotModal.value = true
+}
+
+const handleForgotPassword = async () => {
+  if (!forgotEmail.value.trim()) {
+    forgotError.value = 'Please enter your account email address.'
+    return
+  }
+  isSendingReset.value = true
+  forgotError.value = ''
+  try {
+    await authService.forgotPassword(forgotEmail.value.trim())
+    forgotSuccess.value = true
+    Notify.success('Password reset link sent to your email!')
+  } catch (err: any) {
+    forgotError.value = err.message || 'Failed to send reset link. Please verify your email.'
+    Notify.failure(forgotError.value)
+  } finally {
+    isSendingReset.value = false
+  }
+}
 
 // Step 1: Submit email + password
 const handleLogin = async () => {
@@ -210,7 +245,15 @@ const goToLanding = () => {
           </div>
 
           <div class="flex flex-col">
-            <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-bold text-slate-700">Password</label>
+              <button 
+                type="button" 
+                @click="openForgotPassword" 
+                class="text-[11px] font-bold text-[#024731] hover:underline cursor-pointer">
+                Forgot password?
+              </button>
+            </div>
             <div class="relative">
               <input 
                 :type="showPassword ? 'text' : 'password'" 
@@ -247,6 +290,89 @@ const goToLanding = () => {
           <RouterLink to="/signup" class="text-[#024731] hover:underline font-bold">Sign up here</RouterLink>
         </p>
       </div>
+
+    </div>
+
+    <!-- Forgot Password Modal -->
+    <div v-if="showForgotModal"
+      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in text-left">
+      <div
+        class="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-slate-100 flex flex-col gap-4">
+        
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-full bg-emerald-50 text-[#024731] flex items-center justify-center text-lg">
+              <iconify-icon icon="ph:key-bold"></iconify-icon>
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900 leading-tight">Reset Password</h3>
+              <p class="text-[11px] text-slate-500 font-medium">We will email you a secure reset link</p>
+            </div>
+          </div>
+          <button
+            @click="showForgotModal = false"
+            class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition cursor-pointer">
+            <iconify-icon icon="ph:x-bold" class="text-base"></iconify-icon>
+          </button>
+        </div>
+
+        <div v-if="forgotSuccess" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex flex-col gap-2">
+          <div class="flex items-center gap-2 font-bold text-xs">
+            <iconify-icon icon="ph:check-circle-bold" class="text-emerald-700 text-base"></iconify-icon>
+            <span>Reset Link Sent!</span>
+          </div>
+          <p class="text-xs text-emerald-800 leading-relaxed font-medium">
+            We've sent a password reset link to <strong class="text-emerald-950">{{ forgotEmail }}</strong>. Please check your inbox and click the link to set your new password.
+          </p>
+          <button
+            @click="showForgotModal = false"
+            class="mt-2 py-2 px-4 rounded-xl bg-[#024731] text-white text-xs font-bold self-start cursor-pointer hover:bg-[#013424]">
+            Back to Sign In
+          </button>
+        </div>
+
+        <form v-else @submit.prevent="handleForgotPassword" class="flex flex-col gap-3.5">
+          <p class="text-xs text-slate-600 leading-relaxed font-medium">
+            Enter the email address registered with your HelpFund account and we'll send you instructions to reset your password.
+          </p>
+
+          <div v-if="forgotError" class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+            {{ forgotError }}
+          </div>
+
+          <div class="flex flex-col">
+            <label class="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
+            <input 
+              type="email" 
+              v-model="forgotEmail" 
+              required 
+              placeholder="grace@example.com" 
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-medium" 
+              :disabled="isSendingReset" 
+            />
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 mt-1">
+            <button
+              type="button"
+              @click="showForgotModal = false"
+              :disabled="isSendingReset"
+              class="py-2.5 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition cursor-pointer">
+              Cancel
+            </button>
+            <button
+              type="submit"
+              :disabled="isSendingReset || !forgotEmail.trim()"
+              class="py-2.5 px-4 rounded-xl bg-[#024731] hover:bg-[#013424] disabled:opacity-50 text-white text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
+              <span v-if="isSendingReset"
+                class="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>Send Reset Link</span>
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
 
     </div>
   </div>

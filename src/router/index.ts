@@ -29,6 +29,10 @@ const router = createRouter({
       component: () => import('../domains/auth/views/SetPasswordView.vue'),
     },
     {
+      path: '/resetPassword',
+      redirect: (to) => ({ path: '/set-password', query: to.query }),
+    },
+    {
       path: '/admin/users',
       name: 'admin-users',
       component: () => import('../domains/admin/views/AdminUsersView.vue'),

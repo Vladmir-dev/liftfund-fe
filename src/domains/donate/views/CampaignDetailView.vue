@@ -9,6 +9,8 @@ import {
   type CampaignDetailResponse,
   type CampaignComment,
   type CampaignDonation,
+  type CampaignTeamMember,
+  type CampaignImage,
   type BackendCampaign,
 } from '../../../services/campaign'
 import { openFlutterwavePayment } from '../../../services/payment'
@@ -28,8 +30,15 @@ const campaignId = ref(route.params.id as string)
 const liveData = ref<CampaignDetailResponse | null>(null)
 const comments = ref<CampaignComment[]>([])
 const donations = ref<CampaignDonation[]>([])
+const teamMembers = ref<CampaignTeamMember[]>([])
+const galleryImages = ref<CampaignImage[]>([])
+const activeGalleryImage = ref<string | null>(null)
 const isLoading = ref(true)
 const loadError = ref('')
+
+const campaignStatus = computed(() => {
+  return liveData.value?.campaign?.status || 'active'
+})
 
 // Interactive comment input
 const newComment = ref('')
@@ -128,14 +137,29 @@ const fetchCampaignData = async () => {
   loadError.value = ''
 
   try {
-    const [detailRes, commentsRes, donationsRes] = await Promise.allSettled([
+    const [detailRes, commentsRes, donationsRes, teamRes, imagesRes] = await Promise.allSettled([
       campaignService.getCampaignDetail(campaignId.value),
       campaignService.listComments(campaignId.value),
       campaignService.listCampaignDonations(campaignId.value),
+      campaignService.listTeamMembers(campaignId.value),
+      campaignService.listCampaignImages(campaignId.value),
     ])
 
     if (detailRes.status === 'fulfilled') {
       liveData.value = detailRes.value
+      if (detailRes.value.teamMembers && detailRes.value.teamMembers.length) {
+        teamMembers.value = detailRes.value.teamMembers
+      }
+    }
+
+    if (imagesRes.status === 'fulfilled' && imagesRes.value.length) {
+      galleryImages.value = imagesRes.value
+    } else if (detailRes.status === 'fulfilled' && detailRes.value.images && detailRes.value.images.length) {
+      galleryImages.value = detailRes.value.images
+    }
+
+    if (teamRes.status === 'fulfilled' && teamRes.value.length) {
+      teamMembers.value = teamRes.value
     }
 
     if (commentsRes.status === 'fulfilled') {
@@ -334,10 +358,22 @@ const handleStartDonation = async () => {
           title: campaign.value.title,
           description: `Donation to ${campaign.value.title}`,
         },
-        callback: (fwData: any) => {
-          console.log('Flutterwave payment result:', fwData)
+        callback: async (fwData: any) => {
+          console.log('Flutterwave payment callback:', fwData)
+          try {
+            await campaignService.verifyDonation({
+              txRef: res.txRef,
+              transactionId: String(fwData.transaction_id || fwData.id || ''),
+            })
+          } catch (vErr) {
+            console.warn('Donation verification response:', vErr)
+          }
+
           donationSuccess.value = true
-          fetchCampaignData()
+          Notify.success(
+            `Thank you! Your donation of ${campaign.value?.currency} ${Number(donationAmount.value).toLocaleString()} has been confirmed.`
+          )
+          await fetchCampaignData()
           setTimeout(() => {
             showDonateModal.value = false
           }, 2500)
@@ -347,16 +383,13 @@ const handleStartDonation = async () => {
         },
       })
     } catch (fwErr: any) {
-      console.warn('Flutterwave direct checkout skipped/unavailable, completing demo donation:', fwErr)
-      // Test environment fallback: simulate completed donation
-      donationSuccess.value = true
-      fetchCampaignData()
-      setTimeout(() => {
-        showDonateModal.value = false
-      }, 2500)
+      console.warn('Flutterwave checkout error:', fwErr)
+      donationError.value = fwErr.message || 'Could not open payment window. Please try again.'
+      Notify.failure(donationError.value)
     }
   } catch (err: any) {
     donationError.value = err.message || 'Failed to initiate donation. Please try again.'
+    Notify.failure(donationError.value)
   } finally {
     isSubmittingDonation.value = false
   }
@@ -421,15 +454,29 @@ const handleStartDonation = async () => {
           </div>
 
           <!-- Organizer brief header -->
-          <div class="flex items-center gap-4 py-2 border-b border-slate-100">
-            <div
-              class="w-10 h-10 rounded-full bg-[#edfce0] border border-[#bbf770] text-[#024731] flex items-center justify-center font-bold text-sm shrink-0">
-              {{campaign.organizer.split(' ').map((n: string) => n[0]).join('') || 'O'}}
+          <div class="flex flex-col gap-3 py-2 border-b border-slate-100">
+            <div class="flex items-center gap-4">
+              <div
+                class="w-10 h-10 rounded-full bg-[#edfce0] border border-[#bbf770] text-[#024731] flex items-center justify-center font-bold text-sm shrink-0">
+                {{ campaign.organizer.split(' ').map((n: string) => n[0]).join('') || 'O' }}
+              </div>
+              <div class="text-xs text-slate-600 font-medium">
+                <span class="font-bold text-slate-900 block text-sm">{{ campaign.organizer }}</span>
+                Organizing this verified fundraiser &bull; <span class="text-slate-500 font-semibold">{{ campaign.location }}</span>
+              </div>
             </div>
-            <div class="text-xs text-slate-600 font-medium">
-              <span class="font-bold text-slate-900 block text-sm">{{ campaign.organizer }}</span>
-              Organizing this verified fundraiser &bull; <span class="text-slate-500 font-semibold">{{ campaign.location
-                }}</span>
+
+            <!-- Team & Co-organizers if present -->
+            <div v-if="teamMembers.length > 0" class="flex items-center gap-2 pt-2 border-t border-slate-50 text-xs">
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Team:</span>
+              <div class="flex flex-wrap gap-1.5">
+                <span v-for="tm in teamMembers" :key="tm.id || tm.userId"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-50 border border-slate-200 text-slate-700 text-[11px] font-semibold">
+                  <iconify-icon icon="ph:user-bold" class="text-emerald-700 text-xs"></iconify-icon>
+                  <span>{{ tm.userName || tm.userEmail }}</span>
+                  <span class="text-[9px] text-slate-400 font-bold capitalize">({{ tm.role || 'Co-organizer' }})</span>
+                </span>
+              </div>
             </div>
           </div>
 
@@ -450,6 +497,26 @@ const handleStartDonation = async () => {
             {{ campaign.story }}
           </article>
 
+          <!-- Campaign Media Gallery -->
+          <div v-if="galleryImages.length > 0" class="py-4 border-t border-slate-100 flex flex-col gap-3">
+            <div class="flex items-center gap-2 text-slate-900 font-black text-sm">
+              <iconify-icon icon="ph:images-bold" class="text-base text-[#024731]"></iconify-icon>
+              <span>Campaign Photos ({{ galleryImages.length }})</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              <div
+                v-for="(img, idx) in galleryImages"
+                :key="img.id || idx"
+                @click="activeGalleryImage = img.url"
+                class="aspect-4/3 rounded-2xl overflow-hidden bg-slate-100 border border-slate-150 shadow-xs cursor-pointer group relative">
+                <img :src="img.url" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-lg">
+                  <iconify-icon icon="ph:magnifying-glass-plus-bold"></iconify-icon>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Call to action card -->
           <div
             class="bg-[#edfce0]/60 border border-[#bbf770]/60 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -459,9 +526,11 @@ const handleStartDonation = async () => {
                 Every contribution directly supports {{ campaign.organizer }}'s verified fundraising goal.
               </p>
             </div>
-            <button @click="openDonate"
-              class="bg-[#024731] hover:bg-[#013424] text-white font-bold text-xs px-6 py-3 rounded-full transition-all shrink-0 cursor-pointer shadow-md">
-              Donate Now
+            <button
+              @click="openDonate"
+              :disabled="campaignStatus === 'paused' || campaignStatus === 'completed'"
+              class="bg-[#024731] hover:bg-[#013424] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs px-6 py-3 rounded-full transition-all shrink-0 cursor-pointer shadow-md">
+              {{ campaignStatus === 'paused' ? 'Donations Paused' : campaignStatus === 'completed' ? 'Goal Reached' : 'Donate Now' }}
             </button>
           </div>
 
@@ -604,12 +673,24 @@ const handleStartDonation = async () => {
             </div>
           </div>
 
+          <!-- Status alert if paused or completed -->
+          <div v-if="campaignStatus === 'paused'" class="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl text-xs font-semibold leading-relaxed">
+            <iconify-icon icon="ph:pause-circle-bold" class="text-amber-700 mr-1 text-sm inline-block align-middle"></iconify-icon>
+            Donations are temporarily paused by the organizer.
+          </div>
+          <div v-else-if="campaignStatus === 'completed'" class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-2xl text-xs font-semibold leading-relaxed">
+            <iconify-icon icon="ph:check-circle-bold" class="text-blue-700 mr-1 text-sm inline-block align-middle"></iconify-icon>
+            This fundraiser has reached its goal and is completed!
+          </div>
+
           <!-- Action Buttons -->
           <div class="flex flex-col gap-3">
-            <button @click="openDonate"
-              class="w-full bg-[#024731] hover:bg-[#013424] text-white font-bold text-sm py-3.5 rounded-2xl shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer">
-              <iconify-icon icon="ph:heart-fill" class="text-lg"></iconify-icon>
-              <span>Donate now</span>
+            <button
+              @click="openDonate"
+              :disabled="campaignStatus === 'paused' || campaignStatus === 'completed'"
+              class="w-full bg-[#024731] hover:bg-[#013424] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm py-3.5 rounded-2xl shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer">
+              <iconify-icon :icon="campaignStatus === 'paused' ? 'ph:pause-circle-fill' : campaignStatus === 'completed' ? 'ph:flag-checkered-fill' : 'ph:heart-fill'" class="text-lg"></iconify-icon>
+              <span>{{ campaignStatus === 'paused' ? 'Donations paused' : campaignStatus === 'completed' ? 'Goal reached' : 'Donate now' }}</span>
             </button>
             <button @click="handleShare('copy')"
               class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 cursor-pointer">
@@ -772,6 +853,20 @@ const handleStartDonation = async () => {
             <span>Delete</span>
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Gallery Lightbox Modal -->
+    <div v-if="activeGalleryImage"
+      class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+      @click="activeGalleryImage = null">
+      <div class="relative max-w-4xl max-h-[90vh] overflow-hidden rounded-3xl bg-black border border-white/10 shadow-2xl flex items-center justify-center" @click.stop>
+        <button
+          @click="activeGalleryImage = null"
+          class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center cursor-pointer transition">
+          <iconify-icon icon="ph:x-bold" class="text-base"></iconify-icon>
+        </button>
+        <img :src="activeGalleryImage" class="w-full h-full max-h-[85vh] object-contain" />
       </div>
     </div>
 
