@@ -37,14 +37,68 @@ onMounted(() => {
   fetchDonations()
 })
 
+const getDonationMessage = (donation: any): string => {
+  if (!donation) return ''
+  let val = donation.message
+  if (!val) return ''
+
+  // If val is a JSON-encoded string like '{"String":"...","Valid":true}'
+  if (typeof val === 'string' && val.trim().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(val)
+      if (parsed && typeof parsed === 'object' && 'String' in parsed) {
+        return parsed.Valid !== false ? (parsed.String || '') : ''
+      }
+    } catch {
+      // Fall through if not JSON
+    }
+  }
+
+  // If val is an object like { String: "...", Valid: true }
+  if (typeof val === 'object' && 'String' in val) {
+    return val.Valid !== false ? (val.String || '') : ''
+  }
+
+  // Plain string
+  if (typeof val === 'string') {
+    return val.trim()
+  }
+
+  return ''
+}
+
+const getDonorName = (donation: any): string => {
+  if (!donation) return 'Generous Donor'
+  if (donation.isAnonymous) return 'Anonymous Supporter'
+  let val = donation.donorName
+  if (!val) return 'Generous Donor'
+
+  if (typeof val === 'string' && val.trim().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(val)
+      if (parsed && typeof parsed === 'object' && 'String' in parsed) {
+        return parsed.Valid !== false ? (parsed.String || 'Generous Donor') : 'Generous Donor'
+      }
+    } catch {
+      // Fall through
+    }
+  }
+
+  if (typeof val === 'object' && 'String' in val) {
+    return val.Valid !== false ? (val.String || 'Generous Donor') : 'Generous Donor'
+  }
+
+  return typeof val === 'string' && val.trim() ? val : 'Generous Donor'
+}
+
 const filteredDonations = computed(() => {
   if (!searchQuery.value.trim()) return donations.value
   const q = searchQuery.value.toLowerCase()
-  return donations.value.filter(
-    (d) =>
-      (d.donorName && d.donorName.toLowerCase().includes(q)) ||
-      (d.message && d.message.toLowerCase().includes(q))
-  )
+  return donations.value.filter((d) => {
+    const name = getDonorName(d).toLowerCase()
+    const msg = getDonationMessage(d).toLowerCase()
+    return name.includes(q) || msg.includes(q)
+  })
 })
 
 const handleCopyLink = () => {
@@ -176,14 +230,14 @@ const handleCopyLink = () => {
         >
           <div class="flex items-start gap-3">
             <div class="w-10 h-10 rounded-full bg-emerald-50 text-[#024731] flex items-center justify-center font-bold text-sm shrink-0">
-              {{ donation.isAnonymous ? 'A' : (donation.donorName ? donation.donorName.charAt(0).toUpperCase() : 'S') }}
+              {{ donation.isAnonymous ? 'A' : getDonorName(donation).charAt(0).toUpperCase() }}
             </div>
             <div>
               <h4 class="font-extrabold text-slate-900 text-xs">
-                {{ donation.isAnonymous ? 'Anonymous Supporter' : (donation.donorName || 'Generous Donor') }}
+                {{ getDonorName(donation) }}
               </h4>
-              <p v-if="donation.message" class="text-xs text-slate-600 font-medium italic mt-1 bg-slate-50 p-2.5 rounded-xl border border-slate-100/80">
-                "{{ donation.message }}"
+              <p v-if="getDonationMessage(donation)" class="text-xs text-slate-600 font-medium italic mt-1 bg-slate-50 p-2.5 rounded-xl border border-slate-100/80">
+                "{{ getDonationMessage(donation) }}"
               </p>
               <span class="text-[10px] text-slate-400 font-semibold block mt-1">
                 {{ new Date(donation.createdAt).toLocaleDateString() }}

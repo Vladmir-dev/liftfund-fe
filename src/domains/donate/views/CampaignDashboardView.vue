@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useLandingStore } from '../../landing/stores'
 import { storeToRefs } from 'pinia'
 import { campaignService } from '../../../services/campaign'
+import { Notify } from '../../../utils/notify'
 import NavHeader from '../../landing/components/NavHeader.vue'
 import MainFooter from '../../landing/components/MainFooter.vue'
 
@@ -81,10 +82,10 @@ const handleImageFile = async (e: Event) => {
     const res = await campaignService.uploadImage(file)
     if (res && res.url) {
       editCoverUrl.value = res.url
+      Notify.success('Cover image uploaded successfully!')
     }
   } catch (err: any) {
-    toastMessage.value = 'Failed to upload image'
-    showToast.value = true
+    Notify.failure('Failed to upload image')
   } finally {
     isUploadingImage.value = false
   }
@@ -107,13 +108,9 @@ const handleSaveCampaign = async () => {
       dashboardCampaign.value.imageUrl = editCoverUrl.value
     }
     showEditModal.value = false
-    toastMessage.value = 'Fundraiser updated successfully!'
-    showToast.value = true
-    setTimeout(() => { showToast.value = false }, 3000)
+    Notify.success('Fundraiser updated successfully!')
   } catch (err: any) {
-    toastMessage.value = err.message || 'Failed to update fundraiser'
-    showToast.value = true
-    setTimeout(() => { showToast.value = false }, 3000)
+    Notify.failure(err.message || 'Failed to update fundraiser')
   } finally {
     isSavingCampaign.value = false
   }
@@ -131,11 +128,7 @@ const toastMessage = ref('')
 const copyLink = () => {
   const link = `${window.location.origin}/campaign/${campaignId.value}`
   navigator.clipboard.writeText(link)
-  toastMessage.value = 'Campaign link copied to clipboard!'
-  showToast.value = true
-  setTimeout(() => {
-    showToast.value = false
-  }, 2500)
+  Notify.info('Campaign link copied to clipboard!')
 }
 
 const loadDashboardData = async () => {

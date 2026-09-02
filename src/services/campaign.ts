@@ -64,6 +64,7 @@ export interface CampaignComment {
   id: string
   campaignId: string
   userId: string
+  userName?: string
   name?: string
   authorName?: string
   content: string
@@ -121,9 +122,11 @@ export interface CreateWithdrawalPayload {
 export interface CampaignUpdateRecord {
   id: string
   campaignId: string
-  title: string
+  title: string | { String: string; Valid: boolean }
   content: string
   createdAt: string
+  updatedAt?: string | { Time: string; Valid: boolean }
+  deletedAt?: string | { Time: string; Valid: boolean }
 }
 
 export interface CreateCampaignUpdatePayload {
@@ -277,6 +280,13 @@ export const campaignService = {
     })
   },
 
+  // Delete own comment (authenticated)
+  deleteComment(commentId: string): Promise<any> {
+    return request(`/api/v1/campaigns/comments/${commentId}`, {
+      method: 'DELETE',
+    })
+  },
+
   // Record a share
   recordShare(campaignId: string, platform: string): Promise<any> {
     return request('/api/v1/campaigns/shares', {
@@ -329,6 +339,13 @@ export const campaignService = {
   async listCampaignUpdates(campaignId: string): Promise<CampaignUpdateRecord[]> {
     const res = await request<any>(`/api/v1/campaigns/${campaignId}/updates`)
     return Array.isArray(res) ? res : (res?.content || res?.updates || [])
+  },
+
+  // Delete a campaign update
+  deleteCampaignUpdate(id: string): Promise<any> {
+    return request(`/api/v1/campaigns/updates/${id}`, {
+      method: 'DELETE',
+    })
   },
 
   // Add team member / collaborator
