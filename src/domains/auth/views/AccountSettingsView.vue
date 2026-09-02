@@ -328,7 +328,7 @@ const unsubscribeAll = () => {
       </div>
 
       <!-- Notifications tab -->
-      <div v-else class="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm flex flex-col gap-6 text-left">
+      <div v-else-if="activeSettingsTab === 'notifications'" class="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm flex flex-col gap-6 text-left">
         <!-- Title and Subtitle -->
         <div>
           <h2 class="text-xl font-black text-slate-900 mb-2">Never miss an update</h2>
@@ -661,8 +661,6 @@ const unsubscribeAll = () => {
         </div>
       </div>
     </div>
-
-    </main>
 
     <MainFooter />
   </div>
