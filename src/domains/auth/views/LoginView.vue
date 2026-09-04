@@ -123,32 +123,31 @@ const goToLanding = () => {
 
 <template>
   <div class="min-h-screen bg-slate-100/60 flex items-center justify-center px-4 relative overflow-hidden font-sans">
-    
+
     <!-- Faded Background Graphics -->
     <div class="absolute inset-0 z-0 pointer-events-none opacity-40">
-      <div class="absolute w-[400px] h-[300px] bg-white rounded-3xl border border-slate-200/50 shadow-sm top-1/4 -left-36 rotate-12"></div>
-      <div class="absolute w-[350px] h-[250px] bg-white rounded-3xl border border-slate-200/50 shadow-sm bottom-1/4 -right-28 -rotate-12"></div>
+      <div
+        class="absolute w-[400px] h-[300px] bg-white rounded-3xl border border-slate-200/50 shadow-sm top-1/4 -left-36 rotate-12">
+      </div>
+      <div
+        class="absolute w-[350px] h-[250px] bg-white rounded-3xl border border-slate-200/50 shadow-sm bottom-1/4 -right-28 -rotate-12">
+      </div>
       <div class="absolute w-[300px] h-[300px] bg-[#edfce0] rounded-full blur-3xl top-12 right-12"></div>
     </div>
 
     <!-- Sign In Card -->
-    <div class="bg-white rounded-[24px] w-full max-w-[440px] p-8 shadow-xl border border-slate-100 z-10 text-center relative">
-      
+    <div
+      class="bg-white rounded-[24px] w-full max-w-[440px] p-8 shadow-xl border border-slate-100 z-10 text-center relative">
+
       <!-- Back Arrow -->
-      <button 
-        v-if="step === 'otp'" 
-        @click="step = 'credentials'" 
+      <button v-if="step === 'otp'" @click="step = 'credentials'"
         class="absolute top-6 left-6 text-slate-400 hover:text-slate-600 p-1 flex items-center justify-center cursor-pointer transition-colors"
-        title="Back to login form"
-      >
+        title="Back to login form">
         <iconify-icon icon="fa6-solid:arrow-left" class="text-base"></iconify-icon>
       </button>
-      <button 
-        v-else 
-        @click="goToLanding" 
+      <button v-else @click="goToLanding"
         class="absolute top-6 left-6 text-slate-400 hover:text-slate-600 p-1 flex items-center justify-center cursor-pointer transition-colors"
-        title="Back to Home"
-      >
+        title="Back to Home">
         <iconify-icon icon="fa6-solid:arrow-left" class="text-base"></iconify-icon>
       </button>
 
@@ -159,8 +158,10 @@ const goToLanding = () => {
       </div>
 
       <!-- Success Screen -->
-      <div v-if="successMsg && step === 'otp' && !errorMsg && authStore.isLoggedIn" class="py-8 flex flex-col items-center justify-center text-center">
-        <div class="w-14 h-14 rounded-full bg-[#edfce0] border border-[#bbf770] flex items-center justify-center text-2xl mb-4">
+      <div v-if="successMsg && step === 'otp' && !errorMsg && authStore.isLoggedIn"
+        class="py-8 flex flex-col items-center justify-center text-center">
+        <div
+          class="w-14 h-14 rounded-full bg-[#edfce0] border border-[#bbf770] flex items-center justify-center text-2xl mb-4">
           <iconify-icon icon="fa6-solid:circle-check" class="text-2xl text-[#02a95c]"></iconify-icon>
         </div>
         <p class="font-bold text-slate-800">{{ successMsg }}</p>
@@ -175,12 +176,14 @@ const goToLanding = () => {
         </p>
 
         <!-- Notification Banner if resend successful -->
-        <div v-if="successMsg" class="mb-4 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[#024731] text-xs font-semibold">
+        <div v-if="successMsg"
+          class="mb-4 p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 text-[#024731] text-xs font-semibold">
           {{ successMsg }}
         </div>
 
         <!-- Error Banner -->
-        <div v-if="errorMsg" class="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2 text-left">
+        <div v-if="errorMsg"
+          class="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2 text-left">
           <iconify-icon icon="fa6-solid:circle-exclamation" class="text-sm shrink-0"></iconify-icon>
           <span>{{ errorMsg }}</span>
         </div>
@@ -188,23 +191,15 @@ const goToLanding = () => {
         <form @submit.prevent="handleVerifyOtp" class="flex flex-col gap-4 text-left">
           <div>
             <label class="block text-xs font-bold text-slate-700 mb-1">5-Digit OTP Code</label>
-            <input 
-              type="text" 
-              v-model="otpCode" 
-              maxlength="6"
-              required 
-              placeholder="12345" 
-              class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-center text-xl font-mono tracking-widest transition-all" 
-              :disabled="isLoading" 
-            />
+            <input type="text" v-model="otpCode" maxlength="6" required placeholder="12345"
+              class="w-full px-5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-center text-xl font-mono tracking-widest transition-all"
+              :disabled="isLoading" />
           </div>
 
-          <button 
-            type="submit" 
-            :disabled="isLoading || !otpCode.trim()" 
-            class="w-full bg-[#024731] hover:bg-[#013424] text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-emerald-950/15 hover:shadow-lg disabled:opacity-50 text-center flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <span v-if="isLoading" class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          <button type="submit" :disabled="isLoading || !otpCode.trim()"
+            class="w-full bg-[#024731] hover:bg-[#013424] text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-emerald-950/15 hover:shadow-lg disabled:opacity-50 text-center flex items-center justify-center gap-2 cursor-pointer">
+            <span v-if="isLoading"
+              class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
             <span>Verify & Sign In</span>
           </button>
         </form>
@@ -213,7 +208,8 @@ const goToLanding = () => {
           <button @click="step = 'credentials'" class="hover:text-slate-800 underline cursor-pointer">
             Use different email
           </button>
-          <button @click="resendOtp" :disabled="isLoading" class="text-[#024731] font-bold hover:underline cursor-pointer">
+          <button @click="resendOtp" :disabled="isLoading"
+            class="text-[#024731] font-bold hover:underline cursor-pointer">
             Resend code
           </button>
         </div>
@@ -225,7 +221,8 @@ const goToLanding = () => {
         <p class="text-slate-500 text-sm mb-6 font-medium">Sign in to HelpFund or create an account.</p>
 
         <!-- Error Banner -->
-        <div v-if="errorMsg" class="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2 text-left">
+        <div v-if="errorMsg"
+          class="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-2 text-left">
           <iconify-icon icon="fa6-solid:circle-exclamation" class="text-sm shrink-0"></iconify-icon>
           <span>{{ errorMsg }}</span>
         </div>
@@ -234,59 +231,42 @@ const goToLanding = () => {
         <form @submit.prevent="handleLogin" class="flex flex-col gap-4 text-left">
           <div class="flex flex-col">
             <label class="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
-            <input 
-              type="email" 
-              v-model="email" 
-              required 
-              placeholder="grace@example.com" 
-              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-sm transition-all" 
-              :disabled="isLoading" 
-            />
+            <input type="email" v-model="email" required placeholder="grace@example.com"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-sm transition-all"
+              :disabled="isLoading" />
           </div>
 
           <div class="flex flex-col">
             <div class="flex items-center justify-between mb-1">
               <label class="block text-xs font-bold text-slate-700">Password</label>
-              <button 
-                type="button" 
-                @click="openForgotPassword" 
+              <button type="button" @click="openForgotPassword"
                 class="text-[11px] font-bold text-[#024731] hover:underline cursor-pointer">
                 Forgot password?
               </button>
             </div>
             <div class="relative">
-              <input 
-                :type="showPassword ? 'text' : 'password'" 
-                v-model="password" 
-                required 
-                placeholder="Enter your password" 
-                class="w-full pl-4 pr-11 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-sm transition-all" 
-                :disabled="isLoading" 
-              />
-              <button 
-                type="button" 
-                @click="showPassword = !showPassword"
+              <input :type="showPassword ? 'text' : 'password'" v-model="password" required
+                placeholder="Enter your password"
+                class="w-full pl-4 pr-11 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-sm transition-all"
+                :disabled="isLoading" />
+              <button type="button" @click="showPassword = !showPassword"
                 class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 p-1 flex items-center justify-center cursor-pointer transition-colors"
-                tabindex="-1"
-                :title="showPassword ? 'Hide password' : 'Show password'"
-              >
+                tabindex="-1" :title="showPassword ? 'Hide password' : 'Show password'">
                 <iconify-icon :icon="showPassword ? 'lucide:eye-off' : 'lucide:eye'" class="text-base"></iconify-icon>
               </button>
             </div>
           </div>
 
-          <button 
-            type="submit" 
-            :disabled="isLoading || !email.trim() || !password.trim()" 
-            class="w-full bg-[#024731] hover:bg-[#013424] text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-emerald-950/15 hover:shadow-lg disabled:opacity-50 text-center flex items-center justify-center gap-2 cursor-pointer mt-1"
-          >
-            <span v-if="isLoading" class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          <button type="submit" :disabled="isLoading || !email.trim() || !password.trim()"
+            class="w-full bg-[#024731] hover:bg-[#013424] text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-emerald-950/15 hover:shadow-lg disabled:opacity-50 text-center flex items-center justify-center gap-2 cursor-pointer mt-1">
+            <span v-if="isLoading"
+              class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
             <span>Sign In</span>
           </button>
         </form>
 
         <p class="text-xs text-slate-400 font-medium mt-6 text-center">
-          Don't have an account? 
+          Don't have an account?
           <RouterLink to="/signup" class="text-[#024731] hover:underline font-bold">Sign up here</RouterLink>
         </p>
       </div>
@@ -298,7 +278,7 @@ const goToLanding = () => {
       class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in text-left">
       <div
         class="bg-white rounded-3xl p-6 sm:p-7 max-w-md w-full shadow-2xl border border-slate-100 flex flex-col gap-4">
-        
+
         <div class="flex items-center justify-between border-b border-slate-100 pb-3">
           <div class="flex items-center gap-2.5">
             <div class="w-9 h-9 rounded-full bg-emerald-50 text-[#024731] flex items-center justify-center text-lg">
@@ -309,23 +289,23 @@ const goToLanding = () => {
               <p class="text-[11px] text-slate-500 font-medium">We will email you a secure reset link</p>
             </div>
           </div>
-          <button
-            @click="showForgotModal = false"
+          <button @click="showForgotModal = false"
             class="w-8 h-8 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 flex items-center justify-center transition cursor-pointer">
             <iconify-icon icon="ph:x-bold" class="text-base"></iconify-icon>
           </button>
         </div>
 
-        <div v-if="forgotSuccess" class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex flex-col gap-2">
+        <div v-if="forgotSuccess"
+          class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex flex-col gap-2">
           <div class="flex items-center gap-2 font-bold text-xs">
             <iconify-icon icon="ph:check-circle-bold" class="text-emerald-700 text-base"></iconify-icon>
             <span>Reset Link Sent!</span>
           </div>
           <p class="text-xs text-emerald-800 leading-relaxed font-medium">
-            We've sent a password reset link to <strong class="text-emerald-950">{{ forgotEmail }}</strong>. Please check your inbox and click the link to set your new password.
+            We've sent a password reset link to <strong class="text-emerald-950">{{ forgotEmail }}</strong>. Please
+            check your inbox and click the link to set your new password.
           </p>
-          <button
-            @click="showForgotModal = false"
+          <button @click="showForgotModal = false"
             class="mt-2 py-2 px-4 rounded-xl bg-[#024731] text-white text-xs font-bold self-start cursor-pointer hover:bg-[#013424]">
             Back to Sign In
           </button>
@@ -333,36 +313,28 @@ const goToLanding = () => {
 
         <form v-else @submit.prevent="handleForgotPassword" class="flex flex-col gap-3.5">
           <p class="text-xs text-slate-600 leading-relaxed font-medium">
-            Enter the email address registered with your HelpFund account and we'll send you instructions to reset your password.
+            Enter the email address registered with your HelpFund account and we'll send you instructions to reset your
+            password.
           </p>
 
-          <div v-if="forgotError" class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+          <div v-if="forgotError"
+            class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
             {{ forgotError }}
           </div>
 
           <div class="flex flex-col">
             <label class="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
-            <input 
-              type="email" 
-              v-model="forgotEmail" 
-              required 
-              placeholder="grace@example.com" 
-              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-medium" 
-              :disabled="isSendingReset" 
-            />
+            <input type="email" v-model="forgotEmail" required placeholder="grace@example.com"
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-medium"
+              :disabled="isSendingReset" />
           </div>
 
           <div class="grid grid-cols-2 gap-2 mt-1">
-            <button
-              type="button"
-              @click="showForgotModal = false"
-              :disabled="isSendingReset"
+            <button type="button" @click="showForgotModal = false" :disabled="isSendingReset"
               class="py-2.5 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-50 transition cursor-pointer">
               Cancel
             </button>
-            <button
-              type="submit"
-              :disabled="isSendingReset || !forgotEmail.trim()"
+            <button type="submit" :disabled="isSendingReset || !forgotEmail.trim()"
               class="py-2.5 px-4 rounded-xl bg-[#024731] hover:bg-[#013424] disabled:opacity-50 text-white text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
               <span v-if="isSendingReset"
                 class="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
@@ -374,6 +346,5 @@ const goToLanding = () => {
       </div>
     </div>
 
-    </div>
   </div>
 </template>

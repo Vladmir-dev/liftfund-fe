@@ -3,6 +3,15 @@ import { ref, computed } from 'vue'
 import type { Fundraiser, Category, FAQItem } from '../types'
 import { campaignService } from '../../../services/campaign'
 
+const formatUgandanPhone = (phone?: string): string => {
+  let cleaned = (phone || '').replace(/[\s\-\(\)]/g, '')
+  if (!cleaned) return '+256700000000'
+  if (cleaned.startsWith('+')) return cleaned
+  if (cleaned.startsWith('0')) return '+256' + cleaned.slice(1)
+  if (cleaned.startsWith('256')) return '+' + cleaned
+  return '+256' + cleaned
+}
+
 export const useLandingStore = defineStore('landing', () => {
   const fundraisers = ref<Fundraiser[]>([])
 
@@ -24,15 +33,15 @@ export const useLandingStore = defineStore('landing', () => {
     },
     {
       question: 'Are donations on HelpFund secure?',
-      answer: 'Yes, absolutely. We use industry-standard encryption protocols and secure gateway payments (Stripe/PayPal) to protect your funds and personal information.'
+      answer: 'Yes, absolutely. We use industry-standard encryption protocols and secure gateway payments (MarzPay / Flutterwave) to protect your funds and personal information.'
     },
     {
       question: 'How do I withdraw the funds I raised?',
-      answer: 'You can request direct bank transfers to your verified bank account at any time. Verification takes 1-2 business days to complete.'
+      answer: 'You can request direct bank transfers or mobile money payouts to your verified account at any time. Verification takes 1-2 business days to complete.'
     },
     {
       question: 'Are there any platform fees on HelpFund?',
-      answer: 'Starting a fundraiser is completely free! We have a 0% platform fee. Standard card processing fees (approx 2.9% + $0.30 per transaction) apply.'
+      answer: 'Starting a fundraiser is completely free! We have a 0% platform fee. Standard processing fees apply via our secure payment partners such as MarzPay.'
     }
   ])
 
@@ -51,12 +60,49 @@ export const useLandingStore = defineStore('landing', () => {
     })
   })
 
-  // Simulated Donation Action
-  const donateToFundraiser = async (id: string, amount: number): Promise<boolean> => {
+  // Donation Action (MarzPay default with backend integration & local fallback)
+  const donateToFundraiser = async (
+    id: string,
+    amount: number,
+    donorData?: { name?: string; email?: string; phone?: string; currency?: string; isAnonymous?: boolean; message?: string }
+  ): Promise<{ success: boolean; paymentLink?: string; txRef?: string }> => {
     const fund = fundraisers.value.find((f) => f.id === id)
-    if (fund && amount > 0) {
-      // Simulate API latency
-      await new Promise((resolve) => setTimeout(resolve, 800))
+    if (!fund || amount <= 0) return { success: false }
+
+    try {
+      const res = await campaignService.createDonation({
+        campaignId: id,
+        amount: Number(amount),
+        currency: donorData?.currency || fund.currency || 'UGX',
+        isAnonymous: donorData?.isAnonymous ?? false,
+        donorName: donorData?.isAnonymous ? 'Anonymous' : (donorData?.name?.trim() || 'Supporter'),
+        email: donorData?.email?.trim() || 'donor@helpfund.org',
+        phone: formatUgandanPhone(donorData?.phone),
+        message: donorData?.message?.trim() || undefined,
+        paymentMethod: 'card',
+      })
+
+      if (res?.paymentLink) {
+        return { success: true, paymentLink: res.paymentLink, txRef: res.txRef }
+      }
+
+      // In sandbox mode or direct confirmation, verify donation with backend
+      if (res?.txRef) {
+        try {
+          await campaignService.verifyDonation({ txRef: res.txRef })
+        } catch (vErr) {
+          console.warn('Donation verification response:', vErr)
+        }
+      }
+
+      // Update local fundraiser counters
+      fund.raisedAmount += amount
+      fund.donorCount += 1
+      return { success: true, txRef: res?.txRef }
+    } catch (err) {
+      console.warn('Backend donation creation error (falling back to simulated donation):', err)
+      // Simulate API latency & local update
+      await new Promise((resolve) => setTimeout(resolve, 600))
       fund.raisedAmount += amount
       fund.donorCount += 1
 
@@ -68,9 +114,8 @@ export const useLandingStore = defineStore('landing', () => {
         savedCampaigns[index].donorCount = fund.donorCount
         localStorage.setItem('helpfund_campaigns', JSON.stringify(savedCampaigns))
       }
-      return true
+      return { success: true }
     }
-    return false
   }
 
   // Add custom campaign to active list

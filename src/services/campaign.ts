@@ -90,14 +90,18 @@ export interface CreateDonationPayload {
   currency?: string
   isAnonymous?: boolean
   donorName?: string
+  email?: string
+  phone?: string
   message?: string
   txRef?: string
+  paymentMethod?: string
 }
 
 export interface CreateDonationResponse {
   donation: CampaignDonation
   txRef: string
   paymentMethodId?: string
+  paymentLink?: string
 }
 
 export interface CampaignTeamMember {

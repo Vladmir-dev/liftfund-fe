@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLandingStore } from '../stores'
 import { storeToRefs } from 'pinia'
+import { campaignService } from '../../../services/campaign'
 import NavHeader from '../components/NavHeader.vue'
 import MainFooter from '../components/MainFooter.vue'
 
@@ -22,11 +23,44 @@ const closeDropdowns = () => {
 // Support Banner State
 const showBanner = ref(true)
 
-// Donation Modal Simulator States
+// Donation Modal States (MarzPay default)
 const activeFundraiserId = ref<string | null>(null)
-const donationAmount = ref<number>(25)
+const donationAmount = ref<number>(25000)
+const donorName = ref('')
+const donorEmail = ref('')
+const donorPhone = ref('')
+const selectedGateway = ref<'marzpay' | 'flutterwave'>('marzpay')
 const isDonating = ref(false)
 const donationSuccess = ref(false)
+const donationErrorMessage = ref('')
+
+// MarzPay Prompt State: 'form' | 'prompt' | 'success'
+const modalStep = ref<'form' | 'prompt' | 'success'>('form')
+const promptTxRef = ref('')
+const promptPhone = ref('')
+const promptCountdown = ref(30)
+let promptTimer: any = null
+const isConfirmingPrompt = ref(false)
+
+const formatUgandanPhone = (phone: string): string => {
+  let cleaned = (phone || '').replace(/[\s\-\(\)]/g, '')
+  if (!cleaned) return '+256700000000'
+  if (cleaned.startsWith('+')) return cleaned
+  if (cleaned.startsWith('0')) return '+256' + cleaned.slice(1)
+  if (cleaned.startsWith('256')) return '+' + cleaned
+  return '+256' + cleaned
+}
+
+const detectedNetwork = computed(() => {
+  const p = (donorPhone.value || '').replace(/\D/g, '')
+  if (p.includes('77') || p.includes('78') || p.includes('76')) {
+    return { name: 'MTN Mobile Money', color: 'bg-amber-400 text-slate-900', icon: 'ph:device-mobile-speaker-bold' }
+  }
+  if (p.includes('70') || p.includes('75') || p.includes('74')) {
+    return { name: 'Airtel Money', color: 'bg-red-500 text-white', icon: 'ph:device-mobile-speaker-bold' }
+  }
+  return { name: 'Mobile Money', color: 'bg-[#024731] text-white', icon: 'ph:device-mobile-speaker-bold' }
+})
 
 const activeFundraiser = computed(() => {
   return store.fundraisers.find(f => f.id === activeFundraiserId.value) || null
@@ -34,26 +68,89 @@ const activeFundraiser = computed(() => {
 
 const openDonateModal = (id: string) => {
   activeFundraiserId.value = id
-  donationAmount.value = 25
+  const f = store.fundraisers.find(item => item.id === id)
+  const isUgx = (f?.currency || 'UGX') === 'UGX'
+  donationAmount.value = isUgx ? 25000 : 25
+  donorName.value = ''
+  donorEmail.value = ''
+  donorPhone.value = ''
+  selectedGateway.value = 'marzpay'
   donationSuccess.value = false
+  donationErrorMessage.value = ''
   isDonating.value = false
+  modalStep.value = 'form'
+  if (promptTimer) clearInterval(promptTimer)
 }
 
 const closeDonateModal = () => {
   activeFundraiserId.value = null
+  modalStep.value = 'form'
+  if (promptTimer) clearInterval(promptTimer)
 }
 
 const handleDonate = async () => {
   if (activeFundraiserId.value && donationAmount.value > 0) {
     isDonating.value = true
-    const success = await store.donateToFundraiser(activeFundraiserId.value, donationAmount.value)
+    donationErrorMessage.value = ''
+
+    const formattedPhone = formatUgandanPhone(donorPhone.value)
+
+    const result = await store.donateToFundraiser(activeFundraiserId.value, donationAmount.value, {
+      name: donorName.value.trim() || undefined,
+      email: donorEmail.value.trim() || 'donor@helpfund.org',
+      phone: formattedPhone,
+      currency: activeFundraiser.value?.currency || 'UGX',
+    })
+
     isDonating.value = false
-    if (success) {
-      donationSuccess.value = true
-      setTimeout(() => {
-        closeDonateModal()
-      }, 1500)
+
+    // 1. If MarzPay returned an external hosted checkout link (live card gateway), redirect immediately
+    if (result.paymentLink) {
+      window.location.href = result.paymentLink
+      return
     }
+
+    // 2. If MarzPay initiated Mobile Money / Sandbox collection, prompt the user for USSD approval
+    if (result.success && result.txRef) {
+      promptTxRef.value = result.txRef
+      promptPhone.value = formattedPhone
+      modalStep.value = 'prompt'
+      promptCountdown.value = 30
+      if (promptTimer) clearInterval(promptTimer)
+      promptTimer = setInterval(() => {
+        if (promptCountdown.value > 0) {
+          promptCountdown.value -= 1
+        } else {
+          clearInterval(promptTimer)
+        }
+      }, 1000)
+      return
+    }
+
+    if (result.message) {
+      donationErrorMessage.value = result.message
+    }
+  }
+}
+
+const confirmMobilePayment = async () => {
+  isConfirmingPrompt.value = true
+  if (promptTimer) clearInterval(promptTimer)
+  try {
+    if (promptTxRef.value) {
+      await campaignService.verifyDonation({ txRef: promptTxRef.value })
+    }
+    modalStep.value = 'success'
+    setTimeout(() => {
+      closeDonateModal()
+      if (promptTxRef.value) {
+        router.push({ path: '/donations/success', query: { txRef: promptTxRef.value, status: 'successful' } })
+      }
+    }, 1500)
+  } catch (err: any) {
+    donationErrorMessage.value = err.message || 'Verification failed. Please try again.'
+  } finally {
+    isConfirmingPrompt.value = false
   }
 }
 
@@ -495,62 +592,155 @@ const startFundraiser = () => {
         </button>
 
         <!-- Success Animation Overlay -->
-        <div v-if="donationSuccess" class="py-12 flex flex-col items-center justify-center text-center">
+        <div v-if="modalStep === 'success'" class="py-12 flex flex-col items-center justify-center text-center">
           <div
             class="w-16 h-16 rounded-full bg-[#edfce0] text-[#02a95c] border-2 border-[#bbf770] flex items-center justify-center text-2xl mb-4 animate-bounce font-black">
             ✓
           </div>
           <h3 class="text-xl font-black text-slate-900 mb-1">Thank You!</h3>
-          <p class="text-slate-600 text-sm font-medium">Your simulated donation of ${{ donationAmount }} was received.</p>
+          <p class="text-slate-600 text-sm font-medium">Your donation of {{ activeFundraiser?.currency || 'UGX' }} {{ Number(donationAmount).toLocaleString() }} was confirmed by MarzPay.</p>
+        </div>
+
+        <!-- MarzPay USSD Mobile Money PIN Prompt Step -->
+        <div v-else-if="modalStep === 'prompt'" class="py-3 text-center flex flex-col items-center">
+          <!-- Gateway Header Badge -->
+          <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#edfce0] border border-[#bbf770] text-[#024731] text-[11px] font-black uppercase tracking-wider mb-4">
+            <span class="w-2 h-2 rounded-full bg-[#02a95c] animate-ping"></span>
+            <span>MarzPay Gateway Prompt</span>
+          </div>
+
+          <!-- Pulsing Mobile Graphic -->
+          <div class="relative w-20 h-20 mb-3 flex items-center justify-center">
+            <span class="absolute inset-0 rounded-3xl bg-emerald-100/70 animate-ping opacity-75"></span>
+            <span class="absolute inset-2 rounded-2xl bg-[#ddf8bc] animate-pulse"></span>
+            <div class="relative w-14 h-14 rounded-2xl bg-[#024731] text-[#bbf770] flex items-center justify-center shadow-lg shadow-emerald-950/20">
+              <iconify-icon icon="ph:device-mobile-speaker-bold" class="text-2xl"></iconify-icon>
+            </div>
+          </div>
+
+          <h3 class="text-lg font-black text-slate-900 mb-1">Check Your Phone</h3>
+          <p class="text-xs text-slate-600 max-w-xs mx-auto mb-4 font-medium leading-relaxed">
+            MarzPay has sent a Mobile Money authorization prompt to your handset. Please approve the prompt by entering your PIN.
+          </p>
+
+          <!-- Prompt Details Card -->
+          <div class="w-full bg-slate-50 rounded-2xl p-4 border border-slate-200/80 mb-4 text-left space-y-2.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500 font-semibold">Amount to Pay:</span>
+              <span class="font-black text-slate-900 text-sm">{{ activeFundraiser?.currency || 'UGX' }} {{ Number(donationAmount).toLocaleString() }}</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500 font-semibold">Recipient:</span>
+              <span class="font-bold text-slate-800 truncate max-w-[200px]">{{ activeFundraiser?.title }}</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500 font-semibold">Phone Number:</span>
+              <span class="font-bold text-slate-800 font-mono">{{ promptPhone }}</span>
+            </div>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500 font-semibold">Network Provider:</span>
+              <span class="px-2 py-0.5 rounded-md text-[10px] font-bold" :class="detectedNetwork.color">
+                {{ detectedNetwork.name }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between text-[11px] pt-1.5 border-t border-slate-200">
+              <span class="text-slate-400">Reference:</span>
+              <span class="font-mono text-slate-500 text-[10px] truncate max-w-[180px]">{{ promptTxRef }}</span>
+            </div>
+          </div>
+
+          <div v-if="donationErrorMessage" class="mb-3 w-full p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+            {{ donationErrorMessage }}
+          </div>
+
+          <!-- Waiting Status / Countdown -->
+          <div class="flex items-center justify-center gap-2 text-xs font-bold text-slate-500 mb-4">
+            <span class="h-3.5 w-3.5 border-2 border-[#024731] border-t-transparent rounded-full animate-spin"></span>
+            <span>Awaiting PIN confirmation ({{ promptCountdown }}s)...</span>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="w-full flex flex-col gap-2">
+            <button @click="confirmMobilePayment" :disabled="isConfirmingPrompt"
+              class="w-full py-3.5 bg-[#024731] hover:bg-[#013424] text-white text-xs font-bold rounded-xl transition shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer">
+              <span v-if="isConfirmingPrompt" class="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>{{ isConfirmingPrompt ? 'Verifying with MarzPay...' : "I've Entered My PIN / Confirm" }}</span>
+            </button>
+            <button @click="modalStep = 'form'"
+              class="w-full py-2 text-xs font-bold text-slate-500 hover:text-slate-700 transition cursor-pointer">
+              Change phone number or amount
+            </button>
+          </div>
         </div>
 
         <!-- Form content -->
         <div v-else>
-          <span class="text-xs text-[#024731] font-black uppercase tracking-wider">Simulate Donation</span>
-          <h3 class="text-lg font-black text-slate-900 mt-1 mb-4 leading-tight">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs text-[#024731] font-black uppercase tracking-wider">Donate to Fundraiser</span>
+            <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#edfce0] text-[#024731] border border-[#bbf770]">
+              <iconify-icon icon="ph:shield-check-fill" class="text-xs text-[#02a95c]"></iconify-icon>
+              <span>MarzPay Secure Rails</span>
+            </span>
+          </div>
+
+          <h3 class="text-lg font-black text-slate-900 mb-1 leading-tight">
             {{ activeFundraiser?.title }}
           </h3>
+          <p class="text-slate-400 text-xs mb-3 font-semibold">Direct payment via Mobile Money or Card.</p>
 
-          <div class="mb-5 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-            <span class="text-xs text-slate-400 block font-semibold mb-1">Current Progress</span>
-            <div class="flex items-baseline gap-1 text-slate-800">
-              <span class="text-lg font-bold">${{ activeFundraiser?.raisedAmount.toLocaleString() }}</span>
-              <span class="text-xs text-slate-400 font-medium">raised of ${{
-                activeFundraiser?.targetAmount.toLocaleString() }}</span>
+          <div v-if="donationErrorMessage" class="mb-3 p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
+            {{ donationErrorMessage }}
+          </div>
+
+          <div class="mb-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+            <div class="flex items-baseline justify-between text-slate-800 mb-1">
+              <span class="text-xs text-slate-500 font-semibold">Current Progress</span>
+              <span class="text-xs font-bold">{{ activeFundraiser?.currency || 'UGX' }} {{ activeFundraiser?.raisedAmount.toLocaleString() }} / {{ activeFundraiser?.targetAmount.toLocaleString() }}</span>
             </div>
-            <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden mt-2">
+            <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
               <div class="h-full bg-[#02a95c] rounded-full"
                 :style="{ width: getProgressPercent(activeFundraiser?.raisedAmount || 0, activeFundraiser?.targetAmount || 1) + '%' }"></div>
             </div>
           </div>
 
-          <form @submit.prevent="handleDonate" class="flex flex-col gap-4">
+          <form @submit.prevent="handleDonate" class="flex flex-col gap-3">
             <div class="flex flex-col">
-              <label class="text-xs text-slate-600 font-bold mb-1.5">Select or Input Donation Amount ($)</label>
+              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Donation Amount ({{ activeFundraiser?.currency || 'UGX' }})</label>
               <!-- Presets -->
-              <div class="grid grid-cols-4 gap-2 mb-3">
-                <button type="button" @click="donationAmount = 10"
-                  class="py-2.5 rounded-xl border text-sm font-bold transition-all text-center cursor-pointer"
-                  :class="donationAmount === 10 ? 'bg-[#024731] border-[#024731] text-white shadow-md shadow-emerald-950/20' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-[#edfce0] hover:text-[#024731]' ">$10</button>
-                <button type="button" @click="donationAmount = 25"
-                  class="py-2.5 rounded-xl border text-sm font-bold transition-all text-center cursor-pointer"
-                  :class="donationAmount === 25 ? 'bg-[#024731] border-[#024731] text-white shadow-md shadow-emerald-950/20' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-[#edfce0] hover:text-[#024731]' ">$25</button>
-                <button type="button" @click="donationAmount = 50"
-                  class="py-2.5 rounded-xl border text-sm font-bold transition-all text-center cursor-pointer"
-                  :class="donationAmount === 50 ? 'bg-[#024731] border-[#024731] text-white shadow-md shadow-emerald-950/20' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-[#edfce0] hover:text-[#024731]' ">$50</button>
-                <button type="button" @click="donationAmount = 100"
-                  class="py-2.5 rounded-xl border text-sm font-bold transition-all text-center cursor-pointer"
-                  :class="donationAmount === 100 ? 'bg-[#024731] border-[#024731] text-white shadow-md shadow-emerald-950/20' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-[#edfce0] hover:text-[#024731]' ">$100</button>
+              <div class="grid grid-cols-4 gap-1.5 mb-2">
+                <button v-for="amt in ((activeFundraiser?.currency || 'UGX') === 'UGX' ? [10000, 25000, 50000, 100000] : [10, 25, 50, 100])"
+                  :key="amt" type="button" @click="donationAmount = amt"
+                  class="py-2 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer"
+                  :class="donationAmount === amt ? 'bg-[#024731] border-[#024731] text-white shadow-xs' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-[#edfce0] hover:text-[#024731]' ">
+                  {{ (activeFundraiser?.currency || 'UGX') === 'UGX' ? (amt / 1000) + 'k' : '$' + amt }}
+                </button>
               </div>
-              <input type="number" v-model="donationAmount" min="5" required
-                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] focus:border-transparent text-sm" />
+              <input type="number" v-model="donationAmount" min="500" required
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-bold text-slate-800" />
             </div>
 
-            <button type="submit" :disabled="isDonating || donationAmount < 5"
-              class="w-full bg-[#024731] hover:bg-[#013424] text-white text-sm font-bold py-3.5 rounded-xl transition-all shadow-md shadow-emerald-950/20 hover:shadow-lg disabled:opacity-50 text-center flex items-center justify-center gap-2 cursor-pointer">
+            <!-- Donor Email & Phone -->
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Email (Receipt)</label>
+                <input type="email" v-model="donorEmail" placeholder="donor@example.com"
+                  class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs" />
+              </div>
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Phone</label>
+                  <span v-if="donorPhone" class="text-[9px] font-bold px-1.5 py-0.2 rounded" :class="detectedNetwork.color">{{ detectedNetwork.name }}</span>
+                </div>
+                <input type="tel" v-model="donorPhone" placeholder="07XXXXXXXX"
+                  class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs" />
+              </div>
+            </div>
+
+            <button type="submit" :disabled="isDonating || donationAmount < 1"
+              class="w-full bg-[#024731] hover:bg-[#013424] text-white text-xs font-bold py-3.5 rounded-xl transition-all shadow-md shadow-emerald-950/20 hover:shadow-lg disabled:opacity-50 text-center flex items-center justify-center gap-2 cursor-pointer mt-1">
               <span v-if="isDonating"
-                class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              <span>{{ isDonating ? 'Processing payment...' : 'Confirm Donation' }}</span>
+                class="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>{{ isDonating ? 'Connecting to MarzPay...' : 'Proceed with MarzPay (' + (activeFundraiser?.currency || 'UGX') + ' ' + Number(donationAmount).toLocaleString() + ')' }}</span>
             </button>
           </form>
         </div>

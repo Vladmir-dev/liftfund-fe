@@ -13,7 +13,6 @@ import {
   type CampaignImage,
   type BackendCampaign,
 } from '../../../services/campaign'
-import { openFlutterwavePayment } from '../../../services/payment'
 import NavHeader from '../../landing/components/NavHeader.vue'
 import MainFooter from '../../landing/components/MainFooter.vue'
 import { Notify } from '../../../utils/notify'
@@ -264,9 +263,9 @@ const handlePostComment = async () => {
   }
 }
 
-// Toast message & Sharing
-const showToast = ref(false)
-const toastMessage = ref('')
+// // Toast message & Sharing
+// const showToast = ref(false)
+// const toastMessage = ref('')
 
 const handleShare = async (platform: string) => {
   try {
@@ -292,6 +291,10 @@ const handleShare = async (platform: string) => {
   }
 }
 
+// Toast State
+const showToast = ref(false)
+const toastMessage = ref('')
+
 // Donation Modal States
 const showDonateModal = ref(false)
 const donationAmount = ref<number>(50000)
@@ -301,10 +304,43 @@ const donorPhone = ref('')
 const donorComment = ref('')
 const isAnonymous = ref(false)
 const isSubmittingDonation = ref(false)
-const donationSuccess = ref(false)
 const donationError = ref('')
+const modalStep = ref<'form' | 'success'>('form')
 
 const presetAmounts = [10000, 25000, 50000, 100000, 250000]
+
+const getDonorName = (donation: any): string => {
+  if (!donation) return 'Supporter'
+  if (donation.isAnonymous) return 'Anonymous'
+  const val = donation.donorName
+  if (!val) return 'Supporter'
+
+  if (typeof val === 'object') {
+    return val.Valid !== false ? (val.String || 'Supporter') : 'Supporter'
+  }
+
+  if (typeof val === 'string' && val.trim().startsWith('{')) {
+    try {
+      const parsed = JSON.parse(val)
+      if (parsed && typeof parsed === 'object' && 'String' in parsed) {
+        return parsed.Valid !== false ? (parsed.String || 'Supporter') : 'Supporter'
+      }
+    } catch {
+      // Fall through
+    }
+  }
+
+  return val || 'Supporter'
+}
+
+const formatUgandanPhone = (phone: string): string => {
+  let cleaned = (phone || '').replace(/[\s\-\(\)]/g, '')
+  if (!cleaned) return '+256700000000'
+  if (cleaned.startsWith('+')) return cleaned
+  if (cleaned.startsWith('0')) return '+256' + cleaned.slice(1)
+  if (cleaned.startsWith('256')) return '+' + cleaned
+  return '+256' + cleaned
+}
 
 const openDonate = () => {
   donationAmount.value = 50000
@@ -313,9 +349,15 @@ const openDonate = () => {
   donorPhone.value = authStore.user?.phone || ''
   donorComment.value = ''
   isAnonymous.value = false
-  donationSuccess.value = false
   donationError.value = ''
+  isSubmittingDonation.value = false
+  modalStep.value = 'form'
   showDonateModal.value = true
+}
+
+const closeDonate = () => {
+  showDonateModal.value = false
+  modalStep.value = 'form'
 }
 
 const handleStartDonation = async () => {
@@ -329,64 +371,45 @@ const handleStartDonation = async () => {
   donationError.value = ''
 
   try {
-    // 1. Create pending donation record in backend
+    const formattedPhone = formatUgandanPhone(donorPhone.value)
+
+    // 1. Create donation in backend with card payment method
     const res = await campaignService.createDonation({
       campaignId: campaignId.value,
       amount: donationAmount.value,
       currency: campaign.value.currency || 'UGX',
       isAnonymous: isAnonymous.value,
       donorName: isAnonymous.value ? 'Anonymous' : (donorName.value.trim() || 'Supporter'),
+      email: donorEmail.value.trim() || authStore.user?.email || 'donor@helpfund.org',
+      phone: formattedPhone,
       message: donorComment.value.trim() || undefined,
+      paymentMethod: 'card',
     })
 
-    // 2. Open Flutterwave Inline Checkout
-    try {
-      await openFlutterwavePayment({
-        tx_ref: res.txRef,
-        amount: donationAmount.value,
-        currency: campaign.value.currency || 'UGX',
-        payment_options: 'card, mobilemoney',
-        customer: {
-          email: donorEmail.value || authStore.user?.email || 'donor@helpfund.org',
-          name: isAnonymous.value ? 'Anonymous' : (donorName.value.trim() || 'Supporter'),
-          phonenumber: donorPhone.value || undefined,
-        },
-        subaccounts: campaign.value.flutterwaveSubaccountId
-          ? [{ id: campaign.value.flutterwaveSubaccountId }]
-          : undefined,
-        customizations: {
-          title: campaign.value.title,
-          description: `Donation to ${campaign.value.title}`,
-        },
-        callback: async (fwData: any) => {
-          console.log('Flutterwave payment callback:', fwData)
-          try {
-            await campaignService.verifyDonation({
-              txRef: res.txRef,
-              transactionId: String(fwData.transaction_id || fwData.id || ''),
-            })
-          } catch (vErr) {
-            console.warn('Donation verification response:', vErr)
-          }
-
-          donationSuccess.value = true
-          Notify.success(
-            `Thank you! Your donation of ${campaign.value?.currency} ${Number(donationAmount.value).toLocaleString()} has been confirmed.`
-          )
-          await fetchCampaignData()
-          setTimeout(() => {
-            showDonateModal.value = false
-          }, 2500)
-        },
-        onclose: () => {
-          isSubmittingDonation.value = false
-        },
-      })
-    } catch (fwErr: any) {
-      console.warn('Flutterwave checkout error:', fwErr)
-      donationError.value = fwErr.message || 'Could not open payment window. Please try again.'
-      Notify.failure(donationError.value)
+    // 2. If MarzPay returned a payment link (hosted card gateway or redirect URL):
+    if (res.paymentLink) {
+      Notify.info('Redirecting to MarzPay secure checkout...')
+      window.location.href = res.paymentLink
+      return
     }
+
+    // 3. If direct/sandbox completion with txRef:
+    if (res.txRef) {
+      try {
+        await campaignService.verifyDonation({ txRef: res.txRef })
+      } catch (_) {}
+      router.push({
+        path: '/donations/success',
+        query: { txRef: res.txRef, status: 'successful' }
+      })
+      return
+    }
+
+    modalStep.value = 'success'
+    Notify.success(
+      `Thank you! Your donation of ${campaign.value?.currency} ${Number(donationAmount.value).toLocaleString()} has been received.`
+    )
+    await fetchCampaignData()
   } catch (err: any) {
     donationError.value = err.message || 'Failed to initiate donation. Please try again.'
     Notify.failure(donationError.value)
@@ -458,11 +481,12 @@ const handleStartDonation = async () => {
             <div class="flex items-center gap-4">
               <div
                 class="w-10 h-10 rounded-full bg-[#edfce0] border border-[#bbf770] text-[#024731] flex items-center justify-center font-bold text-sm shrink-0">
-                {{ campaign.organizer.split(' ').map((n: string) => n[0]).join('') || 'O' }}
+                {{campaign.organizer.split(' ').map((n: string) => n[0]).join('') || 'O'}}
               </div>
               <div class="text-xs text-slate-600 font-medium">
                 <span class="font-bold text-slate-900 block text-sm">{{ campaign.organizer }}</span>
-                Organizing this verified fundraiser &bull; <span class="text-slate-500 font-semibold">{{ campaign.location }}</span>
+                Organizing this verified fundraiser &bull; <span class="text-slate-500 font-semibold">{{
+                  campaign.location }}</span>
               </div>
             </div>
 
@@ -504,13 +528,12 @@ const handleStartDonation = async () => {
               <span>Campaign Photos ({{ galleryImages.length }})</span>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              <div
-                v-for="(img, idx) in galleryImages"
-                :key="img.id || idx"
-                @click="activeGalleryImage = img.url"
+              <div v-for="(img, idx) in galleryImages" :key="img.id || idx" @click="activeGalleryImage = img.url"
                 class="aspect-4/3 rounded-2xl overflow-hidden bg-slate-100 border border-slate-150 shadow-xs cursor-pointer group relative">
-                <img :src="img.url" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                <div class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-lg">
+                <img :src="img.url"
+                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                <div
+                  class="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-lg">
                   <iconify-icon icon="ph:magnifying-glass-plus-bold"></iconify-icon>
                 </div>
               </div>
@@ -526,9 +549,7 @@ const handleStartDonation = async () => {
                 Every contribution directly supports {{ campaign.organizer }}'s verified fundraising goal.
               </p>
             </div>
-            <button
-              @click="openDonate"
-              :disabled="campaignStatus === 'paused' || campaignStatus === 'completed'"
+            <button @click="openDonate" :disabled="campaignStatus === 'paused' || campaignStatus === 'completed'"
               class="bg-[#024731] hover:bg-[#013424] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs px-6 py-3 rounded-full transition-all shrink-0 cursor-pointer shadow-md">
               {{ campaignStatus === 'paused' ? 'Donations Paused' : campaignStatus === 'completed' ? 'Goal Reached' : 'Donate Now' }}
             </button>
@@ -596,7 +617,7 @@ const handleStartDonation = async () => {
                   <div class="flex items-center justify-between mb-1">
                     <div class="flex items-center gap-2">
                       <span class="font-bold text-slate-800">{{ c.userName || c.name || c.authorName || 'Supporter'
-                        }}</span>
+                      }}</span>
                       <span v-if="isMyComment(c)"
                         class="text-[10px] px-2 py-0.5 bg-emerald-50 text-emerald-700 font-bold rounded-full">You</span>
                     </div>
@@ -633,8 +654,7 @@ const handleStartDonation = async () => {
                     <iconify-icon icon="fa6-solid:heart"></iconify-icon>
                   </div>
                   <div>
-                    <span class="text-xs font-bold text-slate-900 block">{{ d.isAnonymous ? 'Anonymous' : (d.donorName
-                      || 'Supporter') }}</span>
+                    <span class="text-xs font-bold text-slate-900 block">{{ getDonorName(d) }}</span>
                     <span class="text-[10px] text-slate-400">{{ d.createdAt ? new Date(d.createdAt).toLocaleDateString()
                       : 'Recently' }}</span>
                   </div>
@@ -674,22 +694,26 @@ const handleStartDonation = async () => {
           </div>
 
           <!-- Status alert if paused or completed -->
-          <div v-if="campaignStatus === 'paused'" class="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl text-xs font-semibold leading-relaxed">
-            <iconify-icon icon="ph:pause-circle-bold" class="text-amber-700 mr-1 text-sm inline-block align-middle"></iconify-icon>
+          <div v-if="campaignStatus === 'paused'"
+            class="p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-2xl text-xs font-semibold leading-relaxed">
+            <iconify-icon icon="ph:pause-circle-bold"
+              class="text-amber-700 mr-1 text-sm inline-block align-middle"></iconify-icon>
             Donations are temporarily paused by the organizer.
           </div>
-          <div v-else-if="campaignStatus === 'completed'" class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-2xl text-xs font-semibold leading-relaxed">
-            <iconify-icon icon="ph:check-circle-bold" class="text-blue-700 mr-1 text-sm inline-block align-middle"></iconify-icon>
+          <div v-else-if="campaignStatus === 'completed'"
+            class="p-3 bg-blue-50 border border-blue-200 text-blue-900 rounded-2xl text-xs font-semibold leading-relaxed">
+            <iconify-icon icon="ph:check-circle-bold"
+              class="text-blue-700 mr-1 text-sm inline-block align-middle"></iconify-icon>
             This fundraiser has reached its goal and is completed!
           </div>
 
           <!-- Action Buttons -->
           <div class="flex flex-col gap-3">
-            <button
-              @click="openDonate"
-              :disabled="campaignStatus === 'paused' || campaignStatus === 'completed'"
+            <button @click="openDonate" :disabled="campaignStatus === 'paused' || campaignStatus === 'completed'"
               class="w-full bg-[#024731] hover:bg-[#013424] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm py-3.5 rounded-2xl shadow-md transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer">
-              <iconify-icon :icon="campaignStatus === 'paused' ? 'ph:pause-circle-fill' : campaignStatus === 'completed' ? 'ph:flag-checkered-fill' : 'ph:heart-fill'" class="text-lg"></iconify-icon>
+              <iconify-icon
+                :icon="campaignStatus === 'paused' ? 'ph:pause-circle-fill' : campaignStatus === 'completed' ? 'ph:flag-checkered-fill' : 'ph:heart-fill'"
+                class="text-lg"></iconify-icon>
               <span>{{ campaignStatus === 'paused' ? 'Donations paused' : campaignStatus === 'completed' ? 'Goal reached' : 'Donate now' }}</span>
             </button>
             <button @click="handleShare('copy')"
@@ -734,13 +758,13 @@ const handleStartDonation = async () => {
       <div
         class="bg-white rounded-3xl w-full max-w-md p-6 border border-slate-100 shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-250">
 
-        <button @click="showDonateModal = false"
+        <button @click="closeDonate"
           class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl cursor-pointer">
           <iconify-icon icon="ph:x-bold"></iconify-icon>
         </button>
 
         <!-- Success view -->
-        <div v-if="donationSuccess" class="py-8 flex flex-col items-center justify-center text-center">
+        <div v-if="modalStep === 'success'" class="py-8 flex flex-col items-center justify-center text-center">
           <div
             class="w-16 h-16 rounded-full bg-[#edfce0] border border-[#bbf770] flex items-center justify-center text-3xl mb-4 text-[#02a95c]">
             <iconify-icon icon="ph:sparkle-fill" class="animate-ping absolute w-6 h-6 opacity-30"></iconify-icon>
@@ -748,20 +772,28 @@ const handleStartDonation = async () => {
           </div>
           <h3 class="text-xl font-bold text-slate-950 mb-1">Thank you for your support!</h3>
           <p class="text-slate-500 text-xs font-semibold">
-            Your donation of {{ campaign.currency }} {{ Number(donationAmount).toLocaleString() }} has been received.
+            Your donation of {{ campaign.currency }} {{ Number(donationAmount).toLocaleString() }} has been confirmed by
+            MarzPay.
           </p>
         </div>
 
         <!-- Donation Form -->
         <div v-else>
-          <h3 class="text-lg font-bold text-slate-900 mb-1 flex items-center gap-1.5 text-left">
-            <iconify-icon icon="ph:heart-fill" class="text-[#02a95c]"></iconify-icon>
-            <span>Support this fundraiser</span>
-          </h3>
-          <p class="text-slate-400 text-xs mb-4 text-left font-semibold">Direct payment via Mobile Money or Card.</p>
+          <div class="flex items-center justify-between mb-1.5">
+            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2 text-left">
+              <iconify-icon icon="ph:credit-card-bold" class="text-[#024731] text-xl"></iconify-icon>
+              <span>Donate with Card</span>
+            </h3>
+            <span
+              class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#edfce0] text-[#024731] border border-[#bbf770]">
+              <iconify-icon icon="ph:shield-check-fill" class="text-xs text-[#02a95c]"></iconify-icon>
+              <span>MarzPay Card</span>
+            </span>
+          </div>
+          <p class="text-slate-400 text-xs mb-3 text-left font-semibold">Processed securely via MarzPay Card Gateway.</p>
 
           <div v-if="donationError"
-            class="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold text-left">
+            class="mb-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold text-left">
             {{ donationError }}
           </div>
 
@@ -782,47 +814,56 @@ const handleStartDonation = async () => {
               class="relative rounded-xl border border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-[#024731] focus-within:border-transparent transition-all">
               <span class="absolute left-3.5 top-3.5 font-bold text-xs text-slate-500">{{ campaign.currency }}</span>
               <input type="number" v-model="donationAmount"
-                class="w-full pl-14 pr-4 py-3 focus:outline-none text-sm font-bold text-slate-800" min="1000"
+                class="w-full pl-14 pr-4 py-2.5 focus:outline-none text-sm font-bold text-slate-800" min="1000"
                 step="1000" />
             </div>
           </div>
 
           <!-- Name & Email fields -->
-          <div class="grid grid-cols-2 gap-2 mb-3 text-left">
+          <div class="grid grid-cols-2 gap-2 mb-2 text-left">
             <div>
               <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Your Name</label>
               <input type="text" v-model="donorName" :disabled="isAnonymous" placeholder="John Doe"
-                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold disabled:bg-slate-100" />
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold disabled:bg-slate-100" />
             </div>
             <div>
               <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Email
                 (Receipt)</label>
               <input type="email" v-model="donorEmail" required placeholder="donor@example.com"
-                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold" />
+                class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold" />
             </div>
           </div>
 
+          <!-- Phone Number field (Optional / Receipt) -->
+          <!--
+          <div class="mb-2 text-left">
+            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Phone Number (Optional)</label>
+            <input type="tel" v-model="donorPhone" placeholder="+256 700 000 000"
+              class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold" />
+          </div>
+          -->
+
           <!-- Anonymous check -->
-          <label class="flex items-center gap-2 mb-3 cursor-pointer text-left">
+          <label class="flex items-center gap-2 mb-2 cursor-pointer text-left">
             <input type="checkbox" v-model="isAnonymous"
               class="rounded border-slate-300 text-[#024731] focus:ring-[#024731]" />
             <span class="text-xs text-slate-600 font-semibold">Make my donation anonymous</span>
           </label>
 
           <!-- Comment field -->
-          <div class="mb-4 text-left">
+          <div class="mb-3 text-left">
             <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Message of
               Support</label>
             <textarea v-model="donorComment" placeholder="Send words of encouragement..."
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold h-16 resize-none"></textarea>
+              class="w-full px-3 py-1.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold h-14 resize-none"></textarea>
           </div>
 
           <!-- Action -->
           <button @click="handleStartDonation" :disabled="donationAmount <= 0 || isSubmittingDonation"
-            class="w-full py-3.5 bg-[#024731] hover:bg-[#013424] disabled:bg-slate-200 text-white font-bold text-sm rounded-xl shadow-md disabled:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer">
+            class="w-full py-3 bg-[#024731] hover:bg-[#013424] disabled:bg-slate-200 text-white font-bold text-xs rounded-xl shadow-md disabled:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer">
             <span v-if="isSubmittingDonation"
-              class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            <span>Proceed to Donate ({{ campaign.currency }} {{ Number(donationAmount).toLocaleString() }})</span>
+              class="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            <span>{{ isSubmittingDonation ? 'Connecting to MarzPay...' : 'Pay with Card (' + (campaign.currency || 'UGX') + ' ' + Number(donationAmount).toLocaleString() + ')' }}</span>
           </button>
         </div>
 
@@ -860,9 +901,10 @@ const handleStartDonation = async () => {
     <div v-if="activeGalleryImage"
       class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
       @click="activeGalleryImage = null">
-      <div class="relative max-w-4xl max-h-[90vh] overflow-hidden rounded-3xl bg-black border border-white/10 shadow-2xl flex items-center justify-center" @click.stop>
-        <button
-          @click="activeGalleryImage = null"
+      <div
+        class="relative max-w-4xl max-h-[90vh] overflow-hidden rounded-3xl bg-black border border-white/10 shadow-2xl flex items-center justify-center"
+        @click.stop>
+        <button @click="activeGalleryImage = null"
           class="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-slate-900/80 hover:bg-slate-900 text-white flex items-center justify-center cursor-pointer transition">
           <iconify-icon icon="ph:x-bold" class="text-base"></iconify-icon>
         </button>
@@ -873,21 +915,21 @@ const handleStartDonation = async () => {
     <MainFooter />
   </div>
 
-    <div v-else-if="isLoading" class="min-h-screen bg-white flex flex-col items-center justify-center p-8">
-      <span class="h-8 w-8 border-3 border-[#024731] border-t-transparent rounded-full animate-spin mb-3"></span>
-      <p class="text-sm font-bold text-slate-600">Loading campaign details...</p>
-    </div>
+  <div v-else-if="isLoading" class="min-h-screen bg-white flex flex-col items-center justify-center p-8">
+    <span class="h-8 w-8 border-3 border-[#024731] border-t-transparent rounded-full animate-spin mb-3"></span>
+    <p class="text-sm font-bold text-slate-600">Loading campaign details...</p>
+  </div>
 
-    <div v-else class="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
-      <iconify-icon icon="ph:warning-bold" class="text-amber-500 text-5xl mb-4"></iconify-icon>
-      <h3 class="text-xl font-bold text-slate-900 mb-2">Fundraiser Not Found</h3>
-      <p class="text-slate-500 text-xs mb-6 max-w-sm">The campaign you are looking for does not exist or may have been
-        archived.</p>
-      <RouterLink to="/"
-        class="px-6 py-2.5 bg-[#024731] text-white font-bold text-xs rounded-full shadow hover:bg-[#013424] transition-all">
-        Return Home
-      </RouterLink>
-    </div>
+  <div v-else class="min-h-screen bg-white flex flex-col items-center justify-center p-8 text-center">
+    <iconify-icon icon="ph:warning-bold" class="text-amber-500 text-5xl mb-4"></iconify-icon>
+    <h3 class="text-xl font-bold text-slate-900 mb-2">Fundraiser Not Found</h3>
+    <p class="text-slate-500 text-xs mb-6 max-w-sm">The campaign you are looking for does not exist or may have been
+      archived.</p>
+    <RouterLink to="/"
+      class="px-6 py-2.5 bg-[#024731] text-white font-bold text-xs rounded-full shadow hover:bg-[#013424] transition-all">
+      Return Home
+    </RouterLink>
+  </div>
 </template>
 
 <style scoped>

@@ -63,6 +63,11 @@ const router = createRouter({
       component: () => import('../domains/donate/views/SocialImpactFunds.vue'),
     },
     {
+      path: '/donations/success',
+      name: 'donation-success',
+      component: () => import('../domains/donate/views/DonationSuccessView.vue'),
+    },
+    {
       path: '/donate/supporter-space',
       name: 'supporter-space',
       component: () => import('../domains/donate/views/SupporterSpace.vue'),
