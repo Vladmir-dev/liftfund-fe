@@ -65,7 +65,7 @@ export const useLandingStore = defineStore('landing', () => {
     id: string,
     amount: number,
     donorData?: { name?: string; email?: string; phone?: string; currency?: string; isAnonymous?: boolean; message?: string }
-  ): Promise<{ success: boolean; paymentLink?: string; txRef?: string }> => {
+  ): Promise<{ success: boolean; paymentLink?: string; txRef?: string; message?: string }> => {
     const fund = fundraisers.value.find((f) => f.id === id)
     if (!fund || amount <= 0) return { success: false }
 

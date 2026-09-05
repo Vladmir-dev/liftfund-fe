@@ -102,6 +102,7 @@ export interface CreateDonationResponse {
   txRef: string
   paymentMethodId?: string
   paymentLink?: string
+  message?: string
 }
 
 export interface CampaignTeamMember {
