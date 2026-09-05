@@ -797,12 +797,12 @@ const handleStartDonation = async () => {
             {{ donationError }}
           </div>
 
-          <!-- Quick Select in UGX -->
+          <!-- Quick Select in USD -->
           <div class="grid grid-cols-3 gap-2 mb-3">
             <button v-for="amt in presetAmounts" :key="amt" type="button" @click="donationAmount = amt"
               class="py-2 px-1 rounded-xl border font-bold text-[11px] transition-all cursor-pointer"
               :class="donationAmount === amt ? 'bg-[#edfce0] border-[#024731] text-[#024731] shadow-xs' : 'bg-slate-50 border-slate-200 hover:border-[#024731] text-slate-700'">
-              {{ campaign.currency }} {{ amt.toLocaleString() }}
+              ${{ amt.toLocaleString() }}
             </button>
           </div>
 
