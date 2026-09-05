@@ -772,9 +772,9 @@ const handleStartDonation = async () => {
 
     <!-- Donation Modal Dialog with Flutterwave Integration -->
     <div v-if="showDonateModal"
-      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
       <div
-        class="bg-white rounded-3xl w-full max-w-md p-6 border border-slate-100 shadow-2xl relative overflow-hidden animate-in fade-in zoom-in-95 duration-250">
+        class="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-2rem)] overflow-y-auto p-4 sm:p-6 border border-slate-100 shadow-2xl relative animate-in fade-in zoom-in-95 duration-250">
 
         <button @click="closeDonate"
           class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl cursor-pointer">
@@ -837,7 +837,7 @@ const handleStartDonation = async () => {
           </div>
 
           <!-- Name & Email fields -->
-          <div class="grid grid-cols-2 gap-2 mb-2 text-left">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2 text-left">
             <div>
               <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Your Name</label>
               <input type="text" v-model="donorName" :disabled="isAnonymous" placeholder="John Doe"

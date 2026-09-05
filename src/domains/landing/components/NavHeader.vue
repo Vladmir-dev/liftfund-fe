@@ -8,6 +8,7 @@ const authStore = useAuthStore()
 
 // Dropdown Navigation States
 const activeDropdown = ref<'donate' | 'fundraise' | 'about' | 'user' | null>(null)
+const mobileMenuOpen = ref(false)
 
 const toggleDropdown = (menu: 'donate' | 'fundraise' | 'about' | 'user') => {
   if (activeDropdown.value === menu) {
@@ -19,6 +20,7 @@ const toggleDropdown = (menu: 'donate' | 'fundraise' | 'about' | 'user') => {
 
 const closeDropdowns = () => {
   activeDropdown.value = null
+  mobileMenuOpen.value = false
 }
 
 defineExpose({ closeDropdowns })
@@ -42,16 +44,16 @@ const handleLogout = () => {
   <!-- Navigation Header -->
   <header class="sticky top-0 z-40 bg-white border-b border-slate-100 shadow-sm" @click.stop>
     <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between relative">
-      
+
       <!-- Left Nav Actions -->
-      <div class="flex items-center gap-6">
+      <div class="hidden sm:flex items-center gap-6">
         <!-- Donate Dropdown Wrapper -->
         <div class="relative" @mouseenter="activeDropdown = 'donate'" @mouseleave="activeDropdown = null">
           <button @click="toggleDropdown('donate')" class="flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-[#024731] transition-colors py-2 cursor-pointer">
             Donate
             <svg class="transition-transform duration-200" :class="{ 'rotate-180': activeDropdown === 'donate' }" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
           </button>
-          
+
           <!-- Donate Dropdown Menu (Matches Screenshot 1) -->
           <div v-if="activeDropdown === 'donate'" class="absolute left-0 mt-0 pt-2 w-72 sm:w-[480px] z-50">
             <div class="bg-white rounded-xl shadow-xl border border-slate-100 p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-scale">
@@ -100,14 +102,14 @@ const handleLogout = () => {
       </RouterLink>
 
       <!-- Right Nav Actions -->
-      <div class="flex items-center gap-4">
+      <div class="hidden sm:flex items-center gap-4">
         <!-- About Dropdown Wrapper -->
         <div class="relative hidden lg:block" @mouseenter="activeDropdown = 'about'" @mouseleave="activeDropdown = null">
           <button @click="toggleDropdown('about')" class="flex items-center gap-1.5 text-sm font-semibold text-slate-700 hover:text-[#024731] transition-colors py-2 cursor-pointer">
             About
             <svg class="transition-transform duration-200" :class="{ 'rotate-180': activeDropdown === 'about' }" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/></svg>
           </button>
-          
+
           <!-- About Dropdown (Matches Screenshot 2) -->
           <div v-if="activeDropdown === 'about'" class="absolute right-0 mt-0 pt-2 w-72 sm:w-[480px] z-50">
             <div class="bg-white rounded-xl shadow-xl border border-slate-100 p-5 grid grid-cols-1 sm:grid-cols-2 gap-4 animate-scale">
@@ -186,6 +188,31 @@ const handleLogout = () => {
           </div>
         </template>
       </div>
+
+      <button
+        @click="mobileMenuOpen = !mobileMenuOpen"
+        class="sm:hidden inline-flex items-center justify-center w-10 h-10 rounded-full text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
+        :aria-expanded="mobileMenuOpen"
+        aria-label="Open navigation menu">
+        <iconify-icon :icon="mobileMenuOpen ? 'ph:x-bold' : 'ph:list-bold'" class="text-xl"></iconify-icon>
+      </button>
+    </div>
+
+    <div v-if="mobileMenuOpen" class="sm:hidden border-t border-slate-100 bg-white px-4 py-3 shadow-lg">
+      <nav class="flex flex-col gap-1" aria-label="Mobile navigation">
+        <RouterLink to="/donate/categories" @click="closeDropdowns" class="px-3 py-3 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-[#024731]">Browse fundraisers</RouterLink>
+        <RouterLink to="/donate/crisis-relief" @click="closeDropdowns" class="px-3 py-3 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-[#024731]">Crisis relief</RouterLink>
+        <RouterLink to="/donate/social-impact" @click="closeDropdowns" class="px-3 py-3 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-[#024731]">Social impact funds</RouterLink>
+        <RouterLink to="/donate/supporter-space" @click="closeDropdowns" class="px-3 py-3 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50 hover:text-[#024731]">Supporter space</RouterLink>
+        <div class="my-2 border-t border-slate-100"></div>
+        <button v-if="!authStore.isLoggedIn" @click="goToLogin(); mobileMenuOpen = false" class="px-3 py-3 rounded-lg text-left text-sm font-bold text-slate-700 hover:bg-slate-50 cursor-pointer">Sign in</button>
+        <button v-if="!authStore.isLoggedIn" @click="startFundraiser(); mobileMenuOpen = false" class="mt-1 w-full bg-[#024731] hover:bg-[#013424] text-white text-sm font-bold py-3 rounded-full cursor-pointer">Start a HelpFund</button>
+        <template v-else>
+          <RouterLink to="/profile" @click="closeDropdowns" class="px-3 py-3 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50">Profile</RouterLink>
+          <RouterLink to="/your-impact" @click="closeDropdowns" class="px-3 py-3 rounded-lg text-sm font-bold text-slate-700 hover:bg-slate-50">Your impact</RouterLink>
+          <button @click="handleLogout" class="px-3 py-3 rounded-lg text-left text-sm font-bold text-red-600 hover:bg-red-50 cursor-pointer">Sign out</button>
+        </template>
+      </nav>
     </div>
   </header>
 </template>

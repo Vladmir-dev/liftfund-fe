@@ -166,8 +166,8 @@ const getProgressPercent = (raised: number, target: number) => {
     <MainFooter />
 
     <!-- Simulate Donation Modal -->
-    <div v-if="activeFundId" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm" @click.self="closeDonateModal">
-      <div class="bg-white rounded-3xl w-full max-w-md p-6 border border-slate-100 shadow-2xl animate-scale text-left relative">
+    <div v-if="activeFundId" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/60 backdrop-blur-sm" @click.self="closeDonateModal">
+      <div class="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-2rem)] overflow-y-auto p-4 sm:p-6 border border-slate-100 shadow-2xl animate-scale text-left relative">
         <button @click="closeDonateModal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 cursor-pointer">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />

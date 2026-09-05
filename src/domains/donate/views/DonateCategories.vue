@@ -77,7 +77,7 @@ const getProgressPercent = (raised: number, target: number) => {
 
       <!-- Categories Block Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-        <div v-for="cat in categories" :key="cat.id" 
+        <div v-for="cat in categories" :key="cat.id"
              @click="selectedCategory = cat.name"
              class="p-6 rounded-2xl border bg-white cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
              :class="selectedCategory === cat.name ? 'border-[#024731] ring-2 ring-[#024731]/20 bg-[#edfce0]/20' : 'border-slate-100'">
@@ -110,7 +110,7 @@ const getProgressPercent = (raised: number, target: number) => {
           <button v-if="selectedCategory" @click="selectedCategory = null" class="text-xs font-bold text-[#024731] hover:underline cursor-pointer">
             Clear Category Filter
           </button>
-          
+
           <div class="relative w-full max-w-xs">
             <input type="text" v-model="searchQuery" placeholder="Search inside category..." class="w-full pl-9 pr-4 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-medium bg-white" />
             <svg class="absolute left-3 top-2.5 text-slate-400" xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -133,7 +133,7 @@ const getProgressPercent = (raised: number, target: number) => {
               <h3 class="font-bold text-slate-800 group-hover:text-[#024731] transition-colors mb-2 leading-snug line-clamp-1">{{ fund.title }}</h3>
               <p class="text-slate-500 text-xs line-clamp-2 mb-4 leading-relaxed">{{ fund.description }}</p>
             </div>
-            
+
             <div class="mt-4 pt-4 border-t border-slate-50">
               <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1">
                 <span>${{ fund.raisedAmount.toLocaleString() }} raised</span>
@@ -142,7 +142,7 @@ const getProgressPercent = (raised: number, target: number) => {
               <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                 <div class="h-full bg-[#02a95c] rounded-full" :style="{ width: getProgressPercent(fund.raisedAmount, fund.targetAmount) + '%' }"></div>
               </div>
-              
+
               <button @click="openDonateModal(fund.id)" class="w-full mt-4 bg-[#edfce0] hover:bg-[#024731] hover:text-white text-[#024731] text-xs font-bold py-2.5 rounded-xl transition-all border border-[#bbf770] hover:border-[#024731] cursor-pointer text-center">
                 Donate Now
               </button>
@@ -163,8 +163,8 @@ const getProgressPercent = (raised: number, target: number) => {
     <MainFooter />
 
     <!-- Simulate Donation Modal -->
-    <div v-if="activeFundraiserId" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 backdrop-blur-sm" @click.self="closeDonateModal">
-      <div class="bg-white rounded-3xl w-full max-w-md p-6 border border-slate-100 shadow-2xl animate-scale text-left relative">
+    <div v-if="activeFundraiserId" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/60 backdrop-blur-sm" @click.self="closeDonateModal">
+      <div class="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-2rem)] overflow-y-auto p-4 sm:p-6 border border-slate-100 shadow-2xl animate-scale text-left relative">
         <button @click="closeDonateModal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 cursor-pointer">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
@@ -182,7 +182,7 @@ const getProgressPercent = (raised: number, target: number) => {
           <h3 class="text-lg font-black text-slate-900 mt-1 mb-4 leading-tight">
             {{ store.fundraisers.find(f => f.id === activeFundraiserId)?.title }}
           </h3>
-          
+
           <form @submit.prevent="handleDonate" class="flex flex-col gap-4">
             <div class="flex flex-col">
               <label class="text-xs text-slate-600 font-bold mb-1.5">Donation Amount ($)</label>
