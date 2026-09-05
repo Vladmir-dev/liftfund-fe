@@ -73,7 +73,7 @@ export const useLandingStore = defineStore('landing', () => {
       const res = await campaignService.createDonation({
         campaignId: id,
         amount: Number(amount),
-        currency: donorData?.currency || fund.currency || 'UGX',
+        currency: donorData?.currency || fund.currency || 'USD',
         isAnonymous: donorData?.isAnonymous ?? false,
         donorName: donorData?.isAnonymous ? 'Anonymous' : (donorData?.name?.trim() || 'Supporter'),
         email: donorData?.email?.trim() || 'donor@helpfund.org',
@@ -163,7 +163,7 @@ export const useLandingStore = defineStore('landing', () => {
             imageUrl: coverUrl,
             targetAmount: Number(c.goalAmount) || 1000000,
             raisedAmount: Number(c.raisedAmount) || 0,
-            currency: c.currency || 'UGX',
+            currency: c.currency || 'USD',
             donorCount: Number(c.donorCount) || 0,
             daysLeft: 30,
             organizer: c.ownerName || 'Verified Organizer',

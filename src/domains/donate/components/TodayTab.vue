@@ -16,7 +16,7 @@ const props = withDefaults(
     likeCount?: number
   }>(),
   {
-    currency: 'UGX',
+    currency: 'USD',
     donorCount: 0,
     shareCount: 0,
     likeCount: 0,

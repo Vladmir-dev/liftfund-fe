@@ -8,7 +8,7 @@ const props = withDefaults(
     currency?: string
   }>(),
   {
-    currency: 'UGX',
+    currency: 'USD',
   }
 )
 

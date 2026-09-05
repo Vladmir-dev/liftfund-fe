@@ -87,7 +87,7 @@ const campaign = computed(() => {
       targetAmount: Number(c.goalAmount) || 1000000,
       raisedAmount: Number(c.raisedAmount) || 0,
       donorCount: Number(c.donorCount) || donations.value.length,
-      currency: c.currency || 'UGX',
+      currency: c.currency || 'USD',
       organizer: c.ownerName || 'Verified Organizer',
       location: locationStr,
       likeCount: liveData.value.likeCount || 0,
@@ -109,7 +109,7 @@ const campaign = computed(() => {
       targetAmount: f.targetAmount,
       raisedAmount: f.raisedAmount,
       donorCount: f.donorCount,
-      currency: 'UGX',
+      currency: 'USD',
       organizer: f.organizer,
       location: `${f.city}, ${f.country}`,
       likeCount: 0,
@@ -307,7 +307,7 @@ const isSubmittingDonation = ref(false)
 const donationError = ref('')
 const modalStep = ref<'form' | 'success'>('form')
 
-const presetAmounts = [10000, 25000, 50000, 100000, 250000]
+const presetAmounts = [10, 25, 50, 100, 250]
 
 const getDonorName = (donation: any): string => {
   if (!donation) return 'Supporter'
@@ -377,7 +377,7 @@ const handleStartDonation = async () => {
     const res = await campaignService.createDonation({
       campaignId: campaignId.value,
       amount: donationAmount.value,
-      currency: campaign.value.currency || 'UGX',
+      currency: campaign.value.currency || 'USD',
       isAnonymous: isAnonymous.value,
       donorName: isAnonymous.value ? 'Anonymous' : (donorName.value.trim() || 'Supporter'),
       email: donorEmail.value.trim() || authStore.user?.email || 'donor@helpfund.org',
@@ -802,7 +802,7 @@ const handleStartDonation = async () => {
             <button v-for="amt in presetAmounts" :key="amt" type="button" @click="donationAmount = amt"
               class="py-2 px-1 rounded-xl border font-bold text-[11px] transition-all cursor-pointer"
               :class="donationAmount === amt ? 'bg-[#edfce0] border-[#024731] text-[#024731] shadow-xs' : 'bg-slate-50 border-slate-200 hover:border-[#024731] text-slate-700'">
-              {{ campaign.currency }} {{ (amt / 1000).toLocaleString() }}k
+              {{ campaign.currency }} {{ amt.toLocaleString() }}
             </button>
           </div>
 
@@ -812,10 +812,10 @@ const handleStartDonation = async () => {
               Amount</label>
             <div
               class="relative rounded-xl border border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-[#024731] focus-within:border-transparent transition-all">
-              <span class="absolute left-3.5 top-3.5 font-bold text-xs text-slate-500">{{ campaign.currency }}</span>
+              <span class="absolute left-3.5 top-3.5 font-bold text-xs text-slate-500">$</span>
               <input type="number" v-model="donationAmount"
-                class="w-full pl-14 pr-4 py-2.5 focus:outline-none text-sm font-bold text-slate-800" min="1000"
-                step="1000" />
+                class="w-full pl-14 pr-4 py-2.5 focus:outline-none text-sm font-bold text-slate-800" min="1"
+                step="1" />
             </div>
           </div>
 
@@ -863,7 +863,7 @@ const handleStartDonation = async () => {
             class="w-full py-3 bg-[#024731] hover:bg-[#013424] disabled:bg-slate-200 text-white font-bold text-xs rounded-xl shadow-md disabled:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer">
             <span v-if="isSubmittingDonation"
               class="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            <span>{{ isSubmittingDonation ? 'Connecting to MarzPay...' : 'Pay with Card (' + (campaign.currency || 'UGX') + ' ' + Number(donationAmount).toLocaleString() + ')' }}</span>
+            <span>{{ isSubmittingDonation ? 'Connecting to MarzPay...' : 'Pay with Card ($' + Number(donationAmount).toLocaleString() + ')' }}</span>
           </button>
         </div>
 

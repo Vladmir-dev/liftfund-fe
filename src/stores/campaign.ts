@@ -45,8 +45,8 @@ export const useCampaignStore = defineStore('campaign', () => {
   const beneficiary = ref<'Yourself' | 'Someone else' | 'Charity'>('Yourself')
 
   // Step 2 fields
-  const currency = ref<'UGX' | 'USD'>('UGX')
-  const targetAmount = ref<number>(1000000) // 1,000,000 UGX default
+  const currency = ref<'UGX' | 'USD'>('USD')
+  const targetAmount = ref<number>(10000) // default USD goal
   const useAutomatedGoal = ref(true)
 
   // Step 3 fields
@@ -160,8 +160,8 @@ export const useCampaignStore = defineStore('campaign', () => {
     selectedCategory.value = categories.value[0]?.name || 'Community'
     selectedCategoryId.value = categories.value[0]?.id || null
     beneficiary.value = 'Yourself'
-    currency.value = 'UGX'
-    targetAmount.value = 1000000
+    currency.value = 'USD'
+    targetAmount.value = 10000
     useAutomatedGoal.value = true
     mediaFile.value = null
     mediaUrl.value = null

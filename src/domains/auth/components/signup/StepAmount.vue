@@ -8,7 +8,7 @@ const props = withDefaults(defineProps<{
   startingGoal: number
   amountValid: boolean
 }>(), {
-  currency: 'UGX'
+  currency: 'USD'
 })
 
 const emit = defineEmits<{

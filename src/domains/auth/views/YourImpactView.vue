@@ -123,7 +123,7 @@ const formatDate = (dateStr?: string) => {
       <template v-else>
         <!-- Impact Score -->
         <span class="text-5xl sm:text-6xl font-black text-slate-900 mb-2 leading-none">
-          UGX {{ metrics.totalDonated.toLocaleString() }}
+          ${{ metrics.totalDonated.toLocaleString() }}
         </span>
         <p class="text-slate-500 text-sm font-semibold mb-10 text-center">
           Your total impact from donating and supporting causes on HelpFund
@@ -207,7 +207,7 @@ const formatDate = (dateStr?: string) => {
 
                 <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0">
                   <span class="text-sm font-black text-slate-900">
-                    {{ d.currency || 'UGX' }} {{ d.amount.toLocaleString() }}
+                    {{ d.currency || 'USD' }} {{ d.amount.toLocaleString() }}
                   </span>
                   <span
                     :class="getStatusBadge(d.paymentStatus).class"
