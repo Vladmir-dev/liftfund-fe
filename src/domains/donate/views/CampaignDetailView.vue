@@ -458,6 +458,24 @@ const handleStartDonation = async () => {
         {{ campaign.title }}
       </h1>
 
+      <!-- Mobile-only progress card (hidden on lg+ where the sidebar shows) -->
+      <div class="lg:hidden bg-white border border-slate-200 rounded-3xl p-5 shadow-md mb-8">
+        <h3 class="text-lg font-bold text-slate-900 mb-1.5 flex items-baseline gap-1">
+          <span v-if="campaign.raisedAmount === 0">Be the first to donate</span>
+          <span v-else>{{ campaign.currency }} {{ Number(campaign.raisedAmount).toLocaleString() }}</span>
+          <span class="text-xs text-slate-400 font-semibold"> of {{ campaign.currency }} {{
+            Number(campaign.targetAmount).toLocaleString() }} goal</span>
+        </h3>
+        <div class="w-full bg-slate-100 rounded-full h-2.5 mb-2 overflow-hidden">
+          <div class="bg-[#02a95c] h-full rounded-full transition-all duration-500"
+            :style="{ width: progressPercent + '%' }"></div>
+        </div>
+        <div class="flex justify-between items-center text-xs font-semibold text-slate-400 mt-1">
+          <span>{{ progressPercent }}% completed</span>
+          <span>{{ campaign.donorCount }} donation{{ campaign.donorCount === 1 ? '' : 's' }}</span>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative items-start">
 
         <!-- Left Column: Media, Story, Organizer details (8 cols) -->
