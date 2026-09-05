@@ -388,7 +388,7 @@ const handleStartDonation = async () => {
 
     // 2. If MarzPay returned a payment link (hosted card gateway or redirect URL):
     if (res.paymentLink) {
-      Notify.info('Redirecting to MarzPay secure checkout...')
+      Notify.info('Redirecting to secure checkout...')
       window.location.href = res.paymentLink
       return
     }
@@ -790,8 +790,7 @@ const handleStartDonation = async () => {
           </div>
           <h3 class="text-xl font-bold text-slate-950 mb-1">Thank you for your support!</h3>
           <p class="text-slate-500 text-xs font-semibold">
-            Your donation of {{ campaign.currency }} {{ Number(donationAmount).toLocaleString() }} has been confirmed by
-            MarzPay.
+            Your donation of {{ campaign.currency }} {{ Number(donationAmount).toLocaleString() }} has been confirmed.
           </p>
         </div>
 
@@ -805,10 +804,10 @@ const handleStartDonation = async () => {
             <span
               class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#edfce0] text-[#024731] border border-[#bbf770]">
               <iconify-icon icon="ph:shield-check-fill" class="text-xs text-[#02a95c]"></iconify-icon>
-              <span>MarzPay Card</span>
+              <span>Secure Card</span>
             </span>
           </div>
-          <p class="text-slate-400 text-xs mb-3 text-left font-semibold">Processed securely via MarzPay Card Gateway.</p>
+          <p class="text-slate-400 text-xs mb-3 text-left font-semibold">Processed securely with PCI-compliant card processing.</p>
 
           <div v-if="donationError"
             class="mb-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold text-left">
@@ -881,7 +880,7 @@ const handleStartDonation = async () => {
             class="w-full py-3 bg-[#024731] hover:bg-[#013424] disabled:bg-slate-200 text-white font-bold text-xs rounded-xl shadow-md disabled:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer">
             <span v-if="isSubmittingDonation"
               class="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            <span>{{ isSubmittingDonation ? 'Connecting to MarzPay...' : 'Pay with Card ($' + Number(donationAmount).toLocaleString() + ')' }}</span>
+            <span>{{ isSubmittingDonation ? 'Connecting to secure checkout...' : 'Pay with Card ($' + Number(donationAmount).toLocaleString() + ')' }}</span>
           </button>
         </div>
 

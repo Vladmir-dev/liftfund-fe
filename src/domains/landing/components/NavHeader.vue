@@ -139,7 +139,7 @@ const handleLogout = () => {
 
         <template v-if="!authStore.isLoggedIn">
           <button @click="goToLogin" class="text-sm font-semibold text-slate-700 hover:text-[#024731] transition-colors py-2 px-3 cursor-pointer">Sign in</button>
-          <button @click="startFundraiser" class="bg-[#024731] hover:bg-[#013424] text-white text-sm font-bold py-2 px-4 rounded-full shadow-md shadow-emerald-950/10 hover:shadow-lg transition-all cursor-pointer">Start a HelpFund</button>
+          <button @click="startFundraiser" class="hidden sm:block bg-[#024731] hover:bg-[#013424] text-white text-sm font-bold py-2 px-4 rounded-full shadow-md shadow-emerald-950/10 hover:shadow-lg transition-all cursor-pointer">Start a HelpFund</button>
         </template>
         <template v-else>
           <!-- User Dropdown Menu -->

@@ -62,7 +62,7 @@ const goToCategories = () => {
         <div v-if="isVerifying" class="py-12 flex flex-col items-center justify-center">
           <span class="h-12 w-12 border-3 border-[#024731] border-t-transparent rounded-full animate-spin mb-4"></span>
           <h2 class="text-xl font-black text-slate-900 mb-1">Confirming Payment...</h2>
-          <p class="text-xs text-slate-500 font-medium">Verifying your donation with MarzPay</p>
+          <p class="text-xs text-slate-500 font-medium">Verifying your donation</p>
         </div>
 
         <!-- Success State -->
@@ -73,7 +73,7 @@ const goToCategories = () => {
 
           <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#edfce0] border border-[#bbf770] text-[#024731] text-xs font-bold mb-3">
             <iconify-icon icon="ph:shield-check-fill" class="text-sm text-[#02a95c]"></iconify-icon>
-            <span>Verified by MarzPay</span>
+            <span>Verified &amp; Confirmed</span>
           </div>
 
           <h1 class="text-2xl sm:text-3xl font-black text-slate-950 mb-2">Thank You for Your Donation!</h1>
@@ -84,7 +84,7 @@ const goToCategories = () => {
           <div v-if="txRef || reference" class="w-full bg-slate-50 rounded-2xl p-4 border border-slate-100 text-left mb-6 flex flex-col gap-2">
             <div class="flex justify-between items-center text-xs">
               <span class="text-slate-400 font-semibold">Payment Gateway</span>
-              <span class="font-bold text-slate-800">MarzPay Gateway</span>
+              <span class="font-bold text-slate-800">Secure Card Gateway</span>
             </div>
             <div v-if="txRef" class="flex justify-between items-center text-xs">
               <span class="text-slate-400 font-semibold">Reference ID</span>

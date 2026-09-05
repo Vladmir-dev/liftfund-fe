@@ -598,15 +598,15 @@ const startFundraiser = () => {
             ✓
           </div>
           <h3 class="text-xl font-black text-slate-900 mb-1">Thank You!</h3>
-          <p class="text-slate-600 text-sm font-medium">Your donation of {{ activeFundraiser?.currency || 'USD' }} {{ Number(donationAmount).toLocaleString() }} was confirmed by MarzPay.</p>
+          <p class="text-slate-600 text-sm font-medium">Your donation of {{ activeFundraiser?.currency || 'USD' }} {{ Number(donationAmount).toLocaleString() }} was confirmed.</p>
         </div>
 
-        <!-- MarzPay USSD Mobile Money PIN Prompt Step -->
+        <!-- Mobile Money authorization Prompt Step -->
         <div v-else-if="modalStep === 'prompt'" class="py-3 text-center flex flex-col items-center">
-          <!-- Gateway Header Badge -->
+          <!-- Payment Prompt Header Badge -->
           <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#edfce0] border border-[#bbf770] text-[#024731] text-[11px] font-black uppercase tracking-wider mb-4">
             <span class="w-2 h-2 rounded-full bg-[#02a95c] animate-ping"></span>
-            <span>MarzPay Gateway Prompt</span>
+            <span>Payment Authorization Prompt</span>
           </div>
 
           <!-- Pulsing Mobile Graphic -->
@@ -620,7 +620,7 @@ const startFundraiser = () => {
 
           <h3 class="text-lg font-black text-slate-900 mb-1">Check Your Phone</h3>
           <p class="text-xs text-slate-600 max-w-xs mx-auto mb-4 font-medium leading-relaxed">
-            MarzPay has sent a Mobile Money authorization prompt to your handset. Please approve the prompt by entering your PIN.
+            A Mobile Money authorization prompt has been sent to your handset. Please approve the prompt by entering your PIN.
           </p>
 
           <!-- Prompt Details Card -->
@@ -664,7 +664,7 @@ const startFundraiser = () => {
             <button @click="confirmMobilePayment" :disabled="isConfirmingPrompt"
               class="w-full py-3.5 bg-[#024731] hover:bg-[#013424] text-white text-xs font-bold rounded-xl transition shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer">
               <span v-if="isConfirmingPrompt" class="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              <span>{{ isConfirmingPrompt ? 'Verifying with MarzPay...' : "I've Entered My PIN / Confirm" }}</span>
+              <span>{{ isConfirmingPrompt ? 'Verifying payment...' : "I've Entered My PIN / Confirm" }}</span>
             </button>
             <button @click="modalStep = 'form'"
               class="w-full py-2 text-xs font-bold text-slate-500 hover:text-slate-700 transition cursor-pointer">
@@ -679,7 +679,7 @@ const startFundraiser = () => {
             <span class="text-xs text-[#024731] font-black uppercase tracking-wider">Donate to Fundraiser</span>
             <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#edfce0] text-[#024731] border border-[#bbf770]">
               <iconify-icon icon="ph:shield-check-fill" class="text-xs text-[#02a95c]"></iconify-icon>
-              <span>MarzPay Secure Rails</span>
+              <span>Secure Payment</span>
             </span>
           </div>
 
@@ -740,7 +740,7 @@ const startFundraiser = () => {
               class="w-full bg-[#024731] hover:bg-[#013424] text-white text-xs font-bold py-3.5 rounded-xl transition-all shadow-md shadow-emerald-950/20 hover:shadow-lg disabled:opacity-50 text-center flex items-center justify-center gap-2 cursor-pointer mt-1">
               <span v-if="isDonating"
                 class="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              <span>{{ isDonating ? 'Connecting to MarzPay...' : 'Proceed with MarzPay (' + (activeFundraiser?.currency || 'UGX') + ' ' + Number(donationAmount).toLocaleString() + ')' }}</span>
+              <span>{{ isDonating ? 'Connecting to secure checkout...' : 'Proceed with Payment ($' + Number(donationAmount).toLocaleString() + ')' }}</span>
             </button>
           </form>
         </div>
