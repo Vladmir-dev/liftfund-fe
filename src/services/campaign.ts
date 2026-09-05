@@ -1,5 +1,44 @@
 import { request, API_BASE_URL, ApiError } from './api'
 
+const MAX_UPLOAD_BYTES = 3_800_000
+const MAX_UPLOAD_DIMENSION = 1600
+
+async function compressImage(file: File): Promise<File> {
+  if (!file.type.startsWith('image/') || file.size <= 512 * 1024) return file
+
+  const bitmap = await createImageBitmap(file).catch(() => null)
+  if (!bitmap) return file
+
+  const scale = Math.min(1, MAX_UPLOAD_DIMENSION / Math.max(bitmap.width, bitmap.height))
+  if (scale === 1 && file.size <= MAX_UPLOAD_BYTES) {
+    bitmap.close()
+    return file
+  }
+
+  const canvas = document.createElement('canvas')
+  canvas.width = Math.round(bitmap.width * scale)
+  canvas.height = Math.round(bitmap.height * scale)
+  const ctx = canvas.getContext('2d')
+  if (!ctx) {
+    bitmap.close()
+    return file
+  }
+  ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height)
+  bitmap.close()
+
+  const jpegName = file.name.replace(/\.[^.]+$/, '.jpg') || 'upload.jpg'
+  for (const quality of [0.9, 0.75, 0.6, 0.4, 0.3]) {
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, 'image/jpeg', quality),
+    )
+    if (blob && blob.size <= MAX_UPLOAD_BYTES) {
+      return new File([blob], jpegName, { type: 'image/jpeg' })
+    }
+  }
+
+  return file
+}
+
 export interface CampaignCategory {
   id: string
   name: string
@@ -250,15 +289,17 @@ export const campaignService = {
     return Array.isArray(res) ? res : ((res as any)?.categories || [])
   },
 
-  // Upload a campaign image (returns { url: "/uploads/{userId}/{filename}" })
+  // Upload a campaign image (returns { url })
   async uploadImage(file: File): Promise<{ url: string }> {
     const token = localStorage.getItem('helpfund_accessToken')
     if (!token) {
       throw new ApiError('Authentication required to upload images. Please sign in.', 401)
     }
 
+    const finalFile = await compressImage(file)
+
     const formData = new FormData()
-    formData.append('file', file)
+    formData.append('file', finalFile)
 
     const response = await fetch(`${API_BASE_URL}/api/v1/campaigns/upload`, {
       method: 'POST',
