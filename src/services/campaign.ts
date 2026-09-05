@@ -282,6 +282,20 @@ export interface DonorDonationRecord {
   campaignCover?: string | { String: string; Valid: boolean }
 }
 
+// The backend emits currentAmount/donationCount while the rest of the app
+// expects raisedAmount/donorCount. Align them here so progress bars etc. get
+// real numbers no matter which shape the API returns.
+function normalizeCampaign(c: any): BackendCampaign {
+  if (!c || typeof c !== 'object') return c
+  if (!Number.isFinite(c.raisedAmount)) {
+    c = { ...c, raisedAmount: Number(c.currentAmount) || 0 }
+  }
+  if (!Number.isFinite(c.donorCount)) {
+    c = { ...c, donorCount: Number(c.donationCount) || 0 }
+  }
+  return c
+}
+
 export const campaignService = {
   // Fetch available campaign categories
   async fetchCategories(): Promise<CampaignCategory[]> {
@@ -324,7 +338,7 @@ export const campaignService = {
     const res = await request<any>(`/api/v1/campaigns?page=${page}&limit=${limit}${statusParam}`)
     const list = res?.content || (Array.isArray(res) ? res : (res?.campaigns || []))
     return {
-      campaigns: list,
+      campaigns: (list || []).map(normalizeCampaign),
       pagination: res?.pagination,
     }
   },
@@ -332,20 +346,23 @@ export const campaignService = {
   // List featured campaigns for hero/showcase
   async listFeaturedCampaigns(): Promise<BackendCampaign[]> {
     const res = await request<any>('/api/v1/campaigns/featured')
-    return Array.isArray(res) ? res : (res?.campaigns || res?.content || [])
+    return (Array.isArray(res) ? res : (res?.campaigns || res?.content || [])).map(normalizeCampaign)
   },
 
   // Get full campaign detail
-  getCampaignDetail(idOrSlug: string): Promise<CampaignDetailResponse> {
-    return request<CampaignDetailResponse>(`/api/v1/campaigns/${idOrSlug}`)
+  async getCampaignDetail(idOrSlug: string): Promise<CampaignDetailResponse> {
+    const res = await request<CampaignDetailResponse>(`/api/v1/campaigns/${idOrSlug}`)
+    if (res?.campaign) res.campaign = normalizeCampaign(res.campaign)
+    return res
   },
 
   // Create a new campaign (in draft state)
-  createCampaign(payload: CreateCampaignPayload): Promise<BackendCampaign> {
-    return request<BackendCampaign>('/api/v1/campaigns', {
+  async createCampaign(payload: CreateCampaignPayload): Promise<BackendCampaign> {
+    const res = await request<BackendCampaign>('/api/v1/campaigns', {
       method: 'POST',
       body: JSON.stringify(payload),
     })
+    return normalizeCampaign(res)
   },
 
   // Publish a campaign (transitions status from draft to active)
@@ -358,7 +375,7 @@ export const campaignService = {
   // Get campaigns created by current logged-in user
   async getMyCampaigns(page: number = 1, limit: number = 20): Promise<BackendCampaign[]> {
     const res = await request<any>(`/api/v1/campaigns/me/campaigns?page=${page}&limit=${limit}`)
-    return Array.isArray(res) ? res : (res?.campaigns || res?.content || [])
+    return (Array.isArray(res) ? res : (res?.campaigns || res?.content || [])).map(normalizeCampaign)
   },
 
   // Toggle like for campaign (authenticated)
