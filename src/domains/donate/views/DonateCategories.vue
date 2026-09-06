@@ -4,6 +4,7 @@ import { useLandingStore } from '../../landing/stores'
 import { storeToRefs } from 'pinia'
 import NavHeader from '../../landing/components/NavHeader.vue'
 import MainFooter from '../../landing/components/MainFooter.vue'
+import { redirectToGateway } from '../../../services/gatewayRedirect'
 
 const store = useLandingStore()
 const { categories, searchQuery, selectedCategory, filteredFundraisers } = storeToRefs(store)
@@ -33,9 +34,13 @@ const closeDonateModal = () => {
 const handleDonate = async () => {
   if (activeFundraiserId.value && donationAmount.value > 0) {
     isDonating.value = true
-    const success = await store.donateToFundraiser(activeFundraiserId.value, donationAmount.value)
+    const result = await store.donateToFundraiser(activeFundraiserId.value, donationAmount.value)
     isDonating.value = false
-    if (success) {
+    if (result?.paymentLink) {
+      redirectToGateway(result.paymentLink)
+      return
+    }
+    if (result?.success) {
       donationSuccess.value = true
       setTimeout(() => {
         closeDonateModal()

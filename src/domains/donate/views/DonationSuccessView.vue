@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { campaignService } from '../../../services/campaign'
+import { lastDonation, clearLastDonation } from '../../../services/donationSession'
 import NavHeader from '../../landing/components/NavHeader.vue'
 import MainFooter from '../../landing/components/MainFooter.vue'
 
@@ -12,6 +13,7 @@ const isVerifying = ref(true)
 const isSuccess = ref(true)
 const donationData = ref<any>(null)
 const errorMessage = ref('')
+const status = ref('')
 
 const txRef = ref<string>('')
 const reference = ref<string>('')
@@ -20,6 +22,14 @@ onMounted(async () => {
   // Extract query parameters from callback redirect
   txRef.value = (route.query.txRef || route.query.tx_ref || route.query.reference || '') as string
   reference.value = (route.query.reference || route.query.transaction_id || '') as string
+  status.value = (route.query.status || '') as string
+
+  // The gateway's return page often does not echo our donation txRef; fall
+  // back to the most recent donation started in this browser.
+  const remembered = lastDonation()
+  if (!txRef.value && remembered?.txRef) {
+    txRef.value = remembered.txRef
+  }
 
   if (txRef.value) {
     try {
@@ -28,7 +38,11 @@ onMounted(async () => {
         transactionId: reference.value || undefined,
       })
       donationData.value = res?.donation || null
+      status.value = res?.status || status.value
       isSuccess.value = true
+      if (res?.status === 'succeeded') {
+        clearLastDonation()
+      }
     } catch (err: any) {
       console.warn('Verification result:', err)
       // If payment status was already updated by webhook or immediate confirmation
@@ -92,7 +106,10 @@ const goToCategories = () => {
             </div>
             <div class="flex justify-between items-center text-xs">
               <span class="text-slate-400 font-semibold">Status</span>
-              <span class="font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">Completed</span>
+              <span class="font-bold bg-emerald-50 px-2 py-0.5 rounded-md border"
+                :class="status === 'succeeded' ? 'text-emerald-600 border-emerald-200' : 'text-amber-600 border-amber-200'">
+                {{ status === 'succeeded' ? 'Completed' : 'Pending Confirmation' }}
+              </span>
             </div>
           </div>
 

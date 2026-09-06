@@ -16,6 +16,8 @@ import {
 import NavHeader from '../../landing/components/NavHeader.vue'
 import MainFooter from '../../landing/components/MainFooter.vue'
 import { Notify } from '../../../utils/notify'
+import { rememberDonation } from '../../../services/donationSession'
+import { redirectToGateway } from '../../../services/gatewayRedirect'
 
 const route = useRoute()
 const router = useRouter()
@@ -395,8 +397,9 @@ const handleStartDonation = async () => {
         lc.raisedAmount = (Number(lc.raisedAmount) || 0) + Number(donationAmount.value)
         lc.donorCount = (Number(lc.donorCount) || 0) + 1
       }
+      rememberDonation(res.txRef)
       Notify.info('Redirecting to secure checkout...')
-      window.location.href = res.paymentLink
+      redirectToGateway(res.paymentLink)
       return
     }
 
@@ -407,6 +410,7 @@ const handleStartDonation = async () => {
         lc.raisedAmount = (Number(lc.raisedAmount) || 0) + Number(donationAmount.value)
         lc.donorCount = (Number(lc.donorCount) || 0) + 1
       }
+      rememberDonation(res.txRef)
       try {
         await campaignService.verifyDonation({ txRef: res.txRef })
       } catch (_) {}

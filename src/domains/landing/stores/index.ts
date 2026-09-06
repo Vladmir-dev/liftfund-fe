@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { Fundraiser, Category, FAQItem } from '../types'
 import { campaignService } from '../../../services/campaign'
+import { rememberDonation } from '../../../services/donationSession'
 
 const formatUgandanPhone = (phone?: string): string => {
   let cleaned = (phone || '').replace(/[\s\-\(\)]/g, '')
@@ -87,11 +88,13 @@ export const useLandingStore = defineStore('landing', () => {
         // contribution so progress bars update immediately whether or not the
         // gateway completes the transaction right away.
         bumpCounters(fund, amount)
+        rememberDonation(res.txRef)
         return { success: true, paymentLink: res.paymentLink, txRef: res.txRef }
       }
 
       // In sandbox mode or direct confirmation, verify donation with backend
       if (res?.txRef) {
+        rememberDonation(res.txRef)
         try {
           await campaignService.verifyDonation({ txRef: res.txRef })
         } catch (vErr) {

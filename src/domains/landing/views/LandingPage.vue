@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import { useLandingStore } from '../stores'
 import { storeToRefs } from 'pinia'
 import { campaignService } from '../../../services/campaign'
+import { redirectToGateway } from '../../../services/gatewayRedirect'
 import NavHeader from '../components/NavHeader.vue'
 import MainFooter from '../components/MainFooter.vue'
 
@@ -106,7 +107,7 @@ const handleDonate = async () => {
 
     // 1. If MarzPay returned an external hosted checkout link (live card gateway), redirect immediately
     if (result.paymentLink) {
-      window.location.href = result.paymentLink
+      redirectToGateway(result.paymentLink)
       return
     }
 
