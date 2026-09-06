@@ -166,7 +166,9 @@ const fetchCampaignData = async () => {
     }
 
     if (donationsRes.status === 'fulfilled') {
-      donations.value = donationsRes.value
+      donations.value = (donationsRes.value || []).filter(
+        (d: any) => String(d.paymentStatus || '') === 'succeeded'
+      )
     }
   } catch (err: any) {
     console.warn('Could not load campaign from backend:', err)
@@ -388,6 +390,13 @@ const handleStartDonation = async () => {
 
     // 2. If MarzPay returned a payment link (hosted card gateway or redirect URL):
     if (res.paymentLink) {
+      // Optimistically reflect the contribution so the progress bar updates
+      // right away (the backend confirm via verify/webhook may lag behind).
+      if (liveData.value?.campaign) {
+        const lc = liveData.value.campaign as any
+        lc.raisedAmount = (Number(lc.raisedAmount) || 0) + Number(donationAmount.value)
+        lc.donorCount = (Number(lc.donorCount) || 0) + 1
+      }
       Notify.info('Redirecting to secure checkout...')
       window.location.href = res.paymentLink
       return
@@ -395,6 +404,11 @@ const handleStartDonation = async () => {
 
     // 3. If direct/sandbox completion with txRef:
     if (res.txRef) {
+      if (liveData.value?.campaign) {
+        const lc = liveData.value.campaign as any
+        lc.raisedAmount = (Number(lc.raisedAmount) || 0) + Number(donationAmount.value)
+        lc.donorCount = (Number(lc.donorCount) || 0) + 1
+      }
       try {
         await campaignService.verifyDonation({ txRef: res.txRef })
       } catch (_) {}

@@ -25,7 +25,9 @@ const fetchDonations = async () => {
   isLoadingDonations.value = true
   try {
     const list = await campaignService.listCampaignDonations(props.campaignId)
-    donations.value = list
+    donations.value = (list || []).filter(
+      (d: any) => String(d.paymentStatus || '') === 'succeeded'
+    )
   } catch (err) {
     console.warn('Could not load campaign donations:', err)
   } finally {

@@ -258,6 +258,7 @@ export interface UpdateCampaignPayload {
   status?: string
   isFeatured?: boolean
   endsAt?: string
+  goalAmount?: number
 }
 
 export interface UserDashboardMetrics {

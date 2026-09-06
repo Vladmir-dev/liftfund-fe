@@ -370,6 +370,7 @@ const handlePostUpdate = (text: string) => {
           :title="fundraiser.title"
           :imageUrl="fundraiser.imageUrl"
           :status="fundraiser.status"
+          :goalAmount="fundraiser.targetAmount"
           @post-update="activeTab = 'updates'"
           @transfers="activeTab = 'transfers'"
           @edit="openEditModal"

@@ -13,6 +13,7 @@ const props = defineProps<{
   title: string
   imageUrl: string
   status?: string
+  goalAmount?: number
 }>()
 
 const emit = defineEmits<{
@@ -179,6 +180,7 @@ const showSettingsModal = ref(false)
 const selectedStatus = ref<'active' | 'paused' | 'completed'>(
   (props.status as any) || 'active'
 )
+const goalAmount = ref<number | null>(props.goalAmount ?? null)
 const isSavingSettings = ref(false)
 
 const showDeleteConfirmModal = ref(false)
@@ -187,9 +189,13 @@ const isDeletingCampaign = ref(false)
 const handleSaveSettings = async () => {
   isSavingSettings.value = true
   try {
-    await campaignService.updateCampaign(props.campaignId, {
+    const payload: any = {
       status: selectedStatus.value,
-    })
+    }
+    if (goalAmount.value && Number(goalAmount.value) > 0) {
+      payload.goalAmount = Math.round(Number(goalAmount.value))
+    }
+    await campaignService.updateCampaign(props.campaignId, payload)
     Notify.success(`Campaign status updated to "${selectedStatus.value}".`)
     emit('status-changed', selectedStatus.value)
     showSettingsModal.value = false
@@ -536,12 +542,32 @@ onMounted(() => {
             </button>
           </div>
 
+          <!-- Fundraising Goal -->
+          <div class="flex flex-col gap-2">
+            <label for="goalAmount" class="text-xs font-black text-slate-900 uppercase tracking-wider">Fundraising Goal (USD)</label>
+            <div class="relative">
+              <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">$</span>
+              <input
+                id="goalAmount"
+                v-model.number="goalAmount"
+                type="number"
+                min="1"
+                step="1"
+                placeholder="e.g. 5000"
+                class="w-full py-2.5 pl-7 pr-3.5 rounded-2xl border border-slate-200 bg-white text-sm font-bold text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#024731]/30 focus:border-[#024731]"
+              />
+            </div>
+            <p class="text-[10px] text-slate-400 font-medium">
+              The total amount this fundraiser aims to raise.
+            </p>
+          </div>
+
           <button
             @click="handleSaveSettings"
             :disabled="isSavingSettings"
             class="mt-2 py-3 px-5 bg-[#024731] hover:bg-[#013424] disabled:opacity-50 text-white font-bold text-xs rounded-2xl shadow-sm transition flex items-center justify-center gap-2 cursor-pointer">
             <span v-if="isSavingSettings" class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            <span>Save Status Changes</span>
+            <span>Save Changes</span>
           </button>
         </div>
 

@@ -83,6 +83,10 @@ export const useLandingStore = defineStore('landing', () => {
       })
 
       if (res?.paymentLink) {
+        // Donation accepted (hosted checkout). Optimistically reflect the
+        // contribution so progress bars update immediately whether or not the
+        // gateway completes the transaction right away.
+        bumpCounters(fund, amount)
         return { success: true, paymentLink: res.paymentLink, txRef: res.txRef }
       }
 
@@ -96,25 +100,29 @@ export const useLandingStore = defineStore('landing', () => {
       }
 
       // Update local fundraiser counters
-      fund.raisedAmount += amount
-      fund.donorCount += 1
+      bumpCounters(fund, amount)
       return { success: true, txRef: res?.txRef }
     } catch (err) {
       console.warn('Backend donation creation error (falling back to simulated donation):', err)
       // Simulate API latency & local update
       await new Promise((resolve) => setTimeout(resolve, 600))
-      fund.raisedAmount += amount
-      fund.donorCount += 1
-
-      // Save donation update to local storage if it's a custom campaign
-      const savedCampaigns = JSON.parse(localStorage.getItem('helpfund_campaigns') || '[]')
-      const index = savedCampaigns.findIndex((c: any) => c.id === id)
-      if (index !== -1) {
-        savedCampaigns[index].raisedAmount = fund.raisedAmount
-        savedCampaigns[index].donorCount = fund.donorCount
-        localStorage.setItem('helpfund_campaigns', JSON.stringify(savedCampaigns))
-      }
+      bumpCounters(fund, amount)
       return { success: true }
+    }
+  }
+
+  // Increment a fundraiser's raised amount and donor count, and persist the
+  // update for custom (localStorage) campaigns.
+  const bumpCounters = (fund: Fundraiser, amount: number) => {
+    fund.raisedAmount += amount
+    fund.donorCount += 1
+
+    const savedCampaigns = JSON.parse(localStorage.getItem('helpfund_campaigns') || '[]')
+    const index = savedCampaigns.findIndex((c: any) => c.id === fund.id)
+    if (index !== -1) {
+      savedCampaigns[index].raisedAmount = fund.raisedAmount
+      savedCampaigns[index].donorCount = fund.donorCount
+      localStorage.setItem('helpfund_campaigns', JSON.stringify(savedCampaigns))
     }
   }
 
