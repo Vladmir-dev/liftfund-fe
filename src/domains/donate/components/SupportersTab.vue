@@ -25,9 +25,7 @@ const fetchDonations = async () => {
   isLoadingDonations.value = true
   try {
     const list = await campaignService.listCampaignDonations(props.campaignId)
-    donations.value = (list || []).filter(
-      (d: any) => String(d.paymentStatus || '') === 'succeeded'
-    )
+    donations.value = list
   } catch (err) {
     console.warn('Could not load campaign donations:', err)
   } finally {
@@ -247,7 +245,11 @@ const handleCopyLink = () => {
             </div>
           </div>
 
-          <div class="text-right shrink-0">
+          <div class="text-right shrink-0 flex flex-col items-end gap-1">
+            <span v-if="String(donation.paymentStatus || '') !== 'succeeded'"
+              class="text-[9px] font-bold uppercase tracking-wide bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">
+              Pending
+            </span>
             <span class="font-black text-sm text-[#024731]">
               {{ donation.currency || currency }} {{ Number(donation.amount).toLocaleString() }}
             </span>

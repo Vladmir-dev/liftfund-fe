@@ -166,9 +166,7 @@ const fetchCampaignData = async () => {
     }
 
     if (donationsRes.status === 'fulfilled') {
-      donations.value = (donationsRes.value || []).filter(
-        (d: any) => String(d.paymentStatus || '') === 'succeeded'
-      )
+      donations.value = donationsRes.value || []
     }
   } catch (err: any) {
     console.warn('Could not load campaign from backend:', err)
@@ -691,9 +689,15 @@ const handleStartDonation = async () => {
                       : 'Recently' }}</span>
                   </div>
                 </div>
-                <span class="text-xs font-extrabold text-[#024731]">
-                  {{ d.currency }} {{ Number(d.amount).toLocaleString() }}
-                </span>
+                <div class="flex items-center gap-2">
+                  <span v-if="String(d.paymentStatus || '') !== 'succeeded'"
+                    class="text-[9px] font-bold uppercase tracking-wide bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded-full">
+                    Pending
+                  </span>
+                  <span class="text-xs font-extrabold text-[#024731]">
+                    {{ d.currency }} {{ Number(d.amount).toLocaleString() }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
