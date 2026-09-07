@@ -89,7 +89,7 @@ const campaign = computed(() => {
       targetAmount: Number(c.goalAmount) || 1000000,
       raisedAmount: Number(c.raisedAmount) || 0,
       donorCount: Number(c.donorCount) || donations.value.length,
-      currency: c.currency || 'USD',
+      currency: (c.currency && c.currency !== 'UGX') ? c.currency : 'USD',
       organizer: c.ownerName || 'Verified Organizer',
       location: locationStr,
       likeCount: liveData.value.likeCount || 0,
@@ -299,7 +299,7 @@ const toastMessage = ref('')
 
 // Donation Modal States
 const showDonateModal = ref(false)
-const donationAmount = ref<number>(50000)
+const donationAmount = ref<number>(25)
 const donorName = ref('')
 const donorEmail = ref('')
 const donorPhone = ref('')
@@ -345,7 +345,7 @@ const formatUgandanPhone = (phone: string): string => {
 }
 
 const openDonate = () => {
-  donationAmount.value = 50000
+  donationAmount.value = 25
   donorName.value = authStore.user?.name || ''
   donorEmail.value = authStore.user?.email || ''
   donorPhone.value = authStore.user?.phone || ''
@@ -699,7 +699,7 @@ const handleStartDonation = async () => {
                     Pending
                   </span>
                   <span class="text-xs font-extrabold text-[#024731]">
-                    {{ d.currency }} {{ Number(d.amount).toLocaleString() }}
+                    {{ (d.currency && d.currency !== 'UGX' ? d.currency : 'USD') }} {{ Number(d.amount).toLocaleString() }}
                   </span>
                 </div>
               </div>

@@ -69,9 +69,7 @@ const activeFundraiser = computed(() => {
 
 const openDonateModal = (id: string) => {
   activeFundraiserId.value = id
-  const f = store.fundraisers.find(item => item.id === id)
-  const isUgx = (f?.currency || 'UGX') === 'UGX'
-  donationAmount.value = isUgx ? 25000 : 25
+  donationAmount.value = 25
   donorName.value = ''
   donorEmail.value = ''
   donorPhone.value = ''
@@ -100,7 +98,7 @@ const handleDonate = async () => {
       name: donorName.value.trim() || undefined,
       email: donorEmail.value.trim() || 'donor@helpfund.org',
       phone: formattedPhone,
-      currency: activeFundraiser.value?.currency || 'USD',
+      currency: 'USD',
     })
 
     isDonating.value = false
@@ -415,7 +413,7 @@ const startFundraiser = () => {
               <!-- Progress Bar (GoFundMe Kelly Green) -->
               <div class="mt-auto pt-4 border-t border-slate-50">
                 <div class="flex items-center justify-between text-xs font-bold text-slate-700 mb-1">
-                  <span>{{ (fund.currency || 'USD') + ' ' + fund.raisedAmount.toLocaleString() }} raised</span>
+                  <span>{{ 'USD ' + fund.raisedAmount.toLocaleString() }} raised</span>
                   <span class="text-[#024731] font-black">{{ getProgressPercent(fund.raisedAmount, fund.targetAmount) }}%</span>
                 </div>
                 <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -599,7 +597,7 @@ const startFundraiser = () => {
             ✓
           </div>
           <h3 class="text-xl font-black text-slate-900 mb-1">Thank You!</h3>
-          <p class="text-slate-600 text-sm font-medium">Your donation of {{ activeFundraiser?.currency || 'USD' }} {{ Number(donationAmount).toLocaleString() }} was confirmed.</p>
+          <p class="text-slate-600 text-sm font-medium">Your donation of USD {{ Number(donationAmount).toLocaleString() }} was confirmed.</p>
         </div>
 
         <!-- Mobile Money authorization Prompt Step -->
@@ -628,7 +626,7 @@ const startFundraiser = () => {
           <div class="w-full bg-slate-50 rounded-2xl p-4 border border-slate-200/80 mb-4 text-left space-y-2.5">
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-500 font-semibold">Amount to Pay:</span>
-              <span class="font-black text-slate-900 text-sm">{{ activeFundraiser?.currency || 'USD' }} {{ Number(donationAmount).toLocaleString() }}</span>
+              <span class="font-black text-slate-900 text-sm">USD {{ Number(donationAmount).toLocaleString() }}</span>
             </div>
             <div class="flex items-center justify-between text-xs">
               <span class="text-slate-500 font-semibold">Recipient:</span>
@@ -696,7 +694,7 @@ const startFundraiser = () => {
           <div class="mb-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
             <div class="flex items-baseline justify-between text-slate-800 mb-1">
               <span class="text-xs text-slate-500 font-semibold">Current Progress</span>
-              <span class="text-xs font-bold">{{ activeFundraiser?.currency || 'USD' }} {{ activeFundraiser?.raisedAmount.toLocaleString() }} / {{ activeFundraiser?.targetAmount.toLocaleString() }}</span>
+              <span class="text-xs font-bold">USD {{ activeFundraiser?.raisedAmount.toLocaleString() }} / {{ activeFundraiser?.targetAmount.toLocaleString() }}</span>
             </div>
             <div class="w-full h-1.5 bg-slate-200 rounded-full overflow-hidden">
               <div class="h-full bg-[#02a95c] rounded-full"
@@ -706,17 +704,17 @@ const startFundraiser = () => {
 
           <form @submit.prevent="handleDonate" class="flex flex-col gap-3">
             <div class="flex flex-col">
-              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Donation Amount ({{ activeFundraiser?.currency || 'USD' }})</label>
+              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Donation Amount (USD)</label>
               <!-- Presets -->
               <div class="grid grid-cols-4 gap-1.5 mb-2">
-                <button v-for="amt in ((activeFundraiser?.currency || 'USD') === 'UGX' ? [10000, 25000, 50000, 100000] : [10, 25, 50, 100])"
+                <button v-for="amt in [10, 25, 50, 100]"
                   :key="amt" type="button" @click="donationAmount = amt"
                   class="py-2 rounded-xl border text-xs font-bold transition-all text-center cursor-pointer"
                   :class="donationAmount === amt ? 'bg-[#024731] border-[#024731] text-white shadow-xs' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-[#edfce0] hover:text-[#024731]' ">
-                  {{ (activeFundraiser?.currency || 'USD') === 'UGX' ? (amt / 1000) + 'k' : '$' + amt }}
+                  ${{ amt }}
                 </button>
               </div>
-              <input type="number" v-model="donationAmount" :min="(activeFundraiser?.currency || 'USD') === 'UGX' ? 1000 : 1" required
+              <input type="number" v-model="donationAmount" :min="1" required
                 class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-bold text-slate-800" />
             </div>
 
