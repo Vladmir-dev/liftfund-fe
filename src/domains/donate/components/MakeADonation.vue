@@ -49,7 +49,9 @@ const symbol = computed(() => (isUgx.value ? 'UGX' : '$'))
 
 const minAmount = computed(() => (isUgx.value ? 1000 : 1))
 
-const donationAmount = ref<number>(25)
+// Amount is never pre-selected: the payer must actively choose (chip or custom)
+// so the submitted amount always matches what was entered. Reset to 0 on open.
+const donationAmount = ref<number>(0)
 const donorName = ref('')
 const donorEmail = ref('')
 const isAnonymous = ref(false)
@@ -90,10 +92,10 @@ const coverImage = computed(() =>
 // -- Reset on open ------------------------------------------------------------
 
 watch(
-  () => [props.open, props.target?.id],
+  () => [props.open],
   () => {
     if (!props.open) return
-    donationAmount.value = isUgx.value ? 25000 : (presets.value[0] ?? 25)
+    donationAmount.value = 0
     donorName.value = authStore.user?.name || ''
     donorEmail.value = authStore.user?.email || ''
     isAnonymous.value = false
@@ -181,7 +183,7 @@ const submitDonation = async () => {
 }
 
 const typingAmount = (event: Event) => {
-  const value = (event.target as HTMLInputElement).value
+  const value = (event.target as HTMLInputElement).value.replace(/[^\d]/g, '')
   donationAmount.value = value === '' ? 0 : Number(value)
 }
 </script>
@@ -261,10 +263,10 @@ const typingAmount = (event: Event) => {
             </div>
 
             <!-- Custom amount -->
-            <div class="relative mb-5">
+            <div class="relative mb-1">
               <span class="absolute left-4 top-1/2 -translate-y-1/2 font-black text-sm text-slate-400">{{ symbol }}</span>
-              <input type="number" :value="donationAmount || ''" @input="typingAmount" :min="minAmount"
-                placeholder="Enter custom amount" step="1"
+              <input type="text" inputmode="numeric" :value="donationAmount || ''" @input="typingAmount"
+                placeholder="Enter custom amount"
                 class="w-full pl-12 pr-4 py-3 rounded-xl border-2 font-black text-sm text-slate-900 focus:outline-none focus:border-[#02a95c] transition placeholder:font-semibold placeholder:text-slate-300"
                 :class="presets.includes(donationAmount) ? 'border-slate-200' : 'border-[#02a95c] bg-[#f0fef5]'" />
 
@@ -272,6 +274,10 @@ const typingAmount = (event: Event) => {
                 Minimum donation is {{ formatMoney(minAmount) }}. Your generosity is tax-deductible.
               </p>
             </div>
+
+            <p class="text-xs font-bold text-slate-600 mb-3">
+              You'll donate: <span class="font-black text-[#024731]">{{ donationAmount > 0 ? formatMoney(donationAmount) : '—' }}</span>
+            </p>
 
             <div v-if="errorMessage" class="mb-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
               {{ errorMessage }}
