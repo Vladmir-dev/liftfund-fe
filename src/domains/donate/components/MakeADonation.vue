@@ -113,10 +113,6 @@ const goToDetails = () => {
     errorMessage.value = `Please enter an amount of at least ${formatMoney(minAmount.value)}.`
     return
   }
-  if (!donorEmail.value.trim() && !authStore.user?.email) {
-    errorMessage.value = 'Please provide an email address for your payment receipt.'
-    return
-  }
   errorMessage.value = ''
   modalStep.value = 'details'
 }
