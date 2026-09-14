@@ -198,7 +198,7 @@ export const useCampaignStore = defineStore('campaign', () => {
       }
 
       // 2. Prepare Category IDs
-      let catIds: string[] = []
+      const catIds: string[] = []
       if (selectedCategoryId.value && !selectedCategoryId.value.startsWith('cat-')) {
         catIds.push(selectedCategoryId.value)
       } else {

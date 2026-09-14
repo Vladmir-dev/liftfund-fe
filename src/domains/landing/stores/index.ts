@@ -5,7 +5,7 @@ import { campaignService } from '../../../services/campaign'
 import { rememberDonation } from '../../../services/donationSession'
 
 const formatUgandanPhone = (phone?: string): string => {
-  let cleaned = (phone || '').replace(/[\s\-\(\)]/g, '')
+  const cleaned = (phone || '').replace(/[\s-()]/g, '')
   if (!cleaned) return '+256700000000'
   if (cleaned.startsWith('+')) return cleaned
   if (cleaned.startsWith('0')) return '+256' + cleaned.slice(1)

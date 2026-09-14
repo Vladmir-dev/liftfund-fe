@@ -39,7 +39,7 @@ onMounted(() => {
 
 const getDonationMessage = (donation: any): string => {
   if (!donation) return ''
-  let val = donation.message
+  const val = donation.message
   if (!val) return ''
 
   // If val is a JSON-encoded string like '{"String":"...","Valid":true}'
@@ -70,7 +70,7 @@ const getDonationMessage = (donation: any): string => {
 const getDonorName = (donation: any): string => {
   if (!donation) return 'Generous Donor'
   if (donation.isAnonymous) return 'Anonymous Supporter'
-  let val = donation.donorName
+  const val = donation.donorName
   if (!val) return 'Generous Donor'
 
   if (typeof val === 'string' && val.trim().startsWith('{')) {

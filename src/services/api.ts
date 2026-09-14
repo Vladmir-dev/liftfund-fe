@@ -88,7 +88,7 @@ export async function request<T = any>(
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...((options.headers as Record<string, string>) || {}),
+    ...(options.headers as Record<string, string>),
   }
 
   // Inject token if present and not already provided

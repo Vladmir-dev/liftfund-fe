@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useLandingStore } from '../../landing/stores'
 import { useAuthStore } from '../../../stores/auth'
 import { storeToRefs } from 'pinia'
@@ -11,16 +11,13 @@ import {
   type CampaignDonation,
   type CampaignTeamMember,
   type CampaignImage,
-  type BackendCampaign,
 } from '../../../services/campaign'
 import NavHeader from '../../landing/components/NavHeader.vue'
 import MainFooter from '../../landing/components/MainFooter.vue'
+import MakeADonation from '../components/MakeADonation.vue'
 import { Notify } from '../../../utils/notify'
-import { rememberDonation } from '../../../services/donationSession'
-import { redirectToGateway } from '../../../services/gatewayRedirect'
 
 const route = useRoute()
-const router = useRouter()
 const landingStore = useLandingStore()
 const authStore = useAuthStore()
 const { fundraisers } = storeToRefs(landingStore)
@@ -297,19 +294,36 @@ const handleShare = async (platform: string) => {
 const showToast = ref(false)
 const toastMessage = ref('')
 
-// Donation Modal States
+// Donation Modal State
 const showDonateModal = ref(false)
-const donationAmount = ref<number>(25)
-const donorName = ref('')
-const donorEmail = ref('')
-const donorPhone = ref('')
-const donorComment = ref('')
-const isAnonymous = ref(false)
-const isSubmittingDonation = ref(false)
-const donationError = ref('')
-const modalStep = ref<'form' | 'success'>('form')
 
-const presetAmounts = [10, 25, 50, 100, 250]
+const donationTarget = computed(() => {
+  if (!campaign.value) return null
+  return {
+    id: campaignId.value,
+    title: campaign.value.title,
+    imageUrl: campaign.value.imageUrl,
+    currency: campaign.value.currency || 'USD',
+    raisedAmount: Number(campaign.value.raisedAmount) || 0,
+    targetAmount: Number(campaign.value.targetAmount) || 0,
+    donorCount: Number(campaign.value.donorCount) || 0,
+    organizer: campaign.value.organizer,
+  }
+})
+
+const openDonate = () => {
+  showDonateModal.value = true
+}
+
+const handleDonationCompleted = (amount: number) => {
+  // Optimistically reflect the contribution so the sidebar/status and progress
+  // bar update right away (the backend confirm via verify/webhook may lag).
+  if (liveData.value?.campaign) {
+    const lc = liveData.value.campaign as { raisedAmount?: number; donorCount?: number }
+    lc.raisedAmount = (Number(lc.raisedAmount) || 0) + Number(amount)
+    lc.donorCount = (Number(lc.donorCount) || 0) + 1
+  }
+}
 
 const getDonorName = (donation: any): string => {
   if (!donation) return 'Supporter'
@@ -333,105 +347,6 @@ const getDonorName = (donation: any): string => {
   }
 
   return val || 'Supporter'
-}
-
-const formatUgandanPhone = (phone: string): string => {
-  let cleaned = (phone || '').replace(/[\s\-\(\)]/g, '')
-  if (!cleaned) return '+256700000000'
-  if (cleaned.startsWith('+')) return cleaned
-  if (cleaned.startsWith('0')) return '+256' + cleaned.slice(1)
-  if (cleaned.startsWith('256')) return '+' + cleaned
-  return '+256' + cleaned
-}
-
-const openDonate = () => {
-  donationAmount.value = 25
-  donorName.value = authStore.user?.name || ''
-  donorEmail.value = authStore.user?.email || ''
-  donorPhone.value = authStore.user?.phone || ''
-  donorComment.value = ''
-  isAnonymous.value = false
-  donationError.value = ''
-  isSubmittingDonation.value = false
-  modalStep.value = 'form'
-  showDonateModal.value = true
-}
-
-const closeDonate = () => {
-  showDonateModal.value = false
-  modalStep.value = 'form'
-}
-
-const handleStartDonation = async () => {
-  if (donationAmount.value <= 0 || !campaign.value) return
-  if (!donorEmail.value && !authStore.user?.email) {
-    donationError.value = 'Please provide an email address for your payment receipt.'
-    return
-  }
-
-  isSubmittingDonation.value = true
-  donationError.value = ''
-
-  try {
-    const formattedPhone = formatUgandanPhone(donorPhone.value)
-
-    // 1. Create donation in backend with card payment method
-    const res = await campaignService.createDonation({
-      campaignId: campaignId.value,
-      amount: donationAmount.value,
-      currency: campaign.value.currency || 'USD',
-      isAnonymous: isAnonymous.value,
-      donorName: isAnonymous.value ? 'Anonymous' : (donorName.value.trim() || 'Supporter'),
-      email: donorEmail.value.trim() || authStore.user?.email || 'donor@helpfund.org',
-      phone: formattedPhone,
-      message: donorComment.value.trim() || undefined,
-      paymentMethod: 'card',
-    })
-
-    // 2. If MarzPay returned a payment link (hosted card gateway or redirect URL):
-    if (res.paymentLink) {
-      // Optimistically reflect the contribution so the progress bar updates
-      // right away (the backend confirm via verify/webhook may lag behind).
-      if (liveData.value?.campaign) {
-        const lc = liveData.value.campaign as any
-        lc.raisedAmount = (Number(lc.raisedAmount) || 0) + Number(donationAmount.value)
-        lc.donorCount = (Number(lc.donorCount) || 0) + 1
-      }
-      rememberDonation(res.txRef)
-      Notify.info('Redirecting to secure checkout...')
-      redirectToGateway(res.paymentLink)
-      return
-    }
-
-    // 3. If direct/sandbox completion with txRef:
-    if (res.txRef) {
-      if (liveData.value?.campaign) {
-        const lc = liveData.value.campaign as any
-        lc.raisedAmount = (Number(lc.raisedAmount) || 0) + Number(donationAmount.value)
-        lc.donorCount = (Number(lc.donorCount) || 0) + 1
-      }
-      rememberDonation(res.txRef)
-      try {
-        await campaignService.verifyDonation({ txRef: res.txRef })
-      } catch (_) {}
-      router.push({
-        path: '/donations/success',
-        query: { txRef: res.txRef, status: 'successful' }
-      })
-      return
-    }
-
-    modalStep.value = 'success'
-    Notify.success(
-      `Thank you! Your donation of ${campaign.value?.currency} ${Number(donationAmount.value).toLocaleString()} has been received.`
-    )
-    await fetchCampaignData()
-  } catch (err: any) {
-    donationError.value = err.message || 'Failed to initiate donation. Please try again.'
-    Notify.failure(donationError.value)
-  } finally {
-    isSubmittingDonation.value = false
-  }
 }
 </script>
 
@@ -792,122 +707,9 @@ const handleStartDonation = async () => {
       <span>{{ toastMessage }}</span>
     </div>
 
-    <!-- Donation Modal Dialog with Flutterwave Integration -->
-    <div v-if="showDonateModal"
-      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
-      <div
-        class="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-2rem)] overflow-y-auto p-4 sm:p-6 border border-slate-100 shadow-2xl relative animate-in fade-in zoom-in-95 duration-250">
-
-        <button @click="closeDonate"
-          class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 text-xl cursor-pointer">
-          <iconify-icon icon="ph:x-bold"></iconify-icon>
-        </button>
-
-        <!-- Success view -->
-        <div v-if="modalStep === 'success'" class="py-8 flex flex-col items-center justify-center text-center">
-          <div
-            class="w-16 h-16 rounded-full bg-[#edfce0] border border-[#bbf770] flex items-center justify-center text-3xl mb-4 text-[#02a95c]">
-            <iconify-icon icon="ph:sparkle-fill" class="animate-ping absolute w-6 h-6 opacity-30"></iconify-icon>
-            <iconify-icon icon="ph:check-circle-fill"></iconify-icon>
-          </div>
-          <h3 class="text-xl font-bold text-slate-950 mb-1">Thank you for your support!</h3>
-          <p class="text-slate-500 text-xs font-semibold">
-            Your donation of {{ campaign.currency }} {{ Number(donationAmount).toLocaleString() }} has been confirmed.
-          </p>
-        </div>
-
-        <!-- Donation Form -->
-        <div v-else>
-          <div class="flex items-center justify-between mb-1.5">
-            <h3 class="text-lg font-bold text-slate-900 flex items-center gap-2 text-left">
-              <iconify-icon icon="ph:credit-card-bold" class="text-[#024731] text-xl"></iconify-icon>
-              <span>Donate with Card</span>
-            </h3>
-            <span
-              class="inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#edfce0] text-[#024731] border border-[#bbf770]">
-              <iconify-icon icon="ph:shield-check-fill" class="text-xs text-[#02a95c]"></iconify-icon>
-              <span>Secure Card</span>
-            </span>
-          </div>
-          <p class="text-slate-400 text-xs mb-3 text-left font-semibold">Processed securely with PCI-compliant card processing.</p>
-
-          <div v-if="donationError"
-            class="mb-3 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold text-left">
-            {{ donationError }}
-          </div>
-
-          <!-- Quick Select in USD -->
-          <div class="grid grid-cols-3 gap-2 mb-3">
-            <button v-for="amt in presetAmounts" :key="amt" type="button" @click="donationAmount = amt"
-              class="py-2 px-1 rounded-xl border font-bold text-[11px] transition-all cursor-pointer"
-              :class="donationAmount === amt ? 'bg-[#edfce0] border-[#024731] text-[#024731] shadow-xs' : 'bg-slate-50 border-slate-200 hover:border-[#024731] text-slate-700'">
-              ${{ amt.toLocaleString() }}
-            </button>
-          </div>
-
-          <!-- Custom Amount input -->
-          <div class="mb-3 text-left">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Custom
-              Amount</label>
-            <div
-              class="relative rounded-xl border border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-[#024731] focus-within:border-transparent transition-all">
-              <span class="absolute left-3.5 top-3.5 font-bold text-xs text-slate-500">$</span>
-              <input type="number" v-model="donationAmount"
-                class="w-full pl-14 pr-4 py-2.5 focus:outline-none text-sm font-bold text-slate-800" min="1"
-                step="1" />
-            </div>
-          </div>
-
-          <!-- Name & Email fields -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-2 text-left">
-            <div>
-              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Your Name</label>
-              <input type="text" v-model="donorName" :disabled="isAnonymous" placeholder="John Doe"
-                class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold disabled:bg-slate-100" />
-            </div>
-            <div>
-              <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Email
-                (Receipt)</label>
-              <input type="email" v-model="donorEmail" required placeholder="donor@example.com"
-                class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold" />
-            </div>
-          </div>
-
-          <!-- Phone Number field (Optional / Receipt) -->
-          <!--
-          <div class="mb-2 text-left">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Phone Number (Optional)</label>
-            <input type="tel" v-model="donorPhone" placeholder="+256 700 000 000"
-              class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold" />
-          </div>
-          -->
-
-          <!-- Anonymous check -->
-          <label class="flex items-center gap-2 mb-2 cursor-pointer text-left">
-            <input type="checkbox" v-model="isAnonymous"
-              class="rounded border-slate-300 text-[#024731] focus:ring-[#024731]" />
-            <span class="text-xs text-slate-600 font-semibold">Make my donation anonymous</span>
-          </label>
-
-          <!-- Comment field -->
-          <div class="mb-3 text-left">
-            <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-1">Message of
-              Support</label>
-            <textarea v-model="donorComment" placeholder="Send words of encouragement..."
-              class="w-full px-3 py-1.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-xs font-semibold h-14 resize-none"></textarea>
-          </div>
-
-          <!-- Action -->
-          <button @click="handleStartDonation" :disabled="donationAmount <= 0 || isSubmittingDonation"
-            class="w-full py-3 bg-[#024731] hover:bg-[#013424] disabled:bg-slate-200 text-white font-bold text-xs rounded-xl shadow-md disabled:shadow-none transition-all flex items-center justify-center gap-2 cursor-pointer">
-            <span v-if="isSubmittingDonation"
-              class="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-            <span>{{ isSubmittingDonation ? 'Connecting to secure checkout...' : 'Pay with Card ($' + Number(donationAmount).toLocaleString() + ')' }}</span>
-          </button>
-        </div>
-
-      </div>
-    </div>
+    <!-- GoFundMe-style Donation Modal -->
+    <MakeADonation :open="showDonateModal" :target="donationTarget"
+      @update:open="showDonateModal = $event" @completed="handleDonationCompleted" />
 
     <!-- Delete Comment Confirmation Modal -->
     <div v-if="commentToDelete"

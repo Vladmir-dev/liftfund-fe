@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useLandingStore } from '../../landing/stores'
 import { storeToRefs } from 'pinia'
 import NavHeader from '../../landing/components/NavHeader.vue'
 import MainFooter from '../../landing/components/MainFooter.vue'
-import { redirectToGateway } from '../../../services/gatewayRedirect'
+import MakeADonation from '../components/MakeADonation.vue'
 
 const store = useLandingStore()
 const { categories, searchQuery, selectedCategory, filteredFundraisers } = storeToRefs(store)
@@ -14,39 +14,15 @@ const closeDropdowns = () => {
   navHeaderRef.value?.closeDropdowns()
 }
 
-// Simulated Donation Action
+// Donation Modal
 const activeFundraiserId = ref<string | null>(null)
-const donationAmount = ref<number>(25)
-const isDonating = ref(false)
-const donationSuccess = ref(false)
+
+const activeFundraiser = computed(() => {
+  return store.fundraisers.find(f => f.id === activeFundraiserId.value) || null
+})
 
 const openDonateModal = (id: string) => {
   activeFundraiserId.value = id
-  donationAmount.value = 25
-  donationSuccess.value = false
-  isDonating.value = false
-}
-
-const closeDonateModal = () => {
-  activeFundraiserId.value = null
-}
-
-const handleDonate = async () => {
-  if (activeFundraiserId.value && donationAmount.value > 0) {
-    isDonating.value = true
-    const result = await store.donateToFundraiser(activeFundraiserId.value, donationAmount.value)
-    isDonating.value = false
-    if (result?.paymentLink) {
-      redirectToGateway(result.paymentLink)
-      return
-    }
-    if (result?.success) {
-      donationSuccess.value = true
-      setTimeout(() => {
-        closeDonateModal()
-      }, 1500)
-    }
-  }
 }
 
 const getProgressPercent = (raised: number, target: number) => {
@@ -167,39 +143,8 @@ const getProgressPercent = (raised: number, target: number) => {
 
     <MainFooter />
 
-    <!-- Simulate Donation Modal -->
-    <div v-if="activeFundraiserId" class="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-950/60 backdrop-blur-sm" @click.self="closeDonateModal">
-      <div class="bg-white rounded-2xl sm:rounded-3xl w-full max-w-md max-h-[calc(100vh-1rem)] sm:max-h-[calc(100vh-2rem)] overflow-y-auto p-4 sm:p-6 border border-slate-100 shadow-2xl animate-scale text-left relative">
-        <button @click="closeDonateModal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-700 p-1 cursor-pointer">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-
-        <div v-if="donationSuccess" class="py-12 flex flex-col items-center justify-center text-center">
-          <div class="w-16 h-16 rounded-full bg-[#edfce0] text-[#02a95c] border-2 border-[#bbf770] flex items-center justify-center text-3xl mb-4 animate-bounce font-black">
-            ✓
-          </div>
-          <h3 class="text-xl font-black text-slate-900 mb-1">Thank You!</h3>
-          <p class="text-slate-600 text-sm font-medium">Your simulated donation of ${{ donationAmount }} was received.</p>
-        </div>
-
-        <div v-else>
-          <span class="text-xs text-[#024731] font-black uppercase tracking-wider">Simulate Donation</span>
-          <h3 class="text-lg font-black text-slate-900 mt-1 mb-4 leading-tight">
-            {{ store.fundraisers.find(f => f.id === activeFundraiserId)?.title }}
-          </h3>
-
-          <form @submit.prevent="handleDonate" class="flex flex-col gap-4">
-            <div class="flex flex-col">
-              <label class="text-xs text-slate-600 font-bold mb-1.5">Donation Amount ($)</label>
-              <input type="number" v-model="donationAmount" min="5" required class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-sm" />
-            </div>
-            <button type="submit" :disabled="isDonating" class="w-full bg-[#024731] hover:bg-[#013424] text-white text-sm font-bold py-3.5 rounded-xl transition-all shadow-md shadow-emerald-950/20 flex items-center justify-center gap-2 cursor-pointer">
-              <span v-if="isDonating" class="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              <span>Confirm Donation</span>
-            </button>
-          </form>
-        </div>
-      </div>
-    </div>
+    <!-- GoFundMe-style Donation Modal -->
+    <MakeADonation :open="!!activeFundraiserId" :target="activeFundraiser"
+      @update:open="activeFundraiserId = $event ? activeFundraiserId : null" />
   </div>
 </template>
