@@ -56,6 +56,7 @@ const donorName = ref('')
 const donorEmail = ref('')
 const isAnonymous = ref(false)
 const message = ref('')
+const paymentMethod = ref<'paypal' | 'card'>('paypal')
 
 const formatMoney = (n: number): string => {
   const value = Number(n) || 0
@@ -142,7 +143,7 @@ const submitDonation = async () => {
       donorName: isAnonymous.value ? 'Anonymous' : (donorName.value.trim() || 'Supporter'),
       email,
       message: message.value.trim() || undefined,
-      paymentMethod: 'card',
+      paymentMethod: paymentMethod.value,
     })
 
     // Hosted checkout: remember the tx and hand off to the secure gateway page.
@@ -339,6 +340,30 @@ const typingAmount = (event: Event) => {
                 </label>
                 <textarea v-model="message" rows="2" placeholder="Send words of encouragement..."
                   class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#024731] text-sm font-medium resize-none"></textarea>
+              </div>
+
+              <div class="flex flex-col">
+                <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Payment method</label>
+                <div class="grid grid-cols-2 gap-2.5">
+                  <button type="button" @click="paymentMethod = 'paypal'"
+                    class="flex items-center gap-2.5 px-3.5 py-3 rounded-xl border-2 transition-all cursor-pointer"
+                    :class="paymentMethod === 'paypal' ? 'border-[#024731] bg-[#f0fef5]' : 'border-slate-200 hover:border-slate-300'">
+                    <iconify-icon icon="ic:baseline-paypal" class="text-xl text-[#003087]"></iconify-icon>
+                    <span class="flex flex-col items-start">
+                      <span class="text-xs font-black text-slate-900">PayPal</span>
+                      <span class="text-[10px] font-semibold text-slate-400">Pay with PayPal</span>
+                    </span>
+                  </button>
+                  <button type="button" @click="paymentMethod = 'card'"
+                    class="flex items-center gap-2.5 px-3.5 py-3 rounded-xl border-2 transition-all cursor-pointer"
+                    :class="paymentMethod === 'card' ? 'border-[#024731] bg-[#f0fef5]' : 'border-slate-200 hover:border-slate-300'">
+                    <iconify-icon icon="ph:credit-card-fill" class="text-xl text-[#024731]"></iconify-icon>
+                    <span class="flex flex-col items-start">
+                      <span class="text-xs font-black text-slate-900">Card</span>
+                      <span class="text-[10px] font-semibold text-slate-400">Powered by Stripe</span>
+                    </span>
+                  </button>
+                </div>
               </div>
 
               <div v-if="errorMessage" class="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold">
