@@ -405,6 +405,13 @@ const getDonorName = (donation: any): string => {
           <span>{{ progressPercent }}% completed</span>
           <span>{{ campaign.donorCount }} donation{{ campaign.donorCount === 1 ? '' : 's' }}</span>
         </div>
+        <button @click="openDonate" :disabled="campaignStatus === 'paused' || campaignStatus === 'completed'"
+          class="mt-4 w-full bg-[#024731] hover:bg-[#013424] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-sm py-3.5 rounded-2xl shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer">
+          <iconify-icon
+            :icon="campaignStatus === 'paused' ? 'ph:pause-circle-fill' : campaignStatus === 'completed' ? 'ph:flag-checkered-fill' : 'ph:heart-fill'"
+            class="text-lg"></iconify-icon>
+          <span>{{ campaignStatus === 'paused' ? 'Donations paused' : campaignStatus === 'completed' ? 'Goal reached' : 'Donate now' }}</span>
+        </button>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 relative items-start">
@@ -464,6 +471,21 @@ const getDonorName = (donation: any): string => {
             </span>
           </div>
 
+          <!-- Call to action card -->
+          <div
+            class="bg-[#edfce0]/60 border border-[#bbf770]/60 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex-1">
+              <h4 class="text-base font-bold text-[#024731] mb-1">Make an impact today</h4>
+              <p class="text-xs text-slate-600 leading-relaxed font-semibold">
+                Every contribution directly supports {{ campaign.organizer }}'s verified fundraising goal.
+              </p>
+            </div>
+            <button @click="openDonate" :disabled="campaignStatus === 'paused' || campaignStatus === 'completed'"
+              class="bg-[#024731] hover:bg-[#013424] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs px-6 py-3 rounded-full transition-all shrink-0 cursor-pointer shadow-md">
+              {{ campaignStatus === 'paused' ? 'Donations Paused' : campaignStatus === 'completed' ? 'Goal Reached' : 'Donate Now' }}
+            </button>
+          </div>
+
           <!-- Campaign Narrative / Story -->
           <article
             class="prose prose-slate max-w-none text-slate-700 leading-relaxed text-sm lg:text-base whitespace-pre-line py-2 font-medium">
@@ -487,21 +509,6 @@ const getDonorName = (donation: any): string => {
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Call to action card -->
-          <div
-            class="bg-[#edfce0]/60 border border-[#bbf770]/60 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div class="flex-1">
-              <h4 class="text-base font-bold text-[#024731] mb-1">Make an impact today</h4>
-              <p class="text-xs text-slate-600 leading-relaxed font-semibold">
-                Every contribution directly supports {{ campaign.organizer }}'s verified fundraising goal.
-              </p>
-            </div>
-            <button @click="openDonate" :disabled="campaignStatus === 'paused' || campaignStatus === 'completed'"
-              class="bg-[#024731] hover:bg-[#013424] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold text-xs px-6 py-3 rounded-full transition-all shrink-0 cursor-pointer shadow-md">
-              {{ campaignStatus === 'paused' ? 'Donations Paused' : campaignStatus === 'completed' ? 'Goal Reached' : 'Donate Now' }}
-            </button>
           </div>
 
           <!-- Sharing Section -->

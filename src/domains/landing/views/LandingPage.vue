@@ -262,8 +262,8 @@ const startFundraiser = () => {
 
         <!-- Cards Grid -->
         <div v-if="filteredFundraisers.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          <div v-for="fund in filteredFundraisers" :key="fund.id"
-            class="flex flex-col bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1">
+          <div v-for="fund in filteredFundraisers" :key="fund.id" @click="router.push('/campaign/' + fund.id)"
+            class="flex flex-col bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group hover:-translate-y-1 cursor-pointer">
             <!-- Thumbnail Image -->
             <div class="aspect-video relative overflow-hidden bg-slate-100">
               <img :src="fund.imageUrl"
@@ -310,7 +310,7 @@ const startFundraiser = () => {
               </div>
 
               <!-- Quick Donate -->
-              <button @click="openDonateModal(fund.id)"
+              <button @click.stop="openDonateModal(fund.id)"
                 class="w-full mt-4 bg-[#edfce0] hover:bg-[#024731] hover:text-white text-[#024731] text-xs font-bold py-2.5 rounded-xl transition-all border border-[#bbf770] hover:border-[#024731] text-center cursor-pointer">
                 Donate Now
               </button>
