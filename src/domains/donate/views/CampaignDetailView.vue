@@ -413,10 +413,9 @@ const getDonorName = (donation: any): string => {
         <div class="lg:col-span-8 flex flex-col gap-8">
 
           <!-- Media Container -->
-          <div
-            class="aspect-video w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 shadow-sm relative group">
-            <img v-if="campaign.imageUrl" :src="campaign.imageUrl" class="w-full h-full object-cover" />
-            <div v-else class="w-full h-full bg-[#edfce0] flex items-center justify-center">
+          <div class="w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 shadow-sm relative">
+            <img v-if="campaign.imageUrl" :src="campaign.imageUrl" class="w-full h-auto block" />
+            <div v-else class="w-full aspect-video bg-[#edfce0] flex items-center justify-center">
               <iconify-icon icon="lucide:sunrise" class="text-[#02a95c] text-6xl"></iconify-icon>
             </div>
             <span

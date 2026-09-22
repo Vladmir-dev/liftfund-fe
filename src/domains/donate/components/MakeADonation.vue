@@ -204,7 +204,7 @@ const typingAmount = (event: Event) => {
 
           <!-- Cover strip -->
           <div class="relative h-28 sm:h-32 bg-slate-200 w-full overflow-hidden rounded-t-3xl">
-            <img :src="coverImage" class="w-full h-full object-cover" alt="" />
+            <img :src="coverImage" class="w-full h-full object-contain" alt="" />
             <div class="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent"></div>
             <div class="absolute bottom-3 left-4 right-4 flex items-end gap-2.5">
               <div
