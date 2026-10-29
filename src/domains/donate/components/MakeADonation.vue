@@ -56,7 +56,7 @@ const donorName = ref('')
 const donorEmail = ref('')
 const isAnonymous = ref(false)
 const message = ref('')
-const paymentMethod = ref<'paypal' | 'card'>('card')
+const paymentMethod = ref<'paypal' | 'card'>('paypal')
 
 const formatMoney = (n: number): string => {
   const value = Number(n) || 0
@@ -344,9 +344,8 @@ const typingAmount = (event: Event) => {
 
               <div class="flex flex-col">
                 <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Payment method</label>
-                <div class="grid grid-cols-1 gap-2.5">
-                  <!-- PayPal temporarily disabled: cannot withdraw funds -->
-                  <!-- <button type="button" @click="paymentMethod = 'paypal'"
+                <div class="grid grid-cols-2 gap-2.5">
+                  <button type="button" @click="paymentMethod = 'paypal'"
                     class="flex items-center gap-2.5 px-3.5 py-3 rounded-xl border-2 transition-all cursor-pointer"
                     :class="paymentMethod === 'paypal' ? 'border-[#024731] bg-[#f0fef5]' : 'border-slate-200 hover:border-slate-300'">
                     <iconify-icon icon="ic:baseline-paypal" class="text-xl text-[#003087]"></iconify-icon>
@@ -354,7 +353,7 @@ const typingAmount = (event: Event) => {
                       <span class="text-xs font-black text-slate-900">PayPal</span>
                       <span class="text-[10px] font-semibold text-slate-400">Pay with PayPal</span>
                     </span>
-                  </button> -->
+                  </button>
                   <button type="button" @click="paymentMethod = 'card'"
                     class="flex items-center gap-2.5 px-3.5 py-3 rounded-xl border-2 transition-all cursor-pointer"
                     :class="paymentMethod === 'card' ? 'border-[#024731] bg-[#f0fef5]' : 'border-slate-200 hover:border-slate-300'">
