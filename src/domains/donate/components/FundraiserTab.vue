@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   campaignService,
@@ -14,6 +14,7 @@ const props = defineProps<{
   imageUrl: string
   status?: string
   goalAmount?: number
+  hideDonations?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -21,6 +22,7 @@ const emit = defineEmits<{
   (e: 'transfers'): void
   (e: 'edit'): void
   (e: 'status-changed', newStatus: string): void
+  (e: 'hide-donations-changed', hidden: boolean): void
 }>()
 
 const router = useRouter()
@@ -181,7 +183,15 @@ const selectedStatus = ref<'active' | 'paused' | 'completed'>(
   (props.status as any) || 'active'
 )
 const goalAmount = ref<number | null>(props.goalAmount ?? null)
+const hideDonations = ref<boolean>(!!props.hideDonations)
 const isSavingSettings = ref(false)
+
+watch(
+  () => props.hideDonations,
+  (value) => {
+    hideDonations.value = !!value
+  }
+)
 
 const showDeleteConfirmModal = ref(false)
 const isDeletingCampaign = ref(false)
@@ -191,6 +201,7 @@ const handleSaveSettings = async () => {
   try {
     const payload: any = {
       status: selectedStatus.value,
+      hideDonations: hideDonations.value,
     }
     if (goalAmount.value && Number(goalAmount.value) > 0) {
       payload.goalAmount = Math.round(Number(goalAmount.value))
@@ -198,6 +209,7 @@ const handleSaveSettings = async () => {
     await campaignService.updateCampaign(props.campaignId, payload)
     Notify.success(`Campaign status updated to "${selectedStatus.value}".`)
     emit('status-changed', selectedStatus.value)
+    emit('hide-donations-changed', hideDonations.value)
     showSettingsModal.value = false
   } catch (err: any) {
     Notify.failure(err.message || 'Failed to update campaign status')
@@ -539,6 +551,33 @@ onMounted(() => {
               <iconify-icon icon="ph:flag-checkered-bold" class="text-lg"></iconify-icon>
               <span class="text-xs">Completed</span>
               <span class="text-[9px] text-slate-400 font-normal">Goal reached</span>
+            </button>
+          </div>
+
+          <!-- Donation Visibility -->
+          <div class="rounded-2xl border p-3.5 flex items-start justify-between gap-3 transition"
+            :class="hideDonations ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'">
+            <div class="text-left">
+              <div class="flex items-center gap-1.5">
+                <iconify-icon icon="ph:eye-slash-bold" class="text-sm"
+                  :class="hideDonations ? 'text-amber-700' : 'text-slate-500'"></iconify-icon>
+                <span class="text-xs font-black text-slate-900">Hide donations</span>
+              </div>
+              <p class="text-[10px] text-slate-500 font-medium leading-relaxed mt-1">
+                Payments keep working, but new donations are not shown publicly and do not count toward
+                your raised total. Donations made while this is on stay hidden permanently.
+              </p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              :aria-checked="hideDonations"
+              @click="hideDonations = !hideDonations"
+              class="relative w-11 h-6 rounded-full shrink-0 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#024731]/30"
+              :class="hideDonations ? 'bg-amber-500' : 'bg-slate-300'">
+              <span
+                class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
+                :class="hideDonations ? 'translate-x-5' : 'translate-x-0'"></span>
             </button>
           </div>
 

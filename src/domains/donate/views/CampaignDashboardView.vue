@@ -32,6 +32,7 @@ interface DashboardCampaign {
   donorCount: number
   isPublished?: boolean
   status?: string
+  hideDonations?: boolean
 }
 
 const route = useRoute()
@@ -165,6 +166,7 @@ const loadDashboardData = async () => {
         donorCount: c.donorCount || 0,
         isPublished: c.status === 'active',
         status: c.status || 'active',
+        hideDonations: !!c.hideDonations,
       }
 
       // Fetch donor count
@@ -192,6 +194,12 @@ const handleStatusChanged = (newStatus: string) => {
   if (dashboardCampaign.value) {
     dashboardCampaign.value.status = newStatus
     dashboardCampaign.value.isPublished = newStatus === 'active'
+  }
+}
+
+const handleHideDonationsChanged = (hidden: boolean) => {
+  if (dashboardCampaign.value) {
+    dashboardCampaign.value.hideDonations = hidden
   }
 }
 
@@ -303,6 +311,11 @@ const handlePostUpdate = (text: string) => {
         <div class="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm flex items-center justify-between gap-4">
           <div class="text-xs text-slate-500 font-bold text-left">
             HI, {{ fundraiser.organizer.split(' ')[0] }} &bull; <span class="text-slate-400">Managing {{ fundraiser.title }}</span>
+            <span v-if="fundraiser.hideDonations"
+              class="ml-2 inline-flex items-center gap-1 align-middle rounded-full bg-amber-100 text-amber-800 px-2 py-0.5 text-[10px] font-black uppercase tracking-wide">
+              <iconify-icon icon="ph:eye-slash-bold"></iconify-icon>
+              Donations hidden
+            </span>
           </div>
           <div class="flex items-center gap-2.5">
             <button @click="openEditModal"
@@ -371,10 +384,12 @@ const handlePostUpdate = (text: string) => {
           :imageUrl="fundraiser.imageUrl"
           :status="fundraiser.status"
           :goalAmount="fundraiser.targetAmount"
+          :hideDonations="fundraiser.hideDonations"
           @post-update="activeTab = 'updates'"
           @transfers="activeTab = 'transfers'"
           @edit="openEditModal"
           @status-changed="handleStatusChanged"
+          @hide-donations-changed="handleHideDonationsChanged"
         />
 
       </div>

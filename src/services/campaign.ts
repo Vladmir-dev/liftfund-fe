@@ -80,6 +80,7 @@ export interface BackendCampaign {
   currency: string
   coverImageUrl?: { String: string; Valid: boolean } | string
   status: 'draft' | 'active' | 'paused' | 'completed' | 'cancelled'
+  hideDonations?: boolean
   location?: { String: string; Valid: boolean } | string
   createdAt: string
   endsAt?: { Time: string; Valid: boolean } | string
@@ -257,6 +258,7 @@ export interface UpdateCampaignPayload {
   location?: string
   status?: string
   isFeatured?: boolean
+  hideDonations?: boolean
   endsAt?: string
   goalAmount?: number
 }
@@ -441,7 +443,9 @@ export const campaignService = {
   // List donations for a campaign
   async listCampaignDonations(campaignId: string, page: number = 1, limit: number = 50): Promise<CampaignDonation[]> {
     const res = await request<any>(`/api/v1/campaigns/${campaignId}/donations?page=${page}&limit=${limit}`)
-    return Array.isArray(res) ? res : (res?.donations || res?.content || [])
+    const list = Array.isArray(res) ? res : (res?.donations || res?.content || [])
+    // Only settled, publicly visible donations should ever reach the UI.
+    return (list || []).filter((d: any) => d?.paymentStatus === 'succeeded' && !d?.hidden)
   },
 
   // Request a withdrawal / payout
@@ -592,7 +596,7 @@ export const campaignService = {
     const res = await request<any>(`/api/v1/campaigns/me/donations?page=${page}&limit=${limit}`)
     const list = Array.isArray(res) ? res : (res?.content || [])
     return {
-      content: list,
+      content: (list || []).filter((d: any) => d?.paymentStatus === 'succeeded' && !d?.hidden),
       pagination: res?.pagination || { currentPage: page, totalPages: 1, totalRows: list.length },
     }
   },
