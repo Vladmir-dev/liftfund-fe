@@ -87,10 +87,10 @@ const router = createRouter({
       name: 'your-impact',
       component: () => import('../domains/auth/views/YourImpactView.vue'),
     },
+    // Messages temporarily disabled in the UI.
     {
       path: '/messages',
-      name: 'messages',
-      component: () => import('../domains/auth/views/MessagesView.vue'),
+      redirect: '/',
     },
     {
       path: '/account-settings',

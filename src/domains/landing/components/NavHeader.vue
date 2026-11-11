@@ -173,9 +173,11 @@ const handleLogout = () => {
                 <RouterLink to="/your-impact" @click="closeDropdowns" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                   Your impact
                 </RouterLink>
+                <!-- Messages temporarily disabled.
                 <RouterLink to="/messages" @click="closeDropdowns" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                   Messages
                 </RouterLink>
+                -->
                 <RouterLink to="/account-settings" @click="closeDropdowns" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                   Account settings
                 </RouterLink>
