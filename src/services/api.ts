@@ -1,6 +1,6 @@
 // API client for LiftFund backend
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:19430'
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://api.helpfunde.com'
 export const APP_PUBLIC_KEY = import.meta.env.VITE_APP_PUBLIC_KEY || '++y8EBXnk9ZTAEFwEjHWn7FjlV4tQ9RhXfcouY6Fr1Q='
 
 export interface ApiResponse<T = any> {

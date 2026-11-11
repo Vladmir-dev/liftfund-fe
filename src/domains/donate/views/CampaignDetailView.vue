@@ -530,17 +530,17 @@ const getDonorName = (donation: any): string => {
           </div>
 
           <!-- Words of Support / Comments Section -->
-          <div class="flex flex-col gap-5">
+          <!-- <div class="flex flex-col gap-5">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 class="text-base font-bold text-slate-950">Words of Support</h3>
                 <span class="text-xs text-slate-400 font-medium">{{ comments.length }} message{{ comments.length === 1 ?
                   '' : 's' }}</span>
               </div>
-            </div>
+            </div> -->
 
             <!-- Post a Comment box -->
-            <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
+            <!-- <div class="bg-slate-50 border border-slate-200/80 rounded-2xl p-4">
               <div v-if="commentError" class="text-rose-600 text-xs font-semibold mb-2">{{ commentError }}</div>
               <textarea v-model="newComment" rows="2" placeholder="Leave an encouraging message..."
                 class="w-full bg-white rounded-xl border border-slate-200 p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#024731] resize-none"
@@ -551,10 +551,10 @@ const getDonorName = (donation: any): string => {
                   {{ isSubmittingComment ? 'Posting...' : 'Post Message' }}
                 </button>
               </div>
-            </div>
+            </div> -->
 
             <!-- Comments List -->
-            <div v-if="comments.length > 0" class="flex flex-col gap-3">
+            <!-- <div v-if="comments.length > 0" class="flex flex-col gap-3">
               <div v-for="c in comments" :key="c.id"
                 class="bg-white border border-slate-100 rounded-2xl p-4 shadow-xs flex items-start gap-4 group">
                 <div
@@ -581,14 +581,14 @@ const getDonorName = (donation: any): string => {
                   <p class="text-slate-650 leading-relaxed font-medium whitespace-pre-line">{{ c.content }}</p>
                 </div>
               </div>
-            </div>
+            </div> -->
 
             <!-- Empty Comments State -->
-            <div v-else class="text-center py-8 border border-dashed border-slate-200 rounded-2xl bg-slate-50/20">
+            <!-- <div v-else class="text-center py-8 border border-dashed border-slate-200 rounded-2xl bg-slate-50/20">
               <p class="text-xs text-slate-500 font-bold mb-1">Be the first to leave a message of support!</p>
               <p class="text-[10px] text-slate-400 font-semibold">Kind words mean the world to our fundraisers.</p>
             </div>
-          </div>
+          </div> -->
 
           <!-- Live Donations Section -->
           <div v-if="donations.length > 0" class="flex flex-col gap-4 pt-4 border-t border-slate-100">
