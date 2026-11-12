@@ -11,6 +11,7 @@ const router = useRouter()
 
 const isVerifying = ref(true)
 const isSuccess = ref(true)
+const isCancelled = ref(false)
 const donationData = ref<any>(null)
 const errorMessage = ref('')
 const status = ref('')
@@ -19,6 +20,17 @@ const txRef = ref<string>('')
 const reference = ref<string>('')
 
 onMounted(async () => {
+  // Stripe sends the payer here when they close/abandon checkout. This is not
+  // a successful payment, so never verify or show the thank-you state.
+  if (route.query.cancelled === '1' || route.query.canceled === '1') {
+    isCancelled.value = true
+    isVerifying.value = false
+    isSuccess.value = false
+    status.value = 'cancelled'
+    clearLastDonation()
+    return
+  }
+
   // Extract query parameters from callback redirect
   txRef.value = (route.query.txRef || route.query.tx_ref || route.query.reference || '') as string
   reference.value = (route.query.reference || route.query.transaction_id || '') as string
@@ -114,6 +126,31 @@ const goToCategories = () => {
           </div>
 
           <div class="grid grid-cols-2 gap-3 w-full">
+            <button @click="goToHome"
+              class="py-3 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer">
+              Return Home
+            </button>
+            <button @click="goToCategories"
+              class="py-3 px-4 rounded-xl bg-[#024731] hover:bg-[#013424] text-white text-xs font-bold transition shadow-md shadow-emerald-950/20 cursor-pointer">
+              Explore Fundraisers
+            </button>
+          </div>
+        </div>
+
+        <!-- Cancelled State -->
+        <div v-else-if="isCancelled" class="py-6 flex flex-col items-center">
+          <div class="w-20 h-20 rounded-full bg-amber-50 border-2 border-amber-200 flex items-center justify-center text-4xl mb-5 text-amber-600">
+            <iconify-icon icon="ph:x-circle-fill"></iconify-icon>
+          </div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-bold mb-3">
+            <iconify-icon icon="ph:info-fill" class="text-sm"></iconify-icon>
+            <span>Payment Not Completed</span>
+          </div>
+          <h1 class="text-2xl sm:text-3xl font-black text-slate-950 mb-2">Checkout Cancelled</h1>
+          <p class="text-slate-600 text-sm max-w-sm mb-6 font-medium leading-relaxed">
+            You closed the payment page before finishing. No charge was made and your donation was not recorded.
+          </p>
+          <div class="grid grid-cols-2 gap-3 w-full max-w-sm">
             <button @click="goToHome"
               class="py-3 px-4 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer">
               Return Home
