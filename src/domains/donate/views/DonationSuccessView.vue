@@ -33,7 +33,7 @@ onMounted(async () => {
 
   // Extract query parameters from callback redirect
   txRef.value = (route.query.txRef || route.query.tx_ref || route.query.reference || '') as string
-  reference.value = (route.query.reference || route.query.transaction_id || '') as string
+  reference.value = (route.query.reference || route.query.transaction_id || route.query.token || '') as string
   status.value = (route.query.status || '') as string
 
   // The gateway's return page often does not echo our donation txRef; fall
