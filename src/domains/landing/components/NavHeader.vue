@@ -164,6 +164,10 @@ const handleLogout = () => {
                   <span>Admin Portal</span>
                   <span class="text-[10px] uppercase tracking-wider bg-purple-200 text-purple-800 px-1.5 py-0.5 rounded font-extrabold">Admin</span>
                 </RouterLink>
+                <RouterLink v-if="authStore.isAdmin" to="/admin/settings" @click="closeDropdowns" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-bold text-purple-700 bg-purple-50/60 hover:bg-purple-100/60 transition-colors flex items-center justify-between">
+                  <span>Donation Settings</span>
+                  <span class="text-[10px] uppercase tracking-wider bg-purple-200 text-purple-800 px-1.5 py-0.5 rounded font-extrabold">Admin</span>
+                </RouterLink>
                 <RouterLink to="/profile" @click="closeDropdowns" class="w-full text-left px-3 py-2.5 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition-colors">
                   Profile
                 </RouterLink>

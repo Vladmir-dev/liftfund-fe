@@ -534,6 +534,19 @@ export const campaignService = {
     })
   },
 
+  // Platform-wide donation visibility (admin-controlled, ORed with each
+  // campaign's own hideDonations flag for new donations).
+  getDonationSettings(): Promise<{ hideAllDonations: boolean; updatedAt?: string }> {
+    return request('/api/v1/campaigns/donation-settings')
+  },
+
+  updateDonationSettings(hideAllDonations: boolean): Promise<{ hideAllDonations: boolean; updatedAt?: string }> {
+    return request('/api/v1/campaigns/donation-settings', {
+      method: 'PUT',
+      body: JSON.stringify({ hideAllDonations }),
+    })
+  },
+
   // Delete / archive a campaign
   deleteCampaign(id: string): Promise<any> {
     return request(`/api/v1/campaigns/${id}`, {

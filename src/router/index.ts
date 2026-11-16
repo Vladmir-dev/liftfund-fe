@@ -38,6 +38,11 @@ const router = createRouter({
       component: () => import('../domains/admin/views/AdminUsersView.vue'),
     },
     {
+      path: '/admin/settings',
+      name: 'admin-settings',
+      component: () => import('../domains/admin/views/AdminSettingsView.vue'),
+    },
+    {
       path: '/campaign/:id',
       name: 'campaign-detail',
       component: () => import('../domains/donate/views/CampaignDetailView.vue'),
