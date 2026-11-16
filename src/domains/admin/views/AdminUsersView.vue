@@ -143,6 +143,9 @@ const handleCreateUser = async () => {
         </div>
 
         <div class="flex items-center gap-4">
+          <RouterLink to="/admin/settings" class="text-sm font-semibold text-slate-600 hover:text-slate-900">
+            Donation Settings
+          </RouterLink>
           <RouterLink to="/profile" class="text-sm font-semibold text-slate-600 hover:text-slate-900">
             My Profile
           </RouterLink>
