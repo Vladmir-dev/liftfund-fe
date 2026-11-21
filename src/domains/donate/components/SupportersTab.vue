@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { campaignService, type CampaignDonation } from '../../../services/campaign'
+import { campaignService, type CampaignDonation, type HiddenDonation } from '../../../services/campaign'
 
 const props = withDefaults(
   defineProps<{
@@ -19,13 +19,33 @@ const emit = defineEmits<{
 const activeSubTab = ref<'opportunities' | 'donated' | 'shared'>('opportunities')
 const searchQuery = ref('')
 const donations = ref<CampaignDonation[]>([])
+const hiddenDonations = ref<HiddenDonation[]>([])
 const isLoadingDonations = ref(false)
+
+const relevantHiddenDonations = computed(() =>
+  hiddenDonations.value.filter(
+    (d) => d.campaignId === props.campaignId || d.redirectCampaignId === props.campaignId,
+  ),
+)
+
+const formatHiddenAmount = (value?: number) =>
+  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(Number(value || 0))
+
+const formatHiddenDate = (value?: string) => {
+  if (!value) return ''
+  const d = new Date(value)
+  return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString()
+}
 
 const fetchDonations = async () => {
   isLoadingDonations.value = true
   try {
-    const list = await campaignService.listCampaignDonations(props.campaignId)
-    donations.value = list
+    const [publicList, hiddenList] = await Promise.all([
+      campaignService.listCampaignDonations(props.campaignId),
+      campaignService.listHiddenDonations().catch(() => []),
+    ])
+    donations.value = publicList
+    hiddenDonations.value = hiddenList
   } catch (err) {
     console.warn('Could not load campaign donations:', err)
   } finally {
@@ -217,6 +237,31 @@ const handleCopyLink = () => {
 
     <!-- Donated Tab content -->
     <div v-else-if="activeSubTab === 'donated'" class="flex flex-col gap-4">
+      <div v-if="relevantHiddenDonations.length > 0" class="bg-blue-50 border border-blue-200 rounded-2xl p-4">
+        <div class="flex items-center gap-2 mb-1">
+          <iconify-icon icon="ph:eye-slash-bold" class="text-sm text-blue-700"></iconify-icon>
+          <h4 class="text-xs font-black text-blue-900">Hidden / routed donations ({{ relevantHiddenDonations.length }})</h4>
+        </div>
+        <p class="text-[10px] text-blue-700 font-medium leading-relaxed mb-3">
+          These donations are excluded from public feeds and raised totals. They are visible to you
+          because they belong to this campaign or were tallied onto it.
+        </p>
+        <div class="flex flex-col gap-2">
+          <div v-for="d in relevantHiddenDonations" :key="d.id"
+            class="bg-white/80 border border-blue-100 rounded-xl px-3 py-2 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <p class="text-xs font-black text-slate-900">{{ formatHiddenAmount(d.amount) }}</p>
+              <p class="text-[10px] text-slate-500 font-medium truncate">
+                {{ formatHiddenDate(d.createdAt) }} · {{ d.campaignId === props.campaignId ? 'made here' : 'from ' + (d.campaignTitle || 'another campaign') }}
+              </p>
+            </div>
+            <span v-if="d.redirectCampaignId" class="text-[10px] font-bold text-blue-700 shrink-0">
+              → {{ d.redirectCampaignId === props.campaignId ? 'tallied here' : (d.redirectCampaignTitle || 'routed') }}
+            </span>
+          </div>
+        </div>
+      </div>
+
       <div v-if="isLoadingDonations" class="p-8 text-center bg-white rounded-3xl border border-slate-100">
         <span class="h-6 w-6 border-2 border-[#024731] border-t-transparent rounded-full animate-spin inline-block mb-2"></span>
         <p class="text-xs font-bold text-slate-500">Loading supporters...</p>

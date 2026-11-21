@@ -186,11 +186,15 @@ const goalAmount = ref<number | null>(props.goalAmount ?? null)
 const hideDonations = ref<boolean>(!!props.hideDonations)
 const isSavingSettings = ref(false)
 const globalHideAll = ref(false)
+const routingActive = ref(false)
+const routingTarget = ref('')
 
 const fetchDonationSettings = async () => {
   try {
     const settings = await campaignService.getDonationSettings()
     globalHideAll.value = !!settings?.hideAllDonations
+    routingActive.value = !!settings?.redirectDonationsEnabled
+    routingTarget.value = settings?.redirectCampaignTitle || ''
   } catch {
     // Non-critical: the per-campaign switch still works on its own.
   }
@@ -567,18 +571,24 @@ onMounted(() => {
 
           <!-- Donation Visibility -->
           <div class="rounded-2xl border p-3.5 flex items-start justify-between gap-3 transition"
-            :class="(hideDonations || globalHideAll) ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'">
+            :class="(routingActive || hideDonations || globalHideAll) ? 'bg-amber-50 border-amber-200' : 'bg-slate-50 border-slate-200'">
             <div class="text-left">
               <div class="flex items-center gap-1.5">
                 <iconify-icon icon="ph:eye-slash-bold" class="text-sm"
-                  :class="(hideDonations || globalHideAll) ? 'text-amber-700' : 'text-slate-500'"></iconify-icon>
+                  :class="(routingActive || hideDonations || globalHideAll) ? 'text-amber-700' : 'text-slate-500'"></iconify-icon>
                 <span class="text-xs font-black text-slate-900">Hide donations</span>
               </div>
               <p class="text-[10px] text-slate-500 font-medium leading-relaxed mt-1">
                 Payments keep working, but new donations are not shown publicly and do not count toward
                 your raised total. Donations made while this is on stay hidden permanently.
               </p>
-              <p v-if="globalHideAll"
+              <p v-if="routingActive"
+                class="mt-2 text-[10px] font-bold text-blue-800 bg-blue-100 border border-blue-200 rounded-lg px-2 py-1.5 leading-relaxed">
+                Donation routing is active: an administrator is hiding new donations and tallying them onto
+                {{ routingTarget || 'a chosen campaign' }}. This takes precedence over this switch and the
+                global hide setting.
+              </p>
+              <p v-else-if="globalHideAll"
                 class="mt-2 text-[10px] font-bold text-amber-800 bg-amber-100 border border-amber-200 rounded-lg px-2 py-1.5 leading-relaxed">
                 Hidden platform-wide: an administrator has turned on donation hiding for every campaign.
                 New donations are hidden regardless of this switch.
@@ -588,13 +598,13 @@ onMounted(() => {
               type="button"
               role="switch"
               :aria-checked="hideDonations"
-              :disabled="globalHideAll"
+              :disabled="globalHideAll || routingActive"
               @click="hideDonations = !hideDonations"
               class="relative w-11 h-6 rounded-full shrink-0 transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-[#024731]/30 disabled:cursor-not-allowed disabled:opacity-60"
-              :class="(hideDonations || globalHideAll) ? 'bg-amber-500' : 'bg-slate-300'">
+              :class="(routingActive || hideDonations || globalHideAll) ? 'bg-amber-500' : 'bg-slate-300'">
               <span
                 class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform"
-                :class="(hideDonations || globalHideAll) ? 'translate-x-5' : 'translate-x-0'"></span>
+                :class="(routingActive || hideDonations || globalHideAll) ? 'translate-x-5' : 'translate-x-0'"></span>
             </button>
           </div>
 

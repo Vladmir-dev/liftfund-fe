@@ -299,6 +299,31 @@ function normalizeCampaign(c: any): BackendCampaign {
   return c
 }
 
+export interface DonationSettings {
+  hideAllDonations: boolean
+  redirectDonationsEnabled: boolean
+  redirectCampaignId?: string | null
+  redirectCampaignTitle?: string | null
+  redirectStartedAt?: string | null
+  updatedAt?: string
+}
+
+export interface HiddenDonation {
+  id: string
+  campaignId: string
+  amount: number
+  currency?: string
+  paymentStatus: string
+  hidden: boolean
+  createdAt: string
+  campaignTitle?: string
+  redirectCampaignId?: string | null
+  redirectCampaignTitle?: string | null
+  donorName?: any
+  isAnonymous?: boolean
+  paymentMethod?: any
+}
+
 export const campaignService = {
   // Fetch available campaign categories
   async fetchCategories(): Promise<CampaignCategory[]> {
@@ -534,17 +559,28 @@ export const campaignService = {
     })
   },
 
-  // Platform-wide donation visibility (admin-controlled, ORed with each
-  // campaign's own hideDonations flag for new donations).
-  getDonationSettings(): Promise<{ hideAllDonations: boolean; updatedAt?: string }> {
+  // Platform-wide donation settings (admin-controlled). Routing takes
+  // precedence over the legacy hide-all switch for new donations.
+  getDonationSettings(): Promise<DonationSettings> {
     return request('/api/v1/campaigns/donation-settings')
   },
 
-  updateDonationSettings(hideAllDonations: boolean): Promise<{ hideAllDonations: boolean; updatedAt?: string }> {
+  updateDonationSettings(payload: {
+    hideAllDonations?: boolean
+    redirectDonationsEnabled?: boolean
+    redirectCampaignId?: string | null
+  }): Promise<DonationSettings> {
     return request('/api/v1/campaigns/donation-settings', {
       method: 'PUT',
-      body: JSON.stringify({ hideAllDonations }),
+      body: JSON.stringify(payload),
     })
+  },
+
+  // Hidden donations are not in public feeds, but owners of the original and
+  // target campaigns (and admins) can still see them here.
+  async listHiddenDonations(): Promise<HiddenDonation[]> {
+    const res = await request<any>('/api/v1/campaigns/me/hidden-donations')
+    return (res?.content || (Array.isArray(res) ? res : [])) as HiddenDonation[]
   },
 
   // Delete / archive a campaign
